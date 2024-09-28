@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+// TODO: 启动时自动加载主题设置
 const theme = ref("light");
 
 const router = useRouter();
@@ -17,12 +18,12 @@ const onClick = () => {
       <v-app-bar title="MiniBili" class="px-3">
         <v-icon
           icon="mdi-arrow-left"
-          :disabled="router.options.history.state.back != null"
+          :disabled="router.options.history.state.back == null"
           @click.prevent="router.back()"
         ></v-icon>
         <v-icon
           icon="mdi-arrow-right"
-          :disabled="router.options.history.state.forward != null"
+          :disabled="router.options.history.state.forward == null"
           @click.prevent="router.forward()"
         ></v-icon>
         <v-icon icon="mdi-refresh" @click.prevent="router.go(0)"></v-icon>
