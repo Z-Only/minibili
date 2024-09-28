@@ -19,7 +19,7 @@
     "vuetify": "^3.7.2"
   },
   "devDependencies": {
-    "@mdi/js": "^7.4.47",
+    "@mdi/font": "^7.4.47",
     "@tauri-apps/cli": ">=2.0.0-rc.0",
     "@types/node": "^22.7.4",
     "@vitejs/plugin-vue": "^5.0.5",
