@@ -7,6 +7,14 @@ const theme = ref("light");
 
 const router = useRouter();
 
+const backDisabled = () => {
+  return router.options.history.state.back == null;
+};
+
+const forwardDisabled = () => {
+  return router.options.history.state.forward == null;
+};
+
 const onClick = () => {
   theme.value = theme.value === "light" ? "dark" : "light";
 };
@@ -18,12 +26,12 @@ const onClick = () => {
       <v-app-bar title="MiniBili" class="px-3">
         <v-icon
           icon="mdi-arrow-left"
-          :disabled="router.options.history.state.back == null"
+          :disabled="backDisabled()"
           @click.prevent="router.back()"
         ></v-icon>
         <v-icon
           icon="mdi-arrow-right"
-          :disabled="router.options.history.state.forward == null"
+          :disabled="forwardDisabled()"
           @click.prevent="router.forward()"
         ></v-icon>
         <v-icon icon="mdi-refresh" @click.prevent="router.go(0)"></v-icon>
@@ -32,15 +40,7 @@ const onClick = () => {
           @click.prevent="router.push({ name: 'Home' })"
         ></v-icon>
         <v-spacer></v-spacer>
-
-        <v-btn
-          :prepend-icon="
-            theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'
-          "
-          text="Toggle Theme"
-          slim
-          @click="onClick"
-        ></v-btn>
+        <v-icon :icon="'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'" @click="onClick"></v-icon>
       </v-app-bar>
 
       <v-navigation-drawer>

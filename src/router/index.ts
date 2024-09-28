@@ -13,6 +13,11 @@ const routes = [
     name: "Setting",
     component: () => import("@/components/Setting.vue"),
   },
+  {
+    path: "/video/:bvid",
+    name: "Video",
+    component: () => import("@/components/Video.vue"),
+  }
 ];
 
 const router = createRouter({
