@@ -2,11 +2,19 @@
 </script>
 
 <template>
-  <div>
-    <h1>MiniBili</h1>
+  <v-layout class="rounded rounded-md">
+    <v-app-bar title="MiniBili"></v-app-bar>
 
-    <RouterView />
-  </div>
+    <v-navigation-drawer>
+      <v-list>
+        <v-list-item title="Navigation drawer"></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
+      <RouterView />
+    </v-main>
+  </v-layout>
 </template>
 
 <style scoped>
