@@ -5,7 +5,7 @@ import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from "vuetify";
 import { md3 } from "vuetify/blueprints";
-import { zhHans, en } from "vuetify/locale";
+import { zhHans, en, ja, ko } from "vuetify/locale";
 
 createApp(App)
   .use(router)
@@ -15,7 +15,7 @@ createApp(App)
       locale: {
         locale: "zhHans",
         fallback: "en",
-        messages: { zhHans, en },
+        messages: { zhHans, en, ja, ko },
       },
       theme: {
         defaultTheme: "light",
