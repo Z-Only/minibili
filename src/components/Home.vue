@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, Ref, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getHomeVideoRecommendations } from "@/apis/video/recommend";
-import { Item, RecommendRequest } from "@/apis/video/types";
+import { fetchHomeVideoRecommendations } from "@/apis/video/recommend";
+import { Item } from "@/apis/video/types";
+import { RecommendParams } from "@/apis/video/recommend";
 import { formatDuration, formatPubDate, formatView } from "@/common/utils";
 
 const router = useRouter();
@@ -11,8 +12,8 @@ const recommendations: Ref<Item[]> = ref<Item[]>([]);
 
 let freshIdx = 1;
 
-const homeVideoRecommendations = async (params: RecommendRequest) => {
-  await getHomeVideoRecommendations(params).then((response) => {
+const getHomeVideoRecommendations = async (params: RecommendParams) => {
+  await fetchHomeVideoRecommendations(params).then((response) => {
     recommendations.value.push(...response.data.item);
     console.log(recommendations.value);
     freshIdx++;
@@ -33,7 +34,7 @@ const load = async ({
   if (freshIdx <= 1) {
     return;
   }
-  await homeVideoRecommendations({
+  await getHomeVideoRecommendations({
     ps: 6,
     fresh_idx: freshIdx,
   })
@@ -61,7 +62,7 @@ const getRealIndex = (rowIndex: number, colCount: number, colIndex: number) => {
 };
 
 onMounted(async () => {
-  await homeVideoRecommendations({
+  await getHomeVideoRecommendations({
     ps: 12,
     fresh_idx: 1,
   });
