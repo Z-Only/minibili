@@ -13,6 +13,15 @@ export default defineConfig(async () => ({
       "@": resolve(__dirname, "src"),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    server: {
+      deps: {
+        inline: ['vuetify'],
+      },
+    },
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
