@@ -1,4 +1,4 @@
-interface Data {
+export interface Data {
   item: Item[];
   business_card: null;
   floor_info: null;
@@ -6,9 +6,10 @@ interface Data {
   preload_expose_pct: number;
   preload_floor_expose_pct: number;
   mid: number;
+  [property: string]: any;
 }
 
-interface Item {
+export interface Item {
   id: number;
   bvid: string;
   cid: number;
@@ -35,6 +36,7 @@ interface Item {
   vt_display: string;
   dislike_switch: number;
   dislike_switch_pc: number;
+  [property: string]: any;
 }
 
 interface Stat {
@@ -42,10 +44,33 @@ interface Stat {
   like: number;
   danmaku: number;
   vt: number;
+  [property: string]: any;
 }
 
 interface Owner {
   mid: number;
   name: string;
   face: string;
+  [property: string]: any;
+}
+
+export interface RecommendRequest {
+  brush?: number;
+  feed_version?: string;
+  fetch_row?: number;
+  fresh_idx?: number;
+  fresh_idx_1h?: number;
+  fresh_type?: number;
+  homepage_ver?: number;
+  last_showlist?: string;
+  last_y_num?: number;
+  ps?: number;
+  screen?: string;
+  seo_info?: string;
+  uniq_id?: string;
+  w_rid?: string;
+  web_location?: number;
+  wts?: number;
+  y_num?: number;
+  [property: string]: any;
 }
