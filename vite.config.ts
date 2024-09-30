@@ -4,6 +4,7 @@ import { resolve } from 'path'
 import vuetify from 'vite-plugin-vuetify'
 import eslint from 'vite-plugin-eslint'
 import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
 
 const host = process.env.TAURI_DEV_HOST
 
@@ -21,6 +22,7 @@ export default defineConfig(async () => ({
                 filepath: './.eslintrc-auto-import.js',
             },
         }),
+        Components({ dts: true }),
     ],
     resolve: {
         alias: {
