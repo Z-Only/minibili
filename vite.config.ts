@@ -19,14 +19,19 @@ export default defineConfig(({ mode }) => {
             eslint(),
             AutoImport({
                 imports: ['vue', 'vue-router'],
-                dts: true,
+                dts: false,
                 eslintrc: {
                     enabled: false,
                     filepath: './.eslintrc-auto-import.js',
                 },
             }),
             Components({ dts: true }),
-            visualizer({ open: false }),
+            visualizer({
+                open: false,
+                gzipSize: true,
+                brotliSize: true,
+                filename: './dist/stats.html',
+            }),
         ],
         resolve: {
             alias: {
