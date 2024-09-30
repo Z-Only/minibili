@@ -33,6 +33,7 @@ packages/cli/index.js
 packages/cli/index.d.ts
 crates/tauri-schema-worker/.wrangler
 CHANGELOG.md
+README.md
 *schema.json
 
 # WiX templates
