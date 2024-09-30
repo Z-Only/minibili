@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
                 imports: ['vue', 'vue-router'],
                 dts: true,
                 eslintrc: {
-                    enabled: true,
+                    enabled: false,
                     filepath: './.eslintrc-auto-import.js',
                 },
             }),
