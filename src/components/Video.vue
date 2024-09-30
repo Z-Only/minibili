@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { fetchVideoDetails } from '@/apis/video/info'
 import { VideoDetails } from '@/apis/video/types'
-import { onMounted, Ref, ref } from 'vue'
-import { useRoute } from 'vue-router'
 
 const route = useRoute()
 

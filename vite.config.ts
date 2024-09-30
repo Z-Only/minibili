@@ -3,12 +3,25 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import vuetify from 'vite-plugin-vuetify'
 import eslint from 'vite-plugin-eslint'
+import AutoImport from 'unplugin-auto-import/vite'
 
 const host = process.env.TAURI_DEV_HOST
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-    plugins: [vue(), vuetify(), eslint()],
+    plugins: [
+        vue(),
+        vuetify({ autoImport: true }),
+        eslint(),
+        AutoImport({
+            imports: ['vue', 'vue-router'],
+            dts: true,
+            eslintrc: {
+                enabled: true,
+                filepath: './.eslintrc-auto-import.js',
+            },
+        }),
+    ],
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),

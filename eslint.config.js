@@ -3,13 +3,18 @@ import pluginJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import autoImport from './.eslintrc-auto-import.js'
 
 export default [
     { files: ['**/*.{js,mjs,cjs,ts,vue}'] },
     {
         ignores: ['dist/**', 'src/vite-env.d.ts', 'src-tauri/**'],
     },
-    { languageOptions: { globals: globals.browser } },
+    {
+        languageOptions: {
+            globals: { ...globals.browser, ...autoImport?.globals },
+        },
+    },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,
     ...pluginVue.configs['flat/essential'],

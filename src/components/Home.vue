@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted, Ref, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { fetchHomeVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/video/types'
 import { RecommendParams } from '@/apis/video/recommend'

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useLocale } from 'vuetify'
 
 // TODO: 启动时自动加载主题设置
