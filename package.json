@@ -9,7 +9,12 @@
         "preview": "vite preview",
         "tauri": "tauri",
         "test": "vitest",
-        "lint": "eslint"
+        "lint": "eslint",
+        "prettier": "prettier --write --ignore-unknown",
+        "prepare": "husky"
+    },
+    "lint-staged": {
+        "**/*": "prettier --write --ignore-unknown"
     },
     "dependencies": {
         "@tauri-apps/api": ">=2.0.0-rc.0",
@@ -30,6 +35,8 @@
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-vue": "^9.28.0",
         "globals": "^15.9.0",
+        "husky": "^9.1.6",
+        "lint-staged": "^15.2.10",
         "prettier": "3.3.3",
         "sass": "^1.79.4",
         "sass-loader": "^16.0.2",
