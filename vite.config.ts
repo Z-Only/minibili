@@ -2,12 +2,13 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 import vuetify from "vite-plugin-vuetify";
+import eslint from "vite-plugin-eslint";
 
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [vue(), vuetify()],
+  plugins: [vue(), vuetify(), eslint()],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -15,10 +16,10 @@ export default defineConfig(async () => ({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: "jsdom",
     server: {
       deps: {
-        inline: ['vuetify'],
+        inline: ["vuetify"],
       },
     },
   },
