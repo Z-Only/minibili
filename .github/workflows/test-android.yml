@@ -1,20 +1,7 @@
-# Copyright 2019-2024 Tauri Programme within The Commons Conservancy
-# SPDX-License-Identifier: Apache-2.0
-# SPDX-License-Identifier: MIT
-
 name: test android
 
+# TODO: remove auto trigger, waiting for avaliable action for android, now can only build.
 on:
-    pull_request:
-        paths:
-            - '.github/workflows/test-android.yml'
-            - 'crates/tauri-cli/templates/mobile/android/**'
-            - 'crates/tauri-cli/src/mobile/**'
-            - '!crates/tauri-cli/src/mobile/ios.rs'
-            - '!crates/tauri-cli/src/mobile/ios/**'
-            - 'crates/tauri-build/src/mobile.rs'
-            - 'crates/tauri/mobile/android/**'
-            - 'crates/tauri/mobile/android-codegen/**'
     workflow_dispatch:
 
 concurrency:
@@ -42,7 +29,9 @@ jobs:
                   sudo apt-get update
                   sudo apt-get install -y libgtk-3-dev webkit2gtk-4.1
 
-            - run: corepack enable
+            - name: enable corepack for package management
+              run: corepack enable
+
             - name: setup node
               uses: actions/setup-node@v4
               with:
@@ -62,7 +51,6 @@ jobs:
                   ndk-version: r25b
                   local-cache: true
 
-            # TODO check after https://github.com/nttld/setup-ndk/issues/518 is fixed
             - name: Restore Android Symlinks
               if: matrix.platform == 'ubuntu-latest' || matrix.platform == 'macos-latest'
               run: |
@@ -76,14 +64,22 @@ jobs:
 
             - uses: Swatinem/rust-cache@v2
 
-            - run: pnpm i --frozen-lockfile
+            - name: install frontend dependencies
+              run: pnpm i --frozen-lockfile
 
             - name: init Android Studio project
               run: pnpm tauri android init
               env:
                   NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
-            - name: build APK
+            - name: build APK universal
               run: pnpm tauri android build
               env:
                   NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: build APK split per architecture
+              run: pnpm tauri android build --split-per-abi
+              env:
+                  NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
