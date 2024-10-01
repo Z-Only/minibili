@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { fetchHomeVideoRecommendations } from '@/apis/video/recommend'
+import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/video/types'
 import { RecommendParams } from '@/apis/video/recommend'
 import { formatDuration, formatPubDate, formatView } from '@/common/utils'
@@ -11,7 +11,7 @@ const recommendations: Ref<Item[]> = ref<Item[]>([])
 let freshIdx = 1
 
 const getHomeVideoRecommendations = async (params: RecommendParams) => {
-    await fetchHomeVideoRecommendations(params).then((response) => {
+    await fetchVideoRecommendations(params).then((response) => {
         recommendations.value.push(...response.data.item)
         console.log(recommendations.value)
         freshIdx++
