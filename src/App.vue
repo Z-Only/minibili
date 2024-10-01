@@ -8,12 +8,12 @@ const router = useRouter()
 
 const { current } = useLocale()
 
-const backDisabled = () => {
-    return router.options.history.state.back == null
-}
+const backDisabled = ref(true)
+const forwardDisabled = ref(true)
 
-const forwardDisabled = () => {
-    return router.options.history.state.forward == null
+const updateArrowDisabled = () => {
+    backDisabled.value = router.options.history.state.back == null
+    forwardDisabled.value = router.options.history.state.forward == null
 }
 
 const toggleTheme = () => {
@@ -39,6 +39,15 @@ onMounted(() => {
     // 默认语言
     current.value = 'zh-Hans'
 })
+
+watch(
+    router.options.history.state,
+    () => {
+        updateArrowDisabled()
+        console.log('router changed')
+    },
+    { immediate: true, deep: true }
+)
 </script>
 
 <template>
@@ -47,12 +56,12 @@ onMounted(() => {
             <v-app-bar title="MiniBili" class="px-3">
                 <v-btn
                     icon="mdi-arrow-left"
-                    :disabled="backDisabled()"
+                    :disabled="backDisabled"
                     @click.prevent="router.back()"
                 ></v-btn>
                 <v-btn
                     icon="mdi-arrow-right"
-                    :disabled="forwardDisabled()"
+                    :disabled="forwardDisabled"
                     @click.prevent="router.forward()"
                 ></v-btn>
                 <v-btn icon="mdi-refresh" @click.prevent="router.go(0)"></v-btn>
