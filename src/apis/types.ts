@@ -12,5 +12,4 @@ export interface Owner {
     face: string
     mid: number
     name: string
-    [property: string]: any
 }

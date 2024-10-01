@@ -19,7 +19,6 @@ export interface RecommendParams {
     web_location?: number
     wts?: number
     y_num?: number
-    [property: string]: any
 }
 
 export const fetchHomeVideoRecommendations = async (

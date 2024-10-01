@@ -11,7 +11,6 @@ export interface VideoRecommendations {
     preload_expose_pct: number
     preload_floor_expose_pct: number
     mid: number
-    [property: string]: any
 }
 
 export interface Item {
@@ -41,7 +40,6 @@ export interface Item {
     vt_display: string
     dislike_switch: number
     dislike_switch_pc: number
-    [property: string]: any
 }
 
 interface Stat {
@@ -49,7 +47,6 @@ interface Stat {
     like: number
     danmaku: number
     vt: number
-    [property: string]: any
 }
 
 /*
@@ -100,33 +97,28 @@ export interface VideoDetails {
     user_garb: UserGarb
     videos: number
     vt_display: string
-    [property: string]: any
 }
 
 export interface ArgueInfo {
     argue_link: string
     argue_msg: string
     argue_type: number
-    [property: string]: any
 }
 
 export interface DescV2 {
     biz_id?: number
     raw_text?: string
     type?: number
-    [property: string]: any
 }
 
 export interface DataDimension {
     height: number
     rotate: number
     width: number
-    [property: string]: any
 }
 
 export interface HonorReply {
     honor: Honor[]
-    [property: string]: any
 }
 
 export interface Honor {
@@ -134,7 +126,6 @@ export interface Honor {
     desc?: string
     type?: number
     weekly_recommend_num?: number
-    [property: string]: any
 }
 
 export interface DataPage {
@@ -147,14 +138,12 @@ export interface DataPage {
     part?: string
     vid?: string
     weblink?: string
-    [property: string]: any
 }
 
 export interface PurpleDimension {
     height: number
     rotate: number
     width: number
-    [property: string]: any
 }
 
 export interface DataRights {
@@ -176,7 +165,6 @@ export interface DataRights {
     pay: number
     ugc_pay: number
     ugc_pay_preview: number
-    [property: string]: any
 }
 
 export interface DataStat {
@@ -193,13 +181,11 @@ export interface DataStat {
     share: number
     view: number
     vt: number
-    [property: string]: any
 }
 
 export interface Subtitle {
     allow_submit: boolean
     list: string[]
-    [property: string]: any
 }
 
 export interface UgcSeason {
@@ -216,7 +202,6 @@ export interface UgcSeason {
     sign_state: number
     stat: UgcSeasonStat
     title: string
-    [property: string]: any
 }
 
 export interface Section {
@@ -225,7 +210,6 @@ export interface Section {
     season_id: number
     title: string
     type: number
-    [property: string]: any
 }
 
 export interface Episode {
@@ -240,7 +224,6 @@ export interface Episode {
     season_id: number
     section_id: number
     title: string
-    [property: string]: any
 }
 
 export interface Arc {
@@ -266,21 +249,18 @@ export interface Arc {
     type_name: string
     videos: number
     vt_display: string
-    [property: string]: any
 }
 
 export interface Author {
     face: string
     mid: number
     name: string
-    [property: string]: any
 }
 
 export interface ArcDimension {
     height: number
     rotate: number
     width: number
-    [property: string]: any
 }
 
 export interface ArcRights {
@@ -297,7 +277,6 @@ export interface ArcRights {
     pay: number
     ugc_pay: number
     ugc_pay_preview: number
-    [property: string]: any
 }
 
 export interface ArcStat {
@@ -316,7 +295,6 @@ export interface ArcStat {
     view: number
     vt: number
     vv: number
-    [property: string]: any
 }
 
 export interface PurplePage {
@@ -328,14 +306,12 @@ export interface PurplePage {
     part: string
     vid: string
     weblink: string
-    [property: string]: any
 }
 
 export interface FluffyDimension {
     height: number
     rotate: number
     width: number
-    [property: string]: any
 }
 
 export interface FluffyPage {
@@ -347,14 +323,12 @@ export interface FluffyPage {
     part: string
     vid: string
     weblink: string
-    [property: string]: any
 }
 
 export interface TentacledDimension {
     height: number
     rotate: number
     width: number
-    [property: string]: any
 }
 
 export interface UgcSeasonStat {
@@ -370,10 +344,8 @@ export interface UgcSeasonStat {
     view: number
     vt: number
     vv: number
-    [property: string]: any
 }
 
 export interface UserGarb {
     url_image_ani_cut: string
-    [property: string]: any
 }
