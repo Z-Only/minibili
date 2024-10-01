@@ -91,7 +91,7 @@ onMounted(async () => {
 
 // 监听路由变化，更新箭头状态
 watch(
-    router.options.history.state,
+    ref(router.options.history.state),
     () => {
         updateArrowDisabled()
     },
@@ -100,7 +100,7 @@ watch(
 
 // 监听系统主题变化，如果用户设置为跟随系统，则自动切换主题
 watch(
-    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+    ref(window.matchMedia('(prefers-color-scheme: dark)').matches),
     async () => {
         await store.get('theme').then(async (theme) => {
             if (theme !== 'system') {
@@ -117,7 +117,7 @@ watch(
 
 <template>
     <v-responsive class="border rounded" max-height="3000">
-        <v-app :theme="theme">
+        <v-app>
             <v-app-bar title="MiniBili" class="px-3">
                 <v-btn
                     icon="mdi-arrow-left"
