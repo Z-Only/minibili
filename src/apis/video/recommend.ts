@@ -49,7 +49,7 @@ export interface RecommendParams {
  * @returns A promise that resolves to video recommendations.
  */
 export const fetchVideoRecommendations = async (params: RecommendParams) => {
-    return await get<RecommendParams, VideoRecommendations>(
+    return await get<VideoRecommendations, RecommendParams>(
         '/x/web-interface/wbi/index/top/feed/rcmd',
         params
     )

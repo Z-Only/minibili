@@ -15,7 +15,7 @@
  * @returns A formatted string representing the publication date.
  */
 export const formatPubDate = (timestamp: number): string => {
-    const now = new Date().getTime()
+    const now = Date.now()
 
     const seconds = Math.floor(now / 1000 - timestamp)
     const minutes = Math.floor(seconds / 60)
