@@ -1,4 +1,4 @@
-import { postWithoutSign } from '@/apis/http'
+import { getWithoutSign } from '@/apis/http'
 
 export interface NavUserInfo {
     isLogin: boolean
@@ -13,13 +13,13 @@ export interface WbiImg {
 /**
  * Fetches the navigation user information.
  *
- * This function sends a POST request to the '/x/web-interface/nav' endpoint
+ * This function sends a GET request to the '/x/web-interface/nav' endpoint
  * and returns the navigation user information.
  *
  * @returns {Promise<NavUserInfo>} A promise that resolves to the navigation user information.
  */
 export const fetchNanUserInfo = async (): Promise<NavUserInfo> => {
-    return await postWithoutSign<NavUserInfo>('/x/web-interface/nav').then(
+    return await getWithoutSign<NavUserInfo>('/x/web-interface/nav').then(
         (res) => res.data
     )
 }

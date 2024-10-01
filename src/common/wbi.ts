@@ -24,16 +24,35 @@ const getMixinKey = (orig: string): string =>
         .join('')
         .slice(0, 32)
 
+/**
+ * Extracts the file name without extension from a given URL.
+ *
+ * @param url - The URL string from which to extract the file name.
+ * @returns The file name without its extension. If the URL does not contain a file name, returns an empty string.
+ */
+const extractFileName = (url: string) => {
+    return url.split('/').pop()?.split('.').shift() ?? ''
+}
+
+/**
+ * Encodes the given parameters with additional security keys and returns a query string.
+ *
+ * @template T - A generic type extending a record with string keys and any values.
+ * @param {T} params - The parameters to be encoded.
+ * @param {string} img_key - The image key used for generating the mixin key.
+ * @param {string} sub_key - The sub key used for generating the mixin key.
+ * @returns {string} The encoded query string with an additional security signature.
+ */
 const encWbi = <T extends Record<string, any>>(
     params: T,
     img_key: string,
     sub_key: string
-) => {
+): string => {
     const mixin_key = getMixinKey(img_key + sub_key)
     const wts = getWts()
     const chr_filter = /[!'()*]/g
 
-    Object.assign(params, { wts }) // 添加 wts 字段
+    params = { ...params, wts } // 添加 wts 字段
     // 按照 key 重排参数
     const query = Object.keys(params)
         .sort()
@@ -49,17 +68,24 @@ const encWbi = <T extends Record<string, any>>(
     return query + '&w_rid=' + wbi_sign
 }
 
-const extractFileName = (url: string) => {
-    return url.split('/').pop()?.split('.').shift() ?? ''
-}
-
-export const wbi = async <T extends Record<string, any>>(params: T) => {
-    await fetchNanUserInfo().then((res) => {
+/**
+ * Asynchronously fetches user information and constructs a query string based on the provided parameters.
+ *
+ * @template T - A generic type extending a record with string keys and any values.
+ * @param {T} params - The parameters to be encoded into the query string.
+ * @returns {Promise<string>} A promise that resolves to the constructed query string.
+ */
+export const wbiSignedParams = async <T>(params: T): Promise<string> => {
+    return await fetchNanUserInfo().then((res) => {
         const webKeys = res.wbi_img
         const img_key = extractFileName(webKeys.img_url)
         const sub_key = extractFileName(webKeys.sub_url)
-        const query = encWbi<T>(params, img_key, sub_key)
-        console.log(query)
-        return query
+        const queryParams = encWbi(
+            params as Record<string, any>,
+            img_key,
+            sub_key
+        )
+        console.log(`wbi signed query: ${queryParams}`)
+        return queryParams
     })
 }
