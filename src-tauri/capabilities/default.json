@@ -8,7 +8,13 @@
         "shell:allow-open",
         {
             "identifier": "http:default",
-            "allow": [{ "url": "https://*.bilibili.com/" }]
-        }
+            "allow": [
+                {
+                    "url": "https://*.bilibili.com/"
+                }
+            ]
+        },
+        "store:default",
+        "store:default"
     ]
 }

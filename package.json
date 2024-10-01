@@ -20,6 +20,7 @@
         "@tauri-apps/api": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-http": "~2.0.0-rc",
         "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
+        "@tauri-apps/plugin-store": "2.0.0-rc.1",
         "vite-plugin-vuetify": "^2.0.4",
         "vue": "^3.3.4",
         "vue-router": "4",
