@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { useTheme } from 'vuetify'
 import { useLocale } from 'vuetify'
-
-// TODO: 启动时自动加载主题设置
-const theme = ref('light')
+import { Store } from '@tauri-apps/plugin-store'
 
 const router = useRouter()
 
+const theme = useTheme()
+
 const { current } = useLocale()
+
+// Store 会在 JavaScript 绑定时自动加载
+const store = new Store('settings.json')
 
 const backDisabled = ref(true)
 const forwardDisabled = ref(true)
@@ -16,37 +20,98 @@ const updateArrowDisabled = () => {
     forwardDisabled.value = router.options.history.state.forward == null
 }
 
-const toggleTheme = () => {
-    theme.value = theme.value === 'light' ? 'dark' : 'light'
+const darkEnabled = ref(false)
+
+// 切换主题
+const toggleColorScheme = async () => {
+    darkEnabled.value = !darkEnabled.value
+    theme.global.name.value = darkEnabled.value ? 'dark' : 'light'
+    await store.set('theme', darkEnabled.value ? 'dark' : 'light')
 }
 
 const localeList = [
-    { name: '简体中文', locale: 'zh-Hans' },
-    { name: 'English', locale: 'en' },
-    { name: '日本語', locale: 'ja' },
-    { name: '한국어', locale: 'ko' },
+    {
+        name: '简体中文',
+        locale: 'zh-Hans',
+        language: ['zh', 'zh-CN', 'zh-Hans'],
+    },
+    { name: 'English', locale: 'en', language: ['en'] },
+    { name: '日本語', locale: 'ja', language: ['ja'] },
+    { name: '한국어', locale: 'ko', language: ['ko'] },
 ]
 
-const changeLocale = (locale: string) => {
-    current.value = locale
-}
+const curLocale = ref('')
 
 const getLocaleName = () => {
-    return localeList.find((item) => item.locale === current.value)?.name
+    return (
+        localeList.find((item) => item.locale === curLocale.value)?.name ||
+        'zh-Hans'
+    )
 }
 
-onMounted(() => {
-    // 默认语言
-    current.value = 'zh-Hans'
+const matchLocaleForLanguage = (language: string) => {
+    return (
+        localeList.find((item) => item.language.includes(language))?.locale ||
+        'zh-Hans'
+    )
+}
+
+const updateLocale = async (locale: string) => {
+    // 如果设置无效，使用系统语言
+    if (!locale) {
+        const systemLanguage = navigator.language || navigator.userLanguage
+        console.log('system language', systemLanguage)
+        locale = matchLocaleForLanguage(systemLanguage)
+    }
+    curLocale.value = locale
+    current.value = curLocale.value
+    await store.set('locale', curLocale.value)
+}
+
+onMounted(async () => {
+    // 启动时自动加载设置，优先级: 用户设置 > 系统设置
+    await store.get('theme').then(async (theme) => {
+        console.log('store theme: ', theme)
+        if (theme === 'system') {
+            // 系统设置转换为主题
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+        }
+        console.log('theme: ', theme)
+        if ((theme === 'dark') !== darkEnabled.value) {
+            await toggleColorScheme()
+        }
+    })
+    await store.get('locale').then(async (locale) => {
+        console.log('store locale: ', locale)
+        await updateLocale(locale)
+    })
 })
 
+// 监听路由变化，更新箭头状态
 watch(
     router.options.history.state,
     () => {
         updateArrowDisabled()
-        console.log('router changed')
     },
     { immediate: true, deep: true }
+)
+
+// 监听系统主题变化，如果用户设置为跟随系统，则自动切换主题
+watch(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+    async () => {
+        await store.get('theme').then(async (theme) => {
+            if (theme !== 'system') {
+                return
+            }
+            if ((theme === 'dark') !== darkEnabled.value) {
+                await toggleColorScheme()
+            }
+        })
+    },
+    { immediate: true }
 )
 </script>
 
@@ -83,7 +148,7 @@ watch(
                             <v-list-item-title>
                                 <v-btn
                                     variant="plain"
-                                    @click="changeLocale(item.locale)"
+                                    @click="updateLocale(item.locale)"
                                     >{{ item.name }}</v-btn
                                 ></v-list-item-title
                             >
@@ -93,21 +158,17 @@ watch(
 
                 <v-tooltip
                     location="bottom"
-                    :text="
-                        theme === 'light'
-                            ? 'Toggle on night'
-                            : 'Toggle on light'
-                    "
+                    :text="darkEnabled ? 'Toggle on light' : 'Toggle on night'"
                 >
                     <template v-slot:activator="{ props }">
                         <v-btn
                             v-bind="props"
                             :icon="
-                                theme === 'light'
-                                    ? 'mdi-weather-sunny'
-                                    : 'mdi-weather-night'
+                                darkEnabled
+                                    ? 'mdi-weather-night'
+                                    : 'mdi-weather-sunny'
                             "
-                            @click="toggleTheme"
+                            @click="toggleColorScheme"
                         ></v-btn>
                     </template>
                 </v-tooltip>
