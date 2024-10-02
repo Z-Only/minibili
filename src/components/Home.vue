@@ -11,8 +11,8 @@ const recommendations: Ref<Item[]> = ref<Item[]>([])
 let freshIdx = 1
 
 const getHomeVideoRecommendations = async (params: RecommendParams) => {
-    await fetchVideoRecommendations(params).then((response) => {
-        recommendations.value.push(...response.data.item)
+    await fetchVideoRecommendations(params).then((data) => {
+        recommendations.value.push(...data.item)
         console.log(recommendations.value)
         freshIdx++
         console.log(freshIdx)

@@ -28,6 +28,8 @@ export interface PlayerInfoParams {
  * @param params - The parameters required to fetch player information.
  * @returns A promise that resolves to the player information.
  */
-export const fetchPlayerInfo = async (params: PlayerInfoParams) => {
+export const fetchPlayerInfo = async (
+    params: PlayerInfoParams
+): Promise<PlayerInfo> => {
     return await get<PlayerInfo, PlayerInfoParams>('/x/player/wbi/v2', params)
 }

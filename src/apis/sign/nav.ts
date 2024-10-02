@@ -19,7 +19,5 @@ export interface WbiImg {
  * @returns {Promise<NavUserInfo>} A promise that resolves to the navigation user information.
  */
 export const fetchNanUserInfo = async (): Promise<NavUserInfo> => {
-    return await getWithoutSign<NavUserInfo>('/x/web-interface/nav').then(
-        (res) => res.data
-    )
+    return await getWithoutSign<NavUserInfo>('/x/web-interface/nav')
 }

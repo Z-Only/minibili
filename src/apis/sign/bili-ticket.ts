@@ -75,5 +75,5 @@ export const getBiliTicket = async (csrf?: string): Promise<BiliTicket> => {
     return await postWithoutSign<BiliTicket, WebTicketParams>(
         '/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket',
         await calculateParams(csrf)
-    ).then((res) => res.data)
+    )
 }

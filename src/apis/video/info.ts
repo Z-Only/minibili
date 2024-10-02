@@ -18,7 +18,9 @@ export interface VideoDetailsParams {
  * @param params - The parameters required to fetch the video details.
  * @returns A promise that resolves to the video details.
  */
-export const fetchVideoDetails = async (params: VideoDetailsParams) => {
+export const fetchVideoDetails = async (
+    params: VideoDetailsParams
+): Promise<VideoDetails> => {
     return await get<VideoDetails, VideoDetailsParams>(
         '/x/web-interface/wbi/view',
         params

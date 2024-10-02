@@ -75,7 +75,9 @@ const encWbi = <T extends Record<string, any>>(
  * @param {T} params - The parameters to be encoded into the query string.
  * @returns {Promise<string>} A promise that resolves to the constructed query string.
  */
-export const wbiSignedParams = async <T>(params: T): Promise<string> => {
+export const wbiSignedParams = async <T = null>(
+    params?: T
+): Promise<string> => {
     return await fetchNanUserInfo().then((res) => {
         const webKeys = res.wbi_img
         const img_key = extractFileName(webKeys.img_url)
@@ -85,7 +87,6 @@ export const wbiSignedParams = async <T>(params: T): Promise<string> => {
             img_key,
             sub_key
         )
-        console.log(`wbi signed query: ${queryParams}`)
         return queryParams
     })
 }
