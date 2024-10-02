@@ -10,11 +10,13 @@
             "identifier": "http:default",
             "allow": [
                 {
-                    "url": "https://*.bilibili.com/"
+                    "url": "https://*.bilibili.com"
+                },
+                {
+                    "url": "https://*.bilivideo.*:*"
                 }
             ]
         },
-        "store:default",
         "store:default"
     ]
 }
