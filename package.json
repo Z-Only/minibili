@@ -19,6 +19,7 @@
     "dependencies": {
         "@tauri-apps/api": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-http": "~2.0.0-rc",
+        "@tauri-apps/plugin-log": "~2.0.0-rc",
         "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-store": "2.0.0-rc.1",
         "md5": "^2.3.0",

@@ -14,6 +14,9 @@ importers:
       '@tauri-apps/plugin-http':
         specifier: ~2.0.0-rc
         version: 2.0.0-rc.2
+      '@tauri-apps/plugin-log':
+        specifier: ~2.0.0-rc
+        version: 2.0.0
       '@tauri-apps/plugin-shell':
         specifier: '>=2.0.0-rc.0'
         version: 2.0.0-rc.1
@@ -462,6 +465,9 @@ packages:
   '@tauri-apps/api@2.0.0-rc.6':
     resolution: {integrity: sha512-oENxL0C5WqHNSXWjZEbjnzoBwFFyn8do5S0elOg0ME1cLvWJOAKmqdCnWPpAwtzHQZ+xAzMU0/k8nPpJq4OQYA==}
 
+  '@tauri-apps/api@2.0.2':
+    resolution: {integrity: sha512-3wSwmG+1kr6WrgAFKK5ijkNFPp8TT3FLj3YHUb5EwMO+3FxX4uWlfSWkeeBy+Kc1RsKzugtYLuuya+98Flj+3w==}
+
   '@tauri-apps/cli-darwin-arm64@2.0.0-rc.17':
     resolution: {integrity: sha512-LXlLpavNfhvELPBcjCzQ9DOLx7rlAzZM4iltsaKawAewx30Q0EpIjK53Sg5AR3p5/KzNfCsTMjjpeUZg1AcFgw==}
     engines: {node: '>= 10'}
@@ -533,6 +539,9 @@ packages:
 
   '@tauri-apps/plugin-http@2.0.0-rc.2':
     resolution: {integrity: sha512-s/AbbMaQPgqnIOoObvWNAjJOV17gyf9G+U6gmvjLoFbt7D6jsujOUW6fn+Oe/+rzNSEeo1ZSVrUoMen5DgM+OA==}
+
+  '@tauri-apps/plugin-log@2.0.0':
+    resolution: {integrity: sha512-C+NII9vzswqnOQE8k7oRtnaw0z5TZsMmnirRhXkCKDEhQQH9841Us/PC1WHtGiAaJ8za1A1JB2xXndEq/47X/w==}
 
   '@tauri-apps/plugin-shell@2.0.0-rc.1':
     resolution: {integrity: sha512-JtNROc0rqEwN/g93ig5pK4cl1vUo2yn+osCpY9de64cy/d9hRzof7AuYOgvt/Xcd5VPQmlgo2AGvUh5sQRSR1A==}
@@ -2133,6 +2142,8 @@ snapshots:
 
   '@tauri-apps/api@2.0.0-rc.6': {}
 
+  '@tauri-apps/api@2.0.2': {}
+
   '@tauri-apps/cli-darwin-arm64@2.0.0-rc.17':
     optional: true
 
@@ -2179,6 +2190,10 @@ snapshots:
   '@tauri-apps/plugin-http@2.0.0-rc.2':
     dependencies:
       '@tauri-apps/api': 2.0.0-rc.6
+
+  '@tauri-apps/plugin-log@2.0.0':
+    dependencies:
+      '@tauri-apps/api': 2.0.2
 
   '@tauri-apps/plugin-shell@2.0.0-rc.1':
     dependencies:
@@ -2451,7 +2466,7 @@ snapshots:
 
   '@vue/shared@3.5.10': {}
 
-  '@vuetify/loader-shared@2.0.3(vue@3.5.10(typescript@5.6.2))(vuetify@3.7.2(typescript@5.6.2)(vite-plugin-vuetify@2.0.4)(vue@3.5.10(typescript@5.6.2)))':
+  '@vuetify/loader-shared@2.0.3(vue@3.5.10(typescript@5.6.2))(vuetify@3.7.2)':
     dependencies:
       upath: 2.0.1
       vue: 3.5.10(typescript@5.6.2)
@@ -3472,7 +3487,7 @@ snapshots:
 
   vite-plugin-vuetify@2.0.4(vite@5.4.8(@types/node@22.7.4)(sass@1.79.4)(terser@5.34.1))(vue@3.5.10(typescript@5.6.2))(vuetify@3.7.2):
     dependencies:
-      '@vuetify/loader-shared': 2.0.3(vue@3.5.10(typescript@5.6.2))(vuetify@3.7.2(typescript@5.6.2)(vite-plugin-vuetify@2.0.4)(vue@3.5.10(typescript@5.6.2)))
+      '@vuetify/loader-shared': 2.0.3(vue@3.5.10(typescript@5.6.2))(vuetify@3.7.2)
       debug: 4.3.7
       upath: 2.0.1
       vite: 5.4.8(@types/node@22.7.4)(sass@1.79.4)(terser@5.34.1)

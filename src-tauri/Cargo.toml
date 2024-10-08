@@ -23,6 +23,7 @@ tauri-plugin-http = "2.0.0-rc"
 tauri-plugin-store = "2.0.0-rc"
 tokio = "1.40.0"
 reqwest = "0.12.8"
+tauri-plugin-log = "2.0.0-rc"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
