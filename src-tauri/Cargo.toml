@@ -24,6 +24,7 @@ tauri-plugin-store = "2.0.0-rc"
 tokio = "1.40.0"
 reqwest = "0.12.8"
 tauri-plugin-log = "2.0.0-rc"
+tauri-plugin-clipboard-manager = "2.0.1"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
