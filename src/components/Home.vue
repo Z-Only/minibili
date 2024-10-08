@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { fetchVideoRecommendations } from '@/apis/video/recommend'
-import { Item } from '@/apis/video/types'
+import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
 import { formatDuration, formatPubDate, formatView } from '@/common/utils'
 

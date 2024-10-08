@@ -37,13 +37,13 @@ const extractFileName = (url: string) => {
 /**
  * Encodes the given parameters with additional security keys and returns a query string.
  *
- * @template T - A generic type extending a record with string keys and any values.
+ * @template T - A generic type extending a record with string keys and string values.
  * @param {T} params - The parameters to be encoded.
  * @param {string} img_key - The image key used for generating the mixin key.
  * @param {string} sub_key - The sub key used for generating the mixin key.
  * @returns {string} The encoded query string with an additional security signature.
  */
-const encWbi = <T extends Record<string, any>>(
+const encWbi = <T extends Record<string, string>>(
     params: T,
     img_key: string,
     sub_key: string
@@ -71,7 +71,7 @@ const encWbi = <T extends Record<string, any>>(
 /**
  * Asynchronously fetches user information and constructs a query string based on the provided parameters.
  *
- * @template T - A generic type extending a record with string keys and any values.
+ * @template T - A generic type extending a record with string keys and string values.
  * @param {T} params - The parameters to be encoded into the query string.
  * @returns {Promise<string>} A promise that resolves to the constructed query string.
  */
@@ -83,7 +83,7 @@ export const wbiSignedParams = async <T = null>(
         const img_key = extractFileName(webKeys.img_url)
         const sub_key = extractFileName(webKeys.sub_url)
         const queryParams = encWbi(
-            params as Record<string, any>,
+            params as Record<string, string>,
             img_key,
             sub_key
         )

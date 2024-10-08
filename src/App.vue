@@ -5,7 +5,7 @@ import { Store } from '@tauri-apps/plugin-store'
 
 const router = useRouter()
 
-const theme = useTheme()
+const vuetifyTheme = useTheme()
 
 const { current } = useLocale()
 
@@ -23,10 +23,14 @@ const updateArrowDisabled = () => {
 const darkEnabled = ref(false)
 
 // 切换主题
-const toggleColorScheme = async () => {
+const toggleColorScheme = async (isSystem: boolean = true) => {
     darkEnabled.value = !darkEnabled.value
-    theme.global.name.value = darkEnabled.value ? 'dark' : 'light'
-    await store.set('theme', darkEnabled.value ? 'dark' : 'light')
+    vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
+    if (isSystem) {
+        await store.set('theme', 'system')
+    } else {
+        await store.set('theme', darkEnabled.value ? 'dark' : 'light')
+    }
 }
 
 const localeList = [
@@ -59,7 +63,7 @@ const matchLocaleForLanguage = (language: string) => {
 const updateLocale = async (locale: string) => {
     // 如果设置无效，使用系统语言
     if (!locale) {
-        const systemLanguage = navigator.language || navigator.userLanguage
+        const systemLanguage = navigator.language
         console.log('system language', systemLanguage)
         locale = matchLocaleForLanguage(systemLanguage)
     }
@@ -70,22 +74,23 @@ const updateLocale = async (locale: string) => {
 
 onMounted(async () => {
     // 启动时自动加载设置，优先级: 用户设置 > 系统设置
-    await store.get('theme').then(async (theme) => {
-        console.log('store theme: ', theme)
-        if (theme === 'system') {
-            // 系统设置转换为主题
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+    await store.get('theme').then(async (configTheme) => {
+        console.log('store theme: ', configTheme)
+        let curTheme = configTheme
+        if (configTheme === 'system') {
+            // 如果是跟随系统，查询当前的主题
+            curTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
                 ? 'dark'
                 : 'light'
         }
-        console.log('theme: ', theme)
-        if ((theme === 'dark') !== darkEnabled.value) {
-            await toggleColorScheme()
+        console.log('current theme: ', configTheme)
+        if ((curTheme === 'dark') !== darkEnabled.value) {
+            await toggleColorScheme(configTheme === 'system')
         }
     })
     await store.get('locale').then(async (locale) => {
         console.log('store locale: ', locale)
-        await updateLocale(locale)
+        await updateLocale(locale as string)
     })
 })
 
@@ -102,11 +107,15 @@ watch(
 watch(
     ref(window.matchMedia('(prefers-color-scheme: dark)').matches),
     async () => {
-        await store.get('theme').then(async (theme) => {
-            if (theme !== 'system') {
+        await store.get('theme').then(async (configTheme) => {
+            if (configTheme !== 'system') {
                 return
             }
-            if ((theme === 'dark') !== darkEnabled.value) {
+            const curTheme = window.matchMedia('(prefers-color-scheme: dark)')
+                .matches
+                ? 'dark'
+                : 'light'
+            if ((curTheme === 'dark') !== darkEnabled.value) {
                 await toggleColorScheme()
             }
         })

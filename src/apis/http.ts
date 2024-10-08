@@ -12,10 +12,16 @@ const REFERER: string = 'https://www.bilibili.com'
 const buildUrl = <T>(path: string, params?: T): string => {
     const url = new URL(path, BASE_URL)
     if (params) {
-        const searchParams = new URLSearchParams(
-            params as Record<string, string>
-        ).toString()
-        return `${url}?${searchParams}`
+        // If params is a string, append it to the URL directly
+        if (params instanceof String) {
+            return `${url}?${params}`
+        } else {
+            // If params is an object, convert it to a URLSearchParams object
+            const searchParams = new URLSearchParams(
+                params as Record<string, string>
+            ).toString()
+            return `${url}?${searchParams}`
+        }
     }
     return url.toString()
 }
@@ -75,7 +81,7 @@ export const getWithoutSign = async <T, P = null>(
     path: string,
     params?: P
 ): Promise<T> => {
-    return await handleRequest<T>({ method: 'GET' }, path, params)
+    return await handleRequest<T, P>({ method: 'GET' }, path, params)
 }
 
 export const get = async <T, P = null>(
@@ -83,7 +89,7 @@ export const get = async <T, P = null>(
     params?: P
 ): Promise<T> => {
     const signedParams = await wbiSignedParams(params)
-    return await handleRequest<T>({ method: 'GET' }, path, signedParams)
+    return await handleRequest<T, string>({ method: 'GET' }, path, signedParams)
 }
 
 export const postWithoutSign = async <T, P = null, D = null>(
@@ -91,7 +97,7 @@ export const postWithoutSign = async <T, P = null, D = null>(
     params?: P,
     data?: D
 ): Promise<T> => {
-    return await handleRequest<T>({ method: 'POST' }, path, params, data)
+    return await handleRequest<T, P, D>({ method: 'POST' }, path, params, data)
 }
 
 export const post = async <T, P = null, D = null>(
@@ -100,5 +106,10 @@ export const post = async <T, P = null, D = null>(
     data?: D
 ): Promise<T> => {
     const signedParams = await wbiSignedParams(params)
-    return await handleRequest<T>({ method: 'POST' }, path, signedParams, data)
+    return await handleRequest<T, string, D>(
+        { method: 'POST' },
+        path,
+        signedParams,
+        data
+    )
 }
