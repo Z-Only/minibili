@@ -2,22 +2,22 @@ import { ClientOptions, fetch } from '@tauri-apps/plugin-http'
 import { ApiResult } from '@/apis/types'
 import { wbiSignedParams } from '@/common/wbi'
 
-const BASE_URL: string = 'https://api.bilibili.com/'
+const BASE_URL: string = 'https://api.bilibili.com'
 const CONNECT_TIMEOUT: number = 30000
 const CONTENT_TYPE: string = 'application/json'
 const UA: string =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+const REFERER: string = 'https://www.bilibili.com'
 
 const buildUrl = <T>(path: string, params?: T): string => {
     const url = new URL(path, BASE_URL)
-    if (!params) {
-        return url.toString()
-    } else {
+    if (params) {
         const searchParams = new URLSearchParams(
             params as Record<string, string>
         ).toString()
         return `${url}?${searchParams}`
     }
+    return url.toString()
 }
 
 const handleRequest = async <T, P = null, D = null>(
@@ -33,6 +33,7 @@ const handleRequest = async <T, P = null, D = null>(
             'User-Agent': UA,
         },
         method: 'GET',
+        referrer: REFERER,
     }
     const url = buildUrl(path, params)
     console.log(`request url: ${url}.`)
@@ -46,25 +47,27 @@ const handleRequest = async <T, P = null, D = null>(
                 return await res
                     .json()
                     .then((jsonRes) => {
-                        const result: ApiResult<T> = JSON.parse(jsonRes)
-                        if (result.code !== 0) {
+                        const result: ApiResult<T> = jsonRes
+                        // TODO: -101 is a special code for not logged in, need to handle it.
+                        if (result.code !== 0 && result.code != -101) {
                             throw new Error(
                                 `API error! code: ${result.code}, message: ${result.message}.`
                             )
                         }
+                        console.log(`response data: ${result.data}.`)
                         return result.data
                     })
                     .catch((err) => {
-                        throw new Error(
-                            `Failed to parse JSON response: ${err}.`
-                        )
+                        console.error(`Failed to parse JSON response: ${err}.`)
+                        throw err
                     })
             } else {
                 throw new Error(`HTTP error! status: ${res.status}.`)
             }
         })
         .catch((err) => {
-            throw new Error(`Failed to fetch data: ${err}.`)
+            console.error(`Failed to fetch data: ${err}.`)
+            throw err
         })
 }
 
@@ -79,11 +82,8 @@ export const get = async <T, P = null>(
     path: string,
     params?: P
 ): Promise<T> => {
-    return await handleRequest<T>(
-        { method: 'GET' },
-        buildUrl(path, await wbiSignedParams(params)),
-        params
-    )
+    const signedParams = await wbiSignedParams(params)
+    return await handleRequest<T>({ method: 'GET' }, path, signedParams)
 }
 
 export const postWithoutSign = async <T, P = null, D = null>(
@@ -100,10 +100,5 @@ export const post = async <T, P = null, D = null>(
     data?: D
 ): Promise<T> => {
     const signedParams = await wbiSignedParams(params)
-    return await handleRequest<T>(
-        { method: 'POST' },
-        buildUrl(path, signedParams),
-        params,
-        data
-    )
+    return await handleRequest<T>({ method: 'POST' }, path, signedParams, data)
 }
