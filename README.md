@@ -1,16 +1,56 @@
-# Tauri + Vue + TypeScript
+<p align="center">
+    <img src="./src-tauri/icons/icon.png" width="128" height="128" />
+</p>
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+<div align="center">
 
-## Recommended IDE Setup
+# MiniBili
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Z-Only/minibili)](https://github.com/Z-Only/minibili/releases)
+![GitHub Release Date](https://img.shields.io/github/release-date/Z-Only/minibili)
+![GitHub All Releases](https://img.shields.io/github/downloads/Z-Only/minibili/total)
+![GitHub stars](https://img.shields.io/github/stars/Z-Only/minibili?style=flat)
+![GitHub forks](https://img.shields.io/github/forks/Z-Only/minibili)
 
-## Type Support For `.vue` Imports in TS
+`MiniBili` 是 [哔哩哔哩](https://www.bilibili.com) 的第三方客户端，适用于 Windows、MacOS、Linux 等。
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
+</div>
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+<p align="center">
+<a href="#概述">概述</a> &nbsp;&bull;&nbsp;
+<a href="#开发">开发</a> &nbsp;&bull;&nbsp;
+<a href="#安装">安装</a> &nbsp;&bull;&nbsp;
+<a href="#使用">使用</a> &nbsp;&bull;&nbsp;
+<a href="#鸣谢">鸣谢</a>
+</p>
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+## 概述
+
+MiniBili 是使用 [Tauri v2](https://v2.tauri.app) 框架开发的跨端应用。
+
+## 开发
+
+开发计划
+
+- [ ] 界面
+  - [x] 首页
+  - [x] 视频页
+  - [ ] 搜索页
+  - [ ] 设置页
+  - [ ] 个人中心
+  - [ ] ......
+- [ ] 功能
+
+## 安装
+
+TODO
+
+## 使用
+
+TODO
+
+## 鸣谢
+
+- [Tauri](https://v2.tauri.app)
+- [BiliBili](https://www.bilibili.com/)
+- [哔哩哔哩-API收集整理](https://github.com/SocialSisterYi/bilibili-API-collect)
