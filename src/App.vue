@@ -9,6 +9,8 @@ const vuetifyTheme = useTheme()
 
 const { current } = useLocale()
 
+const searchBarPlaceholder = ref('搜索')
+
 // Store 会在 JavaScript 绑定时自动加载
 const store = new Store('settings.json')
 
@@ -39,7 +41,7 @@ const localeList = [
         locale: 'zh-Hans',
         language: ['zh', 'zh-CN', 'zh-Hans'],
     },
-    { name: 'English', locale: 'en', language: ['en'] },
+    { name: 'English', locale: 'en', language: ['en', 'en-US'] },
     { name: '日本語', locale: 'ja', language: ['ja'] },
     { name: '한국어', locale: 'ko', language: ['ko'] },
 ]
@@ -64,7 +66,7 @@ const updateLocale = async (locale: string) => {
     // 如果设置无效，使用系统语言
     if (!locale) {
         const systemLanguage = navigator.language
-        console.log('system language', systemLanguage)
+        console.log('system language: ', systemLanguage)
         locale = matchLocaleForLanguage(systemLanguage)
     }
     curLocale.value = locale
@@ -143,6 +145,16 @@ watch(
                     icon="mdi-home-outline"
                     @click.prevent="router.push({ name: 'Home' })"
                 ></v-btn>
+                <v-spacer></v-spacer>
+                <v-text-field
+                    v-model="searchBarPlaceholder"
+                    append-inner-icon="mdi-magnify"
+                    clear-icon="mdi-close-circle"
+                    type="text"
+                    variant="filled"
+                    clearable
+                >
+                </v-text-field>
                 <v-spacer></v-spacer>
                 <v-menu open-on-hover>
                     <template v-slot:activator="{ props }"
