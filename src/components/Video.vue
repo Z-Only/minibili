@@ -11,48 +11,35 @@ import { invoke } from '@tauri-apps/api/core'
 
 const route = useRoute()
 
+const bvid = route.params.bvid as string
+
 const videoDetails: Ref<VideoDetails | null> = ref<VideoDetails | null>(null)
 
 const playerInfo: Ref<PlayerInfo | null> = ref<PlayerInfo | null>(null)
 
 const playUrl: Ref<PlayUrl | null> = ref<PlayUrl | null>(null)
 
-const getVideoDetails = async () => {
-    await fetchVideoDetails({
-        bvid: Array.isArray(route.params.bvid)
-            ? route.params.bvid[0]
-            : route.params.bvid,
-    }).then((data) => {
-        videoDetails.value = data
-    })
-}
-
-const getPlayerInfo = async () => {
-    await fetchPlayerInfo({
-        bvid: route.params.bvid,
-        cid: videoDetails.value?.cid,
-    } as PlayerInfoParams).then((data) => {
-        playerInfo.value = data
-    })
-}
-
-const getPlayUrl = async () => {
-    await fetchPlayUrl({
-        bvid: route.params.bvid,
-        cid: videoDetails.value?.cid,
-    } as PlayUrlParams).then((data) => {
-        playUrl.value = data
-    })
-}
-
 onMounted(async () => {
-    await getVideoDetails()
-    JSON.stringify(videoDetails.value)
+    await fetchVideoDetails({
+        bvid,
+    }).then(async (data) => {
+        videoDetails.value = data
 
-    await getPlayerInfo()
+        await fetchPlayerInfo({
+            bvid,
+            cid: videoDetails.value?.cid,
+        } as PlayerInfoParams).then((data) => {
+            playerInfo.value = data
+        })
 
-    await getPlayUrl()
-    console.log(`playUrl: ${JSON.stringify(playUrl.value)}`)
+        await fetchPlayUrl({
+            bvid,
+            cid: videoDetails.value?.cid,
+        } as PlayUrlParams).then((data) => {
+            playUrl.value = data
+            console.log(`playUrl: ${JSON.stringify(playUrl.value)}`)
+        })
+    })
 
     const player = videojs(
         'my-player',

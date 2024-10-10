@@ -6,6 +6,8 @@ use tauri_plugin_log::{Target, TargetKind};
 
 mod video;
 
+mod cookie;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -22,7 +24,11 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![video::req, video::req_video])
+        .invoke_handler(tauri::generate_handler![
+            video::req,
+            video::req_video,
+            cookie::get_cookie
+        ])
         .setup(|app| {
             // create a menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

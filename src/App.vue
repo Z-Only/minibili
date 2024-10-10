@@ -11,6 +11,12 @@ const { current } = useLocale()
 
 const searchBarPlaceholder = ref('搜索')
 
+const searchLoading = ref(false)
+
+const toSearch = (keyword: string, zone: string = 'all') => {
+    router.push({ name: 'Search', params: { zone }, query: { keyword } })
+}
+
 // Store 会在 JavaScript 绑定时自动加载
 const store = new Store('settings.json')
 
@@ -148,11 +154,17 @@ watch(
                 <v-spacer></v-spacer>
                 <v-text-field
                     v-model="searchBarPlaceholder"
+                    :loading="searchLoading"
                     append-inner-icon="mdi-magnify"
                     clear-icon="mdi-close-circle"
                     type="text"
-                    variant="filled"
+                    label="Search templates"
+                    variant="solo"
+                    density="compact"
                     clearable
+                    hide-details
+                    single-line
+                    @click:append-inner="toSearch(searchBarPlaceholder)"
                 >
                 </v-text-field>
                 <v-spacer></v-spacer>

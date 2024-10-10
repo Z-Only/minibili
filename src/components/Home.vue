@@ -2,9 +2,6 @@
 import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
-import { formatDuration, formatPubDate, formatView } from '@/common/utils'
-
-const router = useRouter()
 
 const recommendations: Ref<Item[]> = ref<Item[]>([])
 
@@ -42,10 +39,6 @@ const load = async ({
         .catch(() => {
             done('error')
         })
-}
-
-const toVideo = (bvid: string) => {
-    router.push({ name: 'Video', params: { bvid } })
 }
 
 const getSlice = (rowIndex: number, colCount: number): Item[] => {
@@ -94,51 +87,8 @@ onMounted(async () => {
                         >
                             <v-responsive>
                                 <v-sheet class="ma-2 pa-2"
-                                    ><v-card>
-                                        <v-img
-                                            class="align-end text-white"
-                                            height="200px"
-                                            :src="item.pic"
-                                            cover
-                                            @click.prevent="toVideo(item.bvid)"
-                                        >
-                                            <v-icon icon="mdi-play-box"></v-icon
-                                            >{{ formatView(item.stat.view) }}
-                                            <v-icon
-                                                icon="mdi-message-text-fast"
-                                            ></v-icon
-                                            >{{ item.stat.danmaku }}
-                                            {{ formatDuration(item.duration) }}
-                                        </v-img>
-                                        <v-card-title
-                                            class="title"
-                                            @click.prevent="toVideo(item.bvid)"
-                                            >{{ item.title }}</v-card-title
-                                        >
-                                        <v-card-actions>
-                                            <div
-                                                @click.prevent="
-                                                    toVideo(item.bvid)
-                                                "
-                                            >
-                                                <v-avatar size="24">
-                                                    <v-img
-                                                        :alt="item.owner.name"
-                                                        :src="item.owner.face"
-                                                    ></v-img> </v-avatar
-                                                ><v-icon
-                                                    v-if="item.is_followed"
-                                                    icon="mdi-check-circle"
-                                                    >已关注</v-icon
-                                                >
-                                                {{ item.owner.name }}
-                                                {{
-                                                    formatPubDate(item.pubdate)
-                                                }}
-                                            </div>
-                                        </v-card-actions>
-                                    </v-card></v-sheet
-                                >
+                                    ><video-card :video="item"></video-card
+                                ></v-sheet>
                             </v-responsive>
                         </v-skeleton-loader>
                     </v-col>

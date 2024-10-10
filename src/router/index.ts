@@ -18,6 +18,11 @@ const routes = [
         name: 'Video',
         component: () => import('@/components/Video.vue'),
     },
+    {
+        path: '/search/:zone',
+        name: 'Search',
+        component: () => import('@/components/Search.vue'),
+    },
 ]
 
 const router = createRouter({

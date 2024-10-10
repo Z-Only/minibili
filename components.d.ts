@@ -10,7 +10,9 @@ declare module 'vue' {
     Home: typeof import('./src/components/Home.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Search: typeof import('./src/components/Search.vue')['default']
     Setting: typeof import('./src/components/Setting.vue')['default']
     Video: typeof import('./src/components/Video.vue')['default']
+    VideoCard: typeof import('./src/components/VideoCard.vue')['default']
   }
 }
