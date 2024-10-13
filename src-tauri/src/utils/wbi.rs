@@ -82,11 +82,9 @@ fn _encode_wbi(
 
 async fn get_wbi_keys() -> Result<(String, String), request::Error> {
     let Data { wbi_img } =
-        request::handle_request::<Data>(Method::GET, "/x/web-interface/nav", None, None)
+        request::handle_request::<Data>(None, &Method::GET, "/x/web-interface/nav", None, None)
             .await?
             .data;
-
-    print!("img_url: {}", &wbi_img.img_url);
 
     Ok((
         take_filename(wbi_img.img_url).unwrap(),
@@ -119,7 +117,7 @@ fn value_to_vec(value: &serde_json::Value) -> Option<Vec<(&str, String)>> {
     }
 }
 
-pub async fn sign_params(params: Option<serde_json::Value>) -> String {
+pub async fn sign_params(params: Option<&serde_json::Value>) -> String {
     let keys = get_wbi_keys().await.unwrap();
     let vec_params = match params.as_ref() {
         Some(params) => value_to_vec(params),

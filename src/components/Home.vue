@@ -10,9 +10,8 @@ let freshIdx = 1
 const getHomeVideoRecommendations = async (params: RecommendParams) => {
     await fetchVideoRecommendations(params).then((data) => {
         recommendations.value.push(...data.item)
-        console.log(recommendations.value)
         freshIdx++
-        console.log(freshIdx)
+        console.log('freshIdx: %d', freshIdx)
     })
 }
 

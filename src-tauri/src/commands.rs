@@ -9,12 +9,13 @@ pub async fn fetch(
     method: &str,
     path: &str,
     params: Option<serde_json::Value>,
+    data: Option<serde_json::Value>,
 ) -> Result<ApiResult<serde_json::Value>, Error> {
     Ok(request_with_sign::<serde_json::Value>(
         Method::from_str(method).unwrap(),
         path,
-        params,
-        None,
+        params.as_ref(),
+        data.as_ref(),
     )
     .await?)
 }
