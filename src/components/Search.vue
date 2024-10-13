@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { get } from '@/apis/http'
+import { fetchSearchAll } from '@/apis/search/all'
 
 const route = useRoute()
 
@@ -9,7 +9,7 @@ const keyword = route.query.keyword as string
 console.log('videoZone: %s, keyword: %s', videoZone, keyword)
 
 onMounted(async () => {
-    await get('/x/web-interface/wbi/search/all/v2', { keyword }).then((res) => {
+    await fetchSearchAll({ keyword }).then((res) => {
         console.log(res)
     })
 })
