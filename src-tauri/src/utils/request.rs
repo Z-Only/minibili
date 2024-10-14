@@ -1,19 +1,31 @@
 use crate::utils::wbi;
 use http::Method;
-use reqwest::cookie::Jar;
-use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, REFERER, USER_AGENT};
+use once_cell::sync::Lazy;
+use reqwest::header::{HeaderMap, HeaderValue, REFERER, USER_AGENT};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use std::time::Duration;
 use thiserror;
 use url::Url;
 
 const BASE_URL: &str = "https://api.bilibili.com";
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
-const CONTENT_TYPE_VALUE: &str = "application/json";
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const REFERER_VALUE: &str = "https://www.bilibili.com";
+
+pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
+    // 创建一个 HeaderMap
+    let mut headers = HeaderMap::new();
+    headers.insert(USER_AGENT, HeaderValue::from_static(&UA));
+    headers.insert(REFERER, HeaderValue::from_static(&REFERER_VALUE));
+    // 创建一个 Client
+    Client::builder()
+        .default_headers(headers)
+        .connect_timeout(CONNECT_TIMEOUT)
+        .cookie_store(true)
+        .build()
+        .expect("Failed to build reqwest client")
+});
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -78,40 +90,23 @@ pub fn build_url(path: &str, params: Option<&serde_json::Value>) -> String {
     url.to_string()
 }
 
-async fn get_cookie() -> Result<String, Error> {
-    let client = get_client(None)?;
+async fn fetch_cookie() -> Result<(), Error> {
+    let response = GLOBAL_CLIENT.get("https://www.bilibili.com").send().await?;
+    let cookies: Vec<_> = response.cookies().collect();
 
-    let response = client.get("https://www.bilibili.com").send().await?;
-    let cookies = response.cookies();
-    for cookie in cookies {
-        if cookie.name() == "buvid3" {
-            return Ok(format!("{}={}", cookie.name(), cookie.value()));
-        }
-    }
-    return Err(Error::Cookie("cookie buvid3 not found".to_string()));
-}
-
-fn get_client(cookie_jar: Option<Jar>) -> Result<Client, reqwest::Error> {
-    // 创建一个 HeaderMap
-    let mut headers = HeaderMap::new();
-    headers.insert(CONTENT_TYPE, HeaderValue::from_static(&CONTENT_TYPE_VALUE));
-    headers.insert(USER_AGENT, HeaderValue::from_static(&UA));
-    headers.insert(REFERER, HeaderValue::from_static(&REFERER_VALUE));
-    // 创建一个 Client
-    let client_builder = Client::builder()
-        .default_headers(headers)
-        .connect_timeout(CONNECT_TIMEOUT)
-        .cookie_store(true);
-
-    match cookie_jar {
-        Some(jar) => client_builder.cookie_provider(Arc::new(jar)).build(),
-        None => client_builder.build(),
+    if cookies
+        .iter()
+        .any(|cookie| matches!(cookie.name(), "buvid3"))
+    {
+        Ok(())
+    } else {
+        Err(Error::Cookie(
+            "Cannot find name 'buvid3' in cookies".to_string(),
+        ))
     }
 }
 
-// TODO: 如何复用 client 和 cookie
 pub async fn handle_request<T>(
-    client: Option<&Client>,
     method: &Method,
     path: &str,
     params: Option<&serde_json::Value>,
@@ -120,42 +115,34 @@ pub async fn handle_request<T>(
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
-    let client = match client {
-        Some(client) => client,
-        None => &get_client(None)?,
-    };
-
     let url = &build_url(path, params);
 
     let res = match data {
         Some(data) => {
-            client
+            GLOBAL_CLIENT
                 .request(method.clone(), url)
                 .body(data.to_string())
                 .send()
                 .await?
         }
-        None => client.request(method.clone(), url).send().await?,
+        None => GLOBAL_CLIENT.request(method.clone(), url).send().await?,
     };
 
     let code = res.status();
 
-    print!(
-        "handle_request, url: {:?}, code: {:?}.\n",
+    println!(
+        "Handle request, url: {:?}, code: {:?}.",
         url,
         &code.as_u16()
     );
 
     // 无权限时重新获取 cookie
     if code.as_u16() == 412 {
-        // 创建一个 CookieJar
-        let jar = Jar::default();
-        let cookie = get_cookie().await?;
-        jar.add_cookie_str(&cookie, &Url::parse(BASE_URL).unwrap());
-        let client = get_client(Some(jar))?;
-        return Ok(Box::pin(handle_request(Some(&client), method, path, params, data)).await?);
-    } else if (path.eq("/x/web-interface/nav")
-        || path.eq("/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket"))
+        // 重新获取 cookie
+        fetch_cookie().await?;
+        return Ok(Box::pin(handle_request(method, path, params, data)).await?);
+    } else if (path == "/x/web-interface/nav"
+        || path == "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
         && !code.is_success()
     {
         return Err(Error::StatusCode(res.status().to_string()));
@@ -176,5 +163,5 @@ where
     let signed_params = wbi::sign_params(params).await;
     let mut url = Url::parse(BASE_URL).unwrap().join(path).unwrap();
     url.set_query(Some(&signed_params));
-    Ok(handle_request::<T>(None, &method, &url.to_string(), None, data).await?)
+    Ok(handle_request::<T>(&method, &url.to_string(), None, data).await?)
 }

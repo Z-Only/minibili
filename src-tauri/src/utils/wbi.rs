@@ -82,7 +82,7 @@ fn _encode_wbi(
 
 async fn get_wbi_keys() -> Result<(String, String), request::Error> {
     let Data { wbi_img } =
-        request::handle_request::<Data>(None, &Method::GET, "/x/web-interface/nav", None, None)
+        request::handle_request::<Data>(&Method::GET, "/x/web-interface/nav", None, None)
             .await?
             .data;
 

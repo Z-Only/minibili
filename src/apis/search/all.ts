@@ -1,6 +1,9 @@
 import { get } from '@/apis/http'
 import { SearchAll } from '../types/search-all'
 
+/**
+ * Interface representing the parameters for a search operation.
+ */
 export interface SearchParams {
     keyword: string
 }
