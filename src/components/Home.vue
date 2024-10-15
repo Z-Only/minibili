@@ -2,6 +2,8 @@
 import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
+import { VideoCardData } from '@/common/types/video-card-data'
+import { getDataGridSlice } from '@/common/utils'
 
 const recommendations: Ref<Item[]> = ref<Item[]>([])
 
@@ -40,15 +42,26 @@ const load = async ({
         })
 }
 
-const getSlice = (rowIndex: number, colCount: number): Item[] => {
-    return recommendations.value.slice(
-        rowIndex * colCount,
-        (rowIndex + 1) * colCount
-    )
-}
-
 const getRealIndex = (rowIndex: number, colCount: number, colIndex: number) => {
     return rowIndex * colCount + colIndex
+}
+
+const convertToVideoData = (item: Item): VideoCardData => {
+    const data: VideoCardData = {
+        id: item.id,
+        bvid: item.bvid,
+        url: item.uri,
+        author_name: item.owner.name,
+        avatar_url: item.owner.face,
+        title: item.title,
+        pic_url: item.pic,
+        view: item.stat.view,
+        danmaku: item.stat.danmaku,
+        duration: item.duration,
+        pubdate: item.pubdate,
+        is_followed: item.is_followed === 0 ? false : true,
+    }
+    return data
 }
 
 onMounted(async () => {
@@ -72,7 +85,11 @@ onMounted(async () => {
             >
                 <v-row no-gutters>
                     <v-col
-                        v-for="(item, i) in getSlice(n - 1, 3)"
+                        v-for="(item, i) in getDataGridSlice(
+                            recommendations,
+                            n - 1,
+                            3
+                        )"
                         :key="i"
                         cols="12"
                         sm="4"
@@ -86,7 +103,9 @@ onMounted(async () => {
                         >
                             <v-responsive>
                                 <v-sheet class="ma-2 pa-2"
-                                    ><video-card :video="item"></video-card
+                                    ><video-card
+                                        :video="convertToVideoData(item)"
+                                    ></video-card
                                 ></v-sheet>
                             </v-responsive>
                         </v-skeleton-loader>

@@ -45,7 +45,10 @@ export const formatPubDate = (timestamp: number): string => {
  * @param duration - The duration in seconds to format.
  * @returns A string representing the formatted duration.
  */
-export const formatDuration = (duration: number): string => {
+export const formatDuration = (duration: number | string): string => {
+    if (typeof duration === 'string') {
+        return duration
+    }
     const hours = Math.floor(duration / 3600)
     const minutes = Math.floor((duration % 3600) / 60)
     const seconds = duration % 60
@@ -83,4 +86,21 @@ export const formatView = (view: number): string => {
     } else {
         return `${(view / 10000).toFixed(1)}万`
     }
+}
+
+/**
+ * Extracts a slice of data from a grid-like structure.
+ *
+ * @template T - The type of elements in the data array.
+ * @param {T[]} data - The array of data to slice.
+ * @param {number} rowIndex - The index of the row to extract.
+ * @param {number} colCount - The number of columns in each row.
+ * @returns {T[]} A slice of the data array corresponding to the specified row.
+ */
+export const getDataGridSlice = <T>(
+    data: T[],
+    rowIndex: number,
+    colCount: number
+): T[] => {
+    return data.slice(rowIndex * colCount, (rowIndex + 1) * colCount)
 }
