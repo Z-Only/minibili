@@ -9,6 +9,8 @@ mod utils;
 
 mod commands;
 
+mod video;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -25,7 +27,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![commands::fetch])
+        .invoke_handler(tauri::generate_handler![commands::fetch, video::req_video])
         .setup(|app| {
             // create a menu
             let open_i = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;

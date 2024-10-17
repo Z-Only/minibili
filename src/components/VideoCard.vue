@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatDuration, formatPubDate, formatView } from '@/common/utils'
+import { VideoCardData } from '@/common/types/video-card-data'
 
 const router = useRouter()
 
@@ -7,7 +8,9 @@ const toVideo = (bvid: string) => {
     router.push({ name: 'Video', params: { bvid } })
 }
 
-defineProps(['video'])
+defineProps<{
+    video: VideoCardData
+}>()
 </script>
 
 <template>

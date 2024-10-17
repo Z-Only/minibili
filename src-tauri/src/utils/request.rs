@@ -8,7 +8,7 @@ use std::time::Duration;
 use thiserror;
 use url::Url;
 
-const BASE_URL: &str = "https://api.bilibili.com";
+const HOST: &str = "https://api.bilibili.com";
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const REFERER_VALUE: &str = "https://www.bilibili.com";
@@ -77,7 +77,7 @@ pub struct ApiResult<T> {
 }
 
 pub fn build_url(path: &str, params: Option<&serde_json::Value>) -> String {
-    let mut url = Url::parse(BASE_URL).unwrap().join(path).unwrap();
+    let mut url = Url::parse(HOST).unwrap().join(path).unwrap();
 
     if let Some(serde_json::Value::Object(map)) = params {
         let params_str = url::form_urlencoded::Serializer::new(String::new())
@@ -161,7 +161,7 @@ where
     T: for<'de> Deserialize<'de> + Serialize,
 {
     let signed_params = wbi::sign_params(params).await;
-    let mut url = Url::parse(BASE_URL).unwrap().join(path).unwrap();
+    let mut url = Url::parse(HOST).unwrap().join(path).unwrap();
     url.set_query(Some(&signed_params));
     Ok(handle_request::<T>(&method, &url.to_string(), None, data).await?)
 }
