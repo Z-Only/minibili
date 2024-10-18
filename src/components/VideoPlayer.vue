@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShallowRef } from 'vue'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
 import { fetchVideoDetails } from '@/apis/video/info'
@@ -26,11 +27,14 @@ const videoPlayer = useTemplateRef('videoPlayer')
 
 let player: Player
 
-const videoDetails: Ref<VideoDetails | null> = ref<VideoDetails | null>(null)
+const videoDetails: ShallowRef<VideoDetails | null> =
+    shallowRef<VideoDetails | null>(null)
 
-const playerInfo: Ref<PlayerInfo | null> = ref<PlayerInfo | null>(null)
+const playerInfo: ShallowRef<PlayerInfo | null> = shallowRef<PlayerInfo | null>(
+    null
+)
 
-const playUrl: Ref<PlayUrl | null> = ref<PlayUrl | null>(null)
+const playUrl: ShallowRef<PlayUrl | null> = shallowRef<PlayUrl | null>(null)
 
 onMounted(async () => {
     if (!videoPlayer.value) {
