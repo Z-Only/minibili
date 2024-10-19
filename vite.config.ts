@@ -6,6 +6,7 @@ import eslint from 'vite-plugin-eslint'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { vite as vidstack } from 'vidstack/plugins'
 
 const host = process.env.TAURI_DEV_HOST
 
@@ -14,7 +15,13 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')
     return {
         plugins: [
-            vue(),
+            vue({
+                template: {
+                    compilerOptions: {
+                        isCustomElement: (tag) => tag.startsWith('media-'),
+                    },
+                },
+            }),
             vuetify({ autoImport: true }),
             eslint(),
             AutoImport({
@@ -32,6 +39,7 @@ export default defineConfig(({ mode }) => {
                 brotliSize: true,
                 filename: './dist/stats.html',
             }),
+            vidstack({ include: /player\// }),
         ],
         resolve: {
             alias: {

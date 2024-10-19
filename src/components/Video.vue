@@ -11,9 +11,6 @@ const bvid = route.params.bvid as string
         <v-responsive>
             <!-- <bili-iframe-player :bvid="bvid" /> -->
 
-            <video-player
-                :format="VideoFormatFlag.MP4"
-                :bvid="bvid"
-            /> </v-responsive
+            <player :format="VideoFormatFlag.MP4" :bvid="bvid" /> </v-responsive
     ></v-card>
 </template>
