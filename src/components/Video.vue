@@ -3,8 +3,6 @@ import { VideoFormatFlag } from '@/apis/video/stream'
 
 const route = useRoute()
 
-const defaultFormat = VideoFormatFlag.MP4
-
 const bvid = route.params.bvid as string
 </script>
 
@@ -13,6 +11,9 @@ const bvid = route.params.bvid as string
         <v-responsive>
             <!-- <bili-iframe-player :bvid="bvid" /> -->
 
-            <video-player :format="defaultFormat" :bvid="bvid" /> </v-responsive
+            <video-player
+                :format="VideoFormatFlag.MP4"
+                :bvid="bvid"
+            /> </v-responsive
     ></v-card>
 </template>

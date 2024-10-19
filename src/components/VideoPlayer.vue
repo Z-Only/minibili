@@ -12,9 +12,10 @@ import {
     VideoFormatFlag,
 } from '@/apis/video/stream'
 import { PlayUrl } from '@/apis/types/play-url'
-import { invoke } from '@tauri-apps/api/core'
+// import { invoke } from '@tauri-apps/api/core'
 import Player from 'video.js/dist/types/player'
 import { error } from '@tauri-apps/plugin-log'
+import Tech from 'video.js/dist/types/tech/tech'
 
 const { format = VideoFormatFlag.MP4, bvid } = defineProps<{
     // 视频格式：DASH、MP4
@@ -35,6 +36,8 @@ const playerInfo: ShallowRef<PlayerInfo | null> = shallowRef<PlayerInfo | null>(
 )
 
 const playUrl: ShallowRef<PlayUrl | null> = shallowRef<PlayUrl | null>(null)
+
+const url = ref('')
 
 onMounted(async () => {
     if (!videoPlayer.value) {
@@ -72,6 +75,14 @@ onMounted(async () => {
                 // 是否显示全屏按钮
                 fullscreenToggle: true,
             },
+            // VHS
+            html5: {
+                vhs: {
+                    overrideNative: true,
+                },
+                nativeAudioTracks: false,
+                nativeVideoTracks: false,
+            },
         },
         function onPlayerReady() {
             videojs.log('Your player is ready!')
@@ -98,35 +109,56 @@ onMounted(async () => {
             bvid,
             cid: videoDetails.value?.cid,
             fnval: format,
+            platform: format === VideoFormatFlag.MP4 ? 'html5' : 'pc',
         } as PlayUrlParams).then(async (data) => {
             playUrl.value = data
 
-            let url: string = ''
-
             if (format === VideoFormatFlag.MP4) {
                 if (playUrl.value?.durl && playUrl.value.durl.length > 0) {
-                    url = playUrl.value.durl[0].url as string
+                    url.value = playUrl.value.durl[0].url as string
                 }
             } else if (format === VideoFormatFlag.DASH) {
-                url = playUrl.value?.dash?.video[0]?.base_url as string
+                url.value = playUrl.value?.dash?.video[0]?.base_url as string
             }
 
-            console.log('%s URL: %s', format, url)
+            console.log('%s URL: %s', format, url.value)
 
             if (format === VideoFormatFlag.MP4) {
-                // TODO: 视频流式播放 https://zhuanlan.zhihu.com/p/643297227，请求方式变为 channel?
-                await invoke('req_video', { url })
-                    .then((response) => {
-                        const arrayBuffer = response as ArrayBuffer
-                        const blob = new Blob([new Uint8Array(arrayBuffer)], {
-                            type: 'video/mp4',
-                        })
-                        const blobUrl = URL.createObjectURL(blob)
-                        console.log('Blob URL:', blobUrl) // 调试信息
-                        player.src({ src: blobUrl, type: 'video/mp4' })
-                        player.play()
-                    })
-                    .catch((error) => console.error(error))
+                player.src({ src: url.value, type: 'video/mp4' })
+                player.play()
+                // // TODO: 视频流式播放 https://zhuanlan.zhihu.com/p/643297227，请求方式变为 channel?
+                // await invoke('req_video', { url: url.value })
+                //     .then((response) => {
+                //         const arrayBuffer = response as ArrayBuffer
+                //         const blob = new Blob([new Uint8Array(arrayBuffer)], {
+                //             type: 'video/mp4',
+                //         })
+                //         const blobUrl = URL.createObjectURL(blob)
+                //         console.log('Blob URL:', blobUrl) // 调试信息
+                //         player.src({ src: blobUrl, type: 'video/mp4' })
+                //         player.play()
+                //     })
+                //     .catch((error) => console.error(error))
+            } else if (format === VideoFormatFlag.DASH) {
+                player.on('xhr-hooks-ready', () => {
+                    const playerXhrRequestHook = (options) => {
+                        options.beforeSend = (xhr: XMLHttpRequest) => {
+                            console.log('xhr:', xhr)
+
+                            xhr.setRequestHeader(
+                                'Referer',
+                                'https://www.bilibili.com'
+                            )
+                        }
+                        return options
+                    }
+                    const tech: Tech = player.tech()
+                    const vhsHandler = tech.vhs
+                    vhsHandler.xhr.onRequest(playerXhrRequestHook)
+                })
+
+                player.src({ src: url.value, type: 'application/dash+xml' })
+                player.play()
             }
         })
     })
