@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatDuration, formatPubDate, formatView } from '@/common/utils'
-import { VideoCardData } from '@/common/types/video-card-data'
+import { VideoCardData } from '@/common/types/props'
 
 const router = useRouter()
 

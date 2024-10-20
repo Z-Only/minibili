@@ -1,3 +1,5 @@
+import { VideoFormatFlag } from '@/apis/video/stream'
+
 export interface VideoCardData {
     id: number
     bvid: string
@@ -11,4 +13,11 @@ export interface VideoCardData {
     danmaku: number
     pubdate: number
     is_followed: boolean
+}
+
+export interface PlayerData {
+    format?: VideoFormatFlag
+    src: string
+    title: string
+    pic: string
 }

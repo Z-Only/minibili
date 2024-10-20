@@ -51,7 +51,7 @@ export const formatDuration = (duration: number | string): string => {
     }
     const hours = Math.floor(duration / 3600)
     const minutes = Math.floor((duration % 3600) / 60)
-    const seconds = duration % 60
+    const seconds = Math.floor(duration % 60)
 
     let formattedDuration = ''
 
@@ -103,4 +103,31 @@ export const getDataGridSlice = <T>(
     colCount: number
 ): T[] => {
     return data.slice(rowIndex * colCount, (rowIndex + 1) * colCount)
+}
+
+/**
+ * Extracts the file name from a given URL.
+ *
+ * @param {string} url - The URL to extract the file name from.
+ * @returns {string} The extracted file name.
+ */
+export const getFileNameFromUrl = (url: string): string => {
+    const regex = /\/([^/?#]+)(?:\?|#|$)/
+    const matches = url.match(regex)
+    return matches ? matches[1] : ''
+}
+
+/**
+ * Converts a given number of bytes into a human-readable string with appropriate units.
+ *
+ * @param bytes - The number of bytes to format.
+ * @returns A string representing the formatted size in appropriate units (e.g., B, KB, MB, etc.).
+ */
+export const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2))
+    return `${formattedSize} ${sizes[i]}`
 }

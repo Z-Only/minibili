@@ -30,26 +30,23 @@ pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    Io(#[from] std::io::Error),
-    #[error("failed to parse as string: {0}")]
-    Utf8(#[from] std::str::Utf8Error),
-    #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
     #[error("HTTP error: {0}")]
     StatusCode(String),
     #[error("cookie error: {0}")]
     Cookie(String),
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
 }
 
 #[derive(serde::Serialize)]
 #[serde(tag = "kind", content = "message")]
 #[serde(rename_all = "camelCase")]
 enum ErrorKind {
-    Io(String),
-    Utf8(String),
     Reqwest(String),
     StatusCode(String),
     Cookie(String),
+    Io(String),
 }
 
 impl serde::Serialize for Error {
@@ -59,11 +56,10 @@ impl serde::Serialize for Error {
     {
         let error_message = self.to_string();
         let error_kind = match self {
-            Self::Io(_) => ErrorKind::Io(error_message),
-            Self::Utf8(_) => ErrorKind::Utf8(error_message),
             Self::Reqwest(_) => ErrorKind::Reqwest(error_message),
             Self::StatusCode(_) => ErrorKind::StatusCode(error_message),
             Self::Cookie(_) => ErrorKind::Cookie(error_message),
+            Self::Io(_) => ErrorKind::Io(error_message),
         };
         error_kind.serialize(serializer)
     }

@@ -19,7 +19,7 @@
     "dependencies": {
         "@tauri-apps/api": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-clipboard-manager": "^2.0.0",
-        "@tauri-apps/plugin-http": "~2.0.0-rc",
+        "@tauri-apps/plugin-dialog": "~2.0.0-rc",
         "@tauri-apps/plugin-log": "~2.0.0-rc",
         "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
         "@tauri-apps/plugin-store": "2.0.0-rc.1",
@@ -57,5 +57,5 @@
         "vitest": "^2.1.1",
         "vue-tsc": "^2.0.22"
     },
-    "packageManager": "pnpm@9.11.0"
+    "packageManager": "pnpm@9.12.1"
 }

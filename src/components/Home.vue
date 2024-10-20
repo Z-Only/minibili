@@ -2,7 +2,7 @@
 import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
-import { VideoCardData } from '@/common/types/video-card-data'
+import { VideoCardData } from '@/common/types/props'
 import { getDataGridSlice } from '@/common/utils'
 
 const recommendations: Ref<Item[]> = ref<Item[]>([])

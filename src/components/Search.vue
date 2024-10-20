@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { fetchSearchAll } from '@/apis/search/all'
 import { SearchAll, Datum } from '@/apis/types/search-all'
-import { VideoCardData } from '@/common/types/video-card-data'
+import { VideoCardData } from '@/common/types/props'
 import { getDataGridSlice } from '@/common/utils'
 
 const route = useRoute()

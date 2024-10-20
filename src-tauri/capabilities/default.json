@@ -6,19 +6,9 @@
     "permissions": [
         "core:default",
         "shell:allow-open",
-        {
-            "identifier": "http:default",
-            "allow": [
-                {
-                    "url": "https://*.bilibili.com"
-                },
-                {
-                    "url": "https://*.bilivideo.*:*"
-                }
-            ]
-        },
         "store:default",
         "log:default",
-        "clipboard-manager:default"
+        "clipboard-manager:default",
+        "dialog:default"
     ]
 }
