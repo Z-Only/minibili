@@ -1,5 +1,5 @@
 import { get } from '@/apis/http'
-import { SearchAll } from '../types/search-all'
+import { SearchAll } from '@/apis/types/search-all'
 
 /**
  * Interface representing the parameters for a search operation.
@@ -18,7 +18,7 @@ export const fetchSearchAll = async (
     params: SearchParams
 ): Promise<SearchAll> => {
     return await get<SearchAll, SearchParams>(
-        '/x/web-interface/wbi/search/all/v2',
+        'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
         params
     )
 }

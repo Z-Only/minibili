@@ -52,7 +52,7 @@ export const fetchVideoRecommendations = async (
     params: RecommendParams
 ): Promise<VideoRecommendations> => {
     return await get<VideoRecommendations, RecommendParams>(
-        '/x/web-interface/wbi/index/top/feed/rcmd',
+        'https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd',
         params
     )
 }

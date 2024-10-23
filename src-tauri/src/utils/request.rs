@@ -8,7 +8,6 @@ use std::time::Duration;
 use thiserror;
 use url::Url;
 
-const HOST: &str = "https://api.bilibili.com";
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const REFERER_VALUE: &str = "https://www.bilibili.com";
@@ -72,9 +71,8 @@ pub struct ApiResult<T> {
     pub data: T,
 }
 
-pub fn build_url(path: &str, params: Option<&serde_json::Value>) -> String {
-    let mut url = Url::parse(HOST).unwrap().join(path).unwrap();
-
+pub fn join_query_params(url: &str, params: Option<&serde_json::Value>) -> String {
+    let mut url = Url::parse(url).unwrap();
     if let Some(serde_json::Value::Object(map)) = params {
         let params_str = url::form_urlencoded::Serializer::new(String::new())
             .extend_pairs(map.iter().map(|(k, v)| (k.as_str(), v.to_string())))
@@ -104,31 +102,31 @@ async fn fetch_cookie() -> Result<(), Error> {
 
 pub async fn handle_request<T>(
     method: &Method,
-    path: &str,
+    url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
 ) -> Result<ApiResult<T>, Error>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
-    let url = &build_url(path, params);
+    let url = join_query_params(url, params);
 
     let res = match data {
         Some(data) => {
             GLOBAL_CLIENT
-                .request(method.clone(), url)
+                .request(method.clone(), &url)
                 .body(data.to_string())
                 .send()
                 .await?
         }
-        None => GLOBAL_CLIENT.request(method.clone(), url).send().await?,
+        None => GLOBAL_CLIENT.request(method.clone(), &url).send().await?,
     };
 
     let code = res.status();
 
     println!(
         "Handle request, url: {:?}, code: {:?}.",
-        url,
+        &url,
         &code.as_u16()
     );
 
@@ -136,9 +134,9 @@ where
     if code.as_u16() == 412 {
         // 重新获取 cookie
         fetch_cookie().await?;
-        return Ok(Box::pin(handle_request(method, path, params, data)).await?);
-    } else if (path == "/x/web-interface/nav"
-        || path == "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
+        return Ok(Box::pin(handle_request(method, &url, params, data)).await?);
+    } else if (url == "/x/web-interface/nav"
+        || url == "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
         && !code.is_success()
     {
         return Err(Error::StatusCode(res.status().to_string()));
@@ -149,7 +147,7 @@ where
 
 pub async fn request_with_sign<T>(
     method: Method,
-    path: &str,
+    url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
 ) -> Result<ApiResult<T>, Error>
@@ -157,7 +155,7 @@ where
     T: for<'de> Deserialize<'de> + Serialize,
 {
     let signed_params = wbi::sign_params(params).await;
-    let mut url = Url::parse(HOST).unwrap().join(path).unwrap();
+    let mut url = Url::parse(url).unwrap();
     url.set_query(Some(&signed_params));
     Ok(handle_request::<T>(&method, &url.to_string(), None, data).await?)
 }

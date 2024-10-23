@@ -31,5 +31,8 @@ export interface PlayerInfoParams {
 export const fetchPlayerInfo = async (
     params: PlayerInfoParams
 ): Promise<PlayerInfo> => {
-    return await get<PlayerInfo, PlayerInfoParams>('/x/player/wbi/v2', params)
+    return await get<PlayerInfo, PlayerInfoParams>(
+        'https://api.bilibili.com/x/player/wbi/v2',
+        params
+    )
 }

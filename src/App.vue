@@ -17,6 +17,10 @@ const toSearch = (keyword: string, zone: string = 'all') => {
     router.push({ name: 'Search', params: { zone }, query: { keyword } })
 }
 
+const toLogin = () => {
+    router.push({ name: 'Login' })
+}
+
 // Store 会在 JavaScript 绑定时自动加载
 const store = new Store('settings.json')
 
@@ -205,6 +209,13 @@ watch(
                         ></v-btn>
                     </template>
                 </v-tooltip>
+
+                <v-avatar @click.prevent="toLogin">
+                    <v-img
+                        alt="akari"
+                        src="https://static.hdslb.com/images/akari.jpg"
+                    ></v-img>
+                </v-avatar>
             </v-app-bar>
 
             <v-navigation-drawer>

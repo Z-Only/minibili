@@ -22,7 +22,7 @@ export const fetchVideoDetails = async (
     params: VideoDetailsParams
 ): Promise<VideoDetails> => {
     return await get<VideoDetails, VideoDetailsParams>(
-        '/x/web-interface/wbi/view',
+        'https://api.bilibili.com/x/web-interface/wbi/view',
         params
     )
 }

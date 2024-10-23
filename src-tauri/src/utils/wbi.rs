@@ -81,10 +81,14 @@ fn _encode_wbi(
 }
 
 async fn get_wbi_keys() -> Result<(String, String), request::Error> {
-    let Data { wbi_img } =
-        request::handle_request::<Data>(&Method::GET, "/x/web-interface/nav", None, None)
-            .await?
-            .data;
+    let Data { wbi_img } = request::handle_request::<Data>(
+        &Method::GET,
+        "https://api.bilibili.com/x/web-interface/nav",
+        None,
+        None,
+    )
+    .await?
+    .data;
 
     Ok((
         take_filename(wbi_img.img_url).unwrap(),
