@@ -64,5 +64,8 @@ export interface PlayUrlParams {
  * @returns {Promise<PlayUrl>} A promise that resolves to the play URL data.
  */
 export const fetchPlayUrl = async (params: PlayUrlParams): Promise<PlayUrl> => {
-    return await get('https://api.bilibili.com/x/player/wbi/playurl', params)
+    return await get<PlayUrl, PlayUrlParams>(
+        'https://api.bilibili.com/x/player/wbi/playurl',
+        params
+    )
 }

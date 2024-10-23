@@ -28,9 +28,7 @@ export interface PlayerInfoParams {
  * @param params - The parameters required to fetch player information.
  * @returns A promise that resolves to the player information.
  */
-export const fetchPlayerInfo = async (
-    params: PlayerInfoParams
-): Promise<PlayerInfo> => {
+export const fetchPlayerInfo = async (params: PlayerInfoParams) => {
     return await get<PlayerInfo, PlayerInfoParams>(
         'https://api.bilibili.com/x/player/wbi/v2',
         params

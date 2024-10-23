@@ -48,9 +48,7 @@ export interface RecommendParams {
  * @param params - The parameters used to fetch video recommendations.
  * @returns A promise that resolves to video recommendations.
  */
-export const fetchVideoRecommendations = async (
-    params: RecommendParams
-): Promise<VideoRecommendations> => {
+export const fetchVideoRecommendations = async (params: RecommendParams) => {
     return await get<VideoRecommendations, RecommendParams>(
         'https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd',
         params

@@ -14,9 +14,7 @@ export interface SearchParams {
  * @param params - The search parameters.
  * @returns A promise that resolves to the search results for all categories.
  */
-export const fetchSearchAll = async (
-    params: SearchParams
-): Promise<SearchAll> => {
+export const fetchSearchAll = async (params: SearchParams) => {
     return await get<SearchAll, SearchParams>(
         'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
         params
