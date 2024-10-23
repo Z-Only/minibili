@@ -30,7 +30,19 @@ MiniBili 是使用 [Tauri v2](https://v2.tauri.app) 框架开发的跨端应用�
 
 ## 开发
 
-开发计划
+### Getting Started
+
+1. [Tauri 前置依赖](https://tauri.app/zh-cn/start/prerequisites/)
+2. 配置 node 环境
+3. 安装依赖，推荐 pnpm
+4. 本地启动
+
+```shell
+pnpm install
+pnpm tauri dev
+```
+
+### ToDoList
 
 - [ ] 界面
   - [x] 首页
@@ -40,6 +52,10 @@ MiniBili 是使用 [Tauri v2](https://v2.tauri.app) 框架开发的跨端应用�
   - [ ] 个人中心
   - [ ] ......
 - [ ] 功能
+  - [x] 下载
+  - [ ] 弹幕
+  - [ ] 评论
+  - [ ] ......
 
 ## 安装
 
