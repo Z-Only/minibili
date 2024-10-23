@@ -42,3 +42,6 @@ README.md
 # examples /gen directory
 examples/**/src-tauri/gen
 bench/**/src-tauri/gen
+
+# docs
+docs/
