@@ -87,6 +87,11 @@ const updateLocale = async (locale: string) => {
 onMounted(async () => {
     // 启动时自动加载设置，优先级: 用户设置 > 系统设置
     await store.get('theme').then(async (configTheme) => {
+        // 如果没有设置主题，使用系统主题
+        if (!configTheme) {
+            configTheme = 'system'
+            await store.set('theme', configTheme)
+        }
         console.log('store theme: ', configTheme)
         let curTheme = configTheme
         if (configTheme === 'system') {
