@@ -26,9 +26,11 @@ defineProps<{
             <v-icon icon="mdi-message-text-fast"></v-icon>{{ video.danmaku }}
             {{ formatDuration(video.duration) }}
         </v-img>
-        <v-card-title class="title" @click.prevent="toVideo(video.bvid)">{{
-            video.title
-        }}</v-card-title>
+        <v-card-title class="title" @click.prevent="toVideo(video.bvid)">
+            <div v-html="video.title"></div>
+            <v-tooltip activator="parent" location="bottom"
+                ><div v-html="video.title"></div></v-tooltip
+        ></v-card-title>
         <v-card-actions>
             <div @click.prevent="toVideo(video.bvid)">
                 <v-avatar size="24">
