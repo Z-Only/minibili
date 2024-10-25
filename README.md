@@ -6,11 +6,13 @@
 
 # MiniBili
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Z-Only/minibili)](https://github.com/Z-Only/minibili/releases)
-![GitHub Release Date](https://img.shields.io/github/release-date/Z-Only/minibili)
-![GitHub All Releases](https://img.shields.io/github/downloads/Z-Only/minibili/total)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Z-Only/minibili?style=flat)](https://github.com/Z-Only/minibili/releases)
+![GitHub Release Date](https://img.shields.io/github/release-date/Z-Only/minibili?style=flat)
+![GitHub All Releases](https://img.shields.io/github/downloads/Z-Only/minibili/total?style=flat)
+![GitHub issues](https://img.shields.io/github/issues/Z-Only/minibili?style=flat)
 ![GitHub stars](https://img.shields.io/github/stars/Z-Only/minibili?style=flat)
-![GitHub forks](https://img.shields.io/github/forks/Z-Only/minibili)
+![GitHub forks](https://img.shields.io/github/forks/Z-Only/minibili?style=flat)
+![Github license](https://img.shields.io/github/license/Z-Only/minibili?style=flat)
 
 `MiniBili` 是 [哔哩哔哩](https://www.bilibili.com) 的第三方客户端，适用于 Windows、MacOS、Linux 等。
 
@@ -27,6 +29,8 @@
 ## 概述
 
 MiniBili 是使用 [Tauri v2](https://v2.tauri.app) 框架开发的跨端应用。
+
+文档地址：[MiniBili](https://z-only.github.io/minibili/)
 
 ## 开发
 
