@@ -1,8 +1,12 @@
 use crate::utils::request;
 use http::Method;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::sync::OnceCell;
+
+pub static WBI_KEYS: Lazy<OnceCell<(String, String)>> = Lazy::new(|| OnceCell::new());
 
 const MIXIN_KEY_ENC_TAB: [usize; 64] = [
     46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29,
@@ -96,6 +100,12 @@ async fn get_wbi_keys() -> Result<(String, String), request::Error> {
     ))
 }
 
+pub async fn initialize_wbi_keys() -> Result<(), Box<dyn std::error::Error>> {
+    let keys = get_wbi_keys().await?;
+    WBI_KEYS.set(keys).map_err(|_| "Failed to set WBI_KEYS")?;
+    Ok(())
+}
+
 fn take_filename(url: String) -> Option<String> {
     url.rsplit_once('/')
         .and_then(|(_, s)| s.rsplit_once('.'))
@@ -121,15 +131,29 @@ fn value_to_vec(value: &serde_json::Value) -> Option<Vec<(&str, String)>> {
     }
 }
 
+/// Converts the given `params` to a vector if `params` is `Some`, otherwise sets `vec_params` to `None`.
+///
+/// # Parameters
+/// - `params`: An optional reference to a value that can be converted to a vector.
+///
+/// # Returns
+/// - `Some(Vec<T>)` if `params` is `Some`.
+/// - `None` if `params` is `None`.
 pub async fn sign_params(params: Option<&serde_json::Value>) -> String {
-    let keys = get_wbi_keys().await.unwrap();
+    // 初始化 WBI_KEYS
+    if WBI_KEYS.get().is_none() {
+        initialize_wbi_keys()
+            .await
+            .expect("Failed to initialize WBI_KEYS");
+    }
+    let keys = WBI_KEYS.get().expect("WBI_KEYS not initialized");
     let vec_params = match params.as_ref() {
         Some(params) => value_to_vec(params),
         None => None,
     };
     match vec_params {
-        Some(params) => encode_wbi(params, keys),
-        None => encode_wbi(Vec::new(), keys),
+        Some(params) => encode_wbi(params, keys.clone()),
+        None => encode_wbi(Vec::new(), keys.clone()),
     }
 }
 

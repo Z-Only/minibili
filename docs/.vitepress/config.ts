@@ -19,7 +19,7 @@ export default defineConfig({
     nav: [
       { text: '主页', link: '/', activeMatch: '/' },
       { text: '指南', link: '/about', activeMatch: '/about/' },
-      { text: 'Release', link: 'https://github.com/Z-Only/minibili/release' },
+      { text: 'Release', link: 'https://github.com/Z-Only/minibili/releases' },
     ],
 
     sidebar: [

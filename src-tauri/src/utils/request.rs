@@ -135,8 +135,8 @@ where
         // 重新获取 cookie
         fetch_cookie().await?;
         return Ok(Box::pin(handle_request(method, &url, params, data)).await?);
-    } else if (url == "/x/web-interface/nav"
-        || url == "/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
+    } else if (url == "https://api.bilibili.com/x/web-interface/nav"
+        || url == "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
         && !code.is_success()
     {
         return Err(Error::StatusCode(res.status().to_string()));
