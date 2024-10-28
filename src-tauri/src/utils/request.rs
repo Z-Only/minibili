@@ -1,7 +1,7 @@
 use crate::utils::wbi;
 use http::Method;
 use once_cell::sync::Lazy;
-use reqwest::header::{HeaderMap, HeaderValue, REFERER, USER_AGENT};
+use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -11,12 +11,20 @@ use url::Url;
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const REFERER_VALUE: &str = "https://www.bilibili.com";
+const ACCEPT_VALUE: &str = "Accept: application/json, text/plain, */*";
+const ACCEPT_ENCODING_VALUE: &str = "Accept-Encoding: gzip, deflate, br";
 
 pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
     // 创建一个 HeaderMap
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, HeaderValue::from_static(&UA));
     headers.insert(REFERER, HeaderValue::from_static(&REFERER_VALUE));
+    headers.insert(ACCEPT, HeaderValue::from_static(&ACCEPT_VALUE));
+    headers.insert(
+        ACCEPT_ENCODING,
+        HeaderValue::from_static(&ACCEPT_ENCODING_VALUE),
+    );
+
     // 创建一个 Client
     Client::builder()
         .default_headers(headers)

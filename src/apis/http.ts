@@ -5,28 +5,25 @@ type Method = 'GET' | 'POST'
 
 const fetch = async <T, P = null, D = null>(
     method: Method,
-    path: string,
+    url: string,
     params?: P,
     data?: D
 ): Promise<ApiResult<T>> => {
-    return await invoke('fetch', { method, path, params, data })
+    return await invoke('fetch', { method, url, params, data })
 }
 
-export const get = async <T, P = null>(
-    path: string,
-    params?: P
-): Promise<T> => {
-    return await fetch<T, P>('GET', path, params).then((result) => {
+export const get = async <T, P = null>(url: string, params?: P): Promise<T> => {
+    return await fetch<T, P>('GET', url, params).then((result) => {
         return result.data
     })
 }
 
 export const post = async <T, P = null, D = null>(
-    path: string,
+    url: string,
     params?: P,
     data?: D
 ): Promise<T> => {
-    return await fetch<T, P, D>('POST', path, params, data).then((result) => {
+    return await fetch<T, P, D>('POST', url, params, data).then((result) => {
         return result.data
     })
 }
