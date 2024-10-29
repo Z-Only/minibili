@@ -1,13 +1,12 @@
 use crate::utils::download::{send_progress_event, write_buffer_to_file, DownloadEvent};
-use crate::utils::request::{request_with_sign, ApiResult, Error, GLOBAL_CLIENT};
+use crate::utils::request::{request_with_sign, ApiResult, Error, GEETEST_CLIENT, GLOBAL_CLIENT};
 use futures_util::StreamExt;
 use http::Method;
-use reqwest::Client;
+use regex::Regex;
 use serde_json;
 use std::fs::File;
 use std::str::FromStr;
 use std::time::Instant;
-use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::ipc::Channel;
 
 #[tauri::command]
@@ -109,90 +108,31 @@ pub async fn download(
     Ok(())
 }
 
-// TODO: 极验
 #[tauri::command]
-pub async fn geetest_verify(gt: &str, challenge: &str) -> Result<String, Error> {
-    let client = Client::new();
+pub async fn geetest_get(
+    url: &str,
+    params: Option<serde_json::Value>,
+) -> Result<serde_json::Value, Error> {
+    let request = GEETEST_CLIENT.get(url).query(&params);
 
-    let time = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis();
+    // 打印请求的详细信息
+    println!("{:?}", request);
 
-    let gettype_url = "https://api.geetest.com/gettype.php";
-    let ajax_url = "https://api.geetest.com/ajax.php";
-    let get_url = "https://api.geetest.com/get.php";
+    let res = request.send().await?;
 
-    // 发送第一个请求
-    let gettype_response = client
-        .get(gettype_url)
-        .query(&[("gt", gt), ("callback", &format!("geetest_{}", time))])
-        .send()
-        .await?;
+    let content = res.text().await?;
 
-    // 检查第一个请求的响应状态
-    if !gettype_response.status().is_success() {
-        return Err(Error::StatusCode(format!(
-            "Failed to get type: {}",
-            gettype_response.status()
-        )));
+    println!("url: {}, params: {:?}, content: {}", url, params, &content);
+
+    // 定义正则表达式，匹配 geetest_时间戳() 中的内容
+    let regex = Regex::new(r"geetest_\d+\((.*)\)").unwrap();
+
+    if let Some(captures) = regex.captures(&content) {
+        if let Some(json_str) = captures.get(1) {
+            // 解析 JSON 数据
+            return serde_json::from_str(json_str.as_str())
+                .map_err(|e| Error::Parse(e.to_string()));
+        }
     }
-
-    // 发送第二个请求，请求验证码类型
-    let ajax_response = client
-        .get(ajax_url)
-        .query(&[
-            ("gt", gt),
-            ("challenge", challenge),
-            ("lang", "zh-cn"),
-            ("pt", "0"),
-            ("client_type", "web"),
-            ("w", ""),
-            ("callback", &format!("geetest_{}", time)),
-        ])
-        .send()
-        .await?;
-
-    // 检查第二个请求的响应状态
-    if !ajax_response.status().is_success() {
-        return Err(Error::StatusCode(format!(
-            "Failed to get ajax: {}",
-            ajax_response.status()
-        )));
-    }
-
-    // 发送第三个请求，获取请求验证码的图片信息
-    let get_response = client
-        .get(get_url)
-        .form(&[
-            ("is_next", "true"),
-            ("type", "click"),
-            ("gt", gt),
-            ("challenge", challenge),
-            ("lang", "zh-cn"),
-            ("https:", "false"),
-            ("protocol", "https://"),
-            ("offline", "false"),
-            ("product", "embed"),
-            ("api_server", "aip.geetest.com"),
-            ("isPC", "true"),
-            ("autoReset", "true"),
-            ("width", "100%"),
-            ("callback", &format!("geetest_{}", time)),
-        ])
-        .send()
-        .await?;
-
-    // 检查第三个请求的响应状态
-    if !get_response.status().is_success() {
-        return Err(Error::StatusCode(format!(
-            "Failed to get: {}",
-            get_response.status()
-        )));
-    }
-
-    let data = get_response.text().await?;
-
-    // 返回成功消息
-    Ok(data)
+    Err(Error::Parse("Geetest response parse error.".to_string()))
 }

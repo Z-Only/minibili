@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import QRCode from 'qrcode'
 import { fetchQrcode, pollQrcode, ScanCode } from '@/apis/login/qrcode'
-import { fetchCaptcha, Captcha } from '@/apis/login/captcha'
-import { invoke } from '@tauri-apps/api/core'
 
 const expiredTimeMs = 1_000 //180_000
 
@@ -85,23 +83,8 @@ const smsCode = ref('')
 
 const smsLogin = async () => {}
 
-const captcha: Ref<Captcha | null> = ref(null)
-
 onMounted(async () => {
     await refreshQrCode()
-
-    captcha.value = await fetchCaptcha().then(async (res) => {
-        console.log('fetchCaptcha: ', res)
-        console.log('time: ', Date.now())
-
-        await invoke('geetest_verify', {
-            ...res.geetest,
-        }).then((res) => {
-            console.log('geetest: ', res)
-        })
-
-        return res
-    })
 })
 
 onBeforeUnmount(() => {
@@ -172,7 +155,7 @@ onBeforeUnmount(() => {
                                         ></template
                                     ></v-text-field
                                 >
-
+                                <captcha-card />
                                 <v-btn @click="passwordLogin">注册</v-btn
                                 ><v-btn class="me-4" type="submit">
                                     登录

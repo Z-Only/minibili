@@ -1,3 +1,5 @@
+import { click_result } from '@/common/geetest/click'
+
 /**
  * Formats a given timestamp into a human-readable publication date string.
  *
@@ -131,3 +133,33 @@ export const formatBytes = (bytes: number): string => {
     const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2))
     return `${formattedSize} ${sizes[i]}`
 }
+
+export const getGeetestCallback = () => `geetest_${Date.now()}`
+
+/**
+ * Calculates a unique key based on an array of points.
+ *
+ * @param points - An array of tuples, where each tuple contains two numbers representing a point.
+ * @returns A string that represents the unique key generated from the points.
+ */
+export const calculateKey = (points: { x: number; y: number }[]): string => {
+    return points
+        .map(({ x, y }) => ({
+            x: Math.round((x / 333.375) * 100.0 * 100.0),
+            y: Math.round((y / 333.375) * 100.0 * 100.0),
+        }))
+        .map(({ x, y }) => `{${x}}_{${y}}`)
+        .join(',')
+}
+
+export const genRandomRt = (min: number = 100, max: number = 1000) =>
+    Math.floor(Math.random() * (max - min + 1) + min)
+
+export const generateW = (
+    key: string,
+    gt: string,
+    challenge: string,
+    c: number[],
+    s: string,
+    rt: string
+): string => click_result(key, gt, challenge, JSON.stringify(c), s, rt)

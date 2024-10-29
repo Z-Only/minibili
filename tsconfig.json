@@ -24,7 +24,11 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"]
-        }
+        },
+
+        /* js */
+        "allowJs": true,
+        "checkJs": false
     },
     "include": [
         "src/**/*.ts",
@@ -32,7 +36,8 @@
         "src/**/*.tsx",
         "src/**/*.vue",
         "./auto-imports.d.ts",
-        "components.d.ts"
+        "components.d.ts",
+        "src/**/*.js"
     ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

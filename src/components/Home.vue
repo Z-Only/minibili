@@ -4,14 +4,17 @@ import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
 import { VideoCardData } from '@/common/types/props'
 import { getDataGridSlice } from '@/common/utils'
+import { ShallowRef } from 'vue'
 
-const recommendations: Ref<Item[]> = ref<Item[]>([])
+const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
 
 let freshIdx = 1
 
 const getHomeVideoRecommendations = async (params: RecommendParams) => {
     await fetchVideoRecommendations(params).then((data) => {
         recommendations.value.push(...data.item)
+        // 手动触发更新
+        recommendations.value = [...recommendations.value]
         freshIdx++
         console.log('freshIdx: %d', freshIdx)
     })

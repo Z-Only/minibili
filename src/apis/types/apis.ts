@@ -78,3 +78,18 @@ export interface Owner {
     mid: number
     name: string
 }
+
+/**
+ * Represents the result of a Geetest API call.
+ *
+ * @template T - The type of the data returned by the API.
+ * @property {('success' | 'error')} status - The status of the API call.
+ * @property {T} data - The data returned by the API.
+ */
+export interface GeetestApiResult<T> {
+    status: 'success' | 'error'
+    data: T
+    error?: string
+    user_error?: string
+    error_code?: string
+}

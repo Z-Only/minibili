@@ -197,7 +197,6 @@ watch(
                         </v-list-item>
                     </v-list></v-menu
                 >
-
                 <v-tooltip
                     location="bottom"
                     :text="darkEnabled ? 'Toggle on light' : 'Toggle on night'"

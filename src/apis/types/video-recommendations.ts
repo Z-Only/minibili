@@ -1,4 +1,4 @@
-import { Owner } from '@/apis/types'
+import { Owner } from '@/apis/types/apis'
 
 /**
  * @description 首页视频推荐列表（web端）

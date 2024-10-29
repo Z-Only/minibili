@@ -28,7 +28,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::fetch,
             commands::download,
-            commands::geetest_verify
+            commands::geetest_get
         ])
         .setup(|app| {
             // create a menu

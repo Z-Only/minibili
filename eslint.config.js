@@ -8,7 +8,12 @@ import autoImport from './.eslintrc-auto-import.js'
 export default [
     { files: ['**/*.{js,mjs,cjs,ts,vue}'] },
     {
-        ignores: ['dist/**', 'src/vite-env.d.ts', 'src-tauri/**'],
+        ignores: [
+            'dist/**',
+            'src/vite-env.d.ts',
+            'src-tauri/**',
+            'src/common/geetest/click.js',
+        ],
     },
     {
         languageOptions: {

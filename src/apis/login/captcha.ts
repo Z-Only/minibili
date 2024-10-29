@@ -20,7 +20,7 @@ export interface Tencent {
     appid: string
 }
 
-export const fetchCaptcha = async () => {
+export const fetchCaptcha = async (): Promise<Captcha> => {
     return await get<Captcha, CaptchaParams>(
         'https://passport.bilibili.com/x/passport-login/captcha',
         { source: 'main_web' }

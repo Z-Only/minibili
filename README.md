@@ -74,3 +74,4 @@ TODO
 - [Tauri](https://v2.tauri.app)
 - [BiliBili](https://www.bilibili.com/)
 - [哔哩哔哩-API收集整理](https://github.com/SocialSisterYi/bilibili-API-collect)
+- [geetest 验证](https://github.com/Amorter/biliTicker_gt)

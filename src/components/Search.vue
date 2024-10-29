@@ -3,6 +3,7 @@ import { fetchSearchAll } from '@/apis/search/all'
 import { SearchAll, Datum } from '@/apis/types/search-all'
 import { VideoCardData } from '@/common/types/props'
 import { getDataGridSlice } from '@/common/utils'
+import { ShallowRef } from 'vue'
 
 const route = useRoute()
 
@@ -11,9 +12,11 @@ const keyword = route.query.keyword as string
 
 console.log('videoZone: %s, keyword: %s', videoZone, keyword)
 
-const searchAll: Ref<SearchAll | null> = ref<SearchAll | null>(null)
+const searchAll: ShallowRef<SearchAll | null> = shallowRef<SearchAll | null>(
+    null
+)
 
-const videoDatums: Ref<Datum[]> = ref<Datum[]>([])
+const videoDatums: ShallowRef<Datum[]> = shallowRef<Datum[]>([])
 
 const colCount = 3
 

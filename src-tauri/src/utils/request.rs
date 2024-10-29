@@ -17,12 +17,12 @@ const ACCEPT_ENCODING_VALUE: &str = "Accept-Encoding: gzip, deflate, br";
 pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
     // 创建一个 HeaderMap
     let mut headers = HeaderMap::new();
-    headers.insert(USER_AGENT, HeaderValue::from_static(&UA));
-    headers.insert(REFERER, HeaderValue::from_static(&REFERER_VALUE));
-    headers.insert(ACCEPT, HeaderValue::from_static(&ACCEPT_VALUE));
+    headers.insert(USER_AGENT, HeaderValue::from_static(UA));
+    headers.insert(REFERER, HeaderValue::from_static(REFERER_VALUE));
+    headers.insert(ACCEPT, HeaderValue::from_static(ACCEPT_VALUE));
     headers.insert(
         ACCEPT_ENCODING,
-        HeaderValue::from_static(&ACCEPT_ENCODING_VALUE),
+        HeaderValue::from_static(ACCEPT_ENCODING_VALUE),
     );
 
     // 创建一个 Client
@@ -31,7 +31,25 @@ pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
         .connect_timeout(CONNECT_TIMEOUT)
         .cookie_store(true)
         .build()
-        .expect("Failed to build reqwest client")
+        .expect("Failed to build global reqwest client")
+});
+
+pub static GEETEST_CLIENT: Lazy<Client> = Lazy::new(|| {
+    // 创建一个 HeaderMap
+    let mut headers = HeaderMap::new();
+    headers.insert(USER_AGENT, HeaderValue::from_static(UA));
+    headers.insert(ACCEPT, HeaderValue::from_static(ACCEPT_VALUE));
+    headers.insert(
+        ACCEPT_ENCODING,
+        HeaderValue::from_static(ACCEPT_ENCODING_VALUE),
+    );
+
+    // 创建一个 Client
+    Client::builder()
+        .connect_timeout(CONNECT_TIMEOUT)
+        .cookie_store(true)
+        .build()
+        .expect("Failed to build geetest reqwest client")
 });
 
 #[derive(Debug, thiserror::Error)]
@@ -44,6 +62,8 @@ pub enum Error {
     Cookie(String),
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[error("parse error: {0}")]
+    Parse(String),
 }
 
 #[derive(serde::Serialize)]
@@ -54,6 +74,7 @@ enum ErrorKind {
     StatusCode(String),
     Cookie(String),
     Io(String),
+    Parse(String),
 }
 
 impl serde::Serialize for Error {
@@ -67,6 +88,7 @@ impl serde::Serialize for Error {
             Self::StatusCode(_) => ErrorKind::StatusCode(error_message),
             Self::Cookie(_) => ErrorKind::Cookie(error_message),
             Self::Io(_) => ErrorKind::Io(error_message),
+            Self::Parse(_) => ErrorKind::Parse(error_message),
         };
         error_kind.serialize(serializer)
     }
@@ -77,19 +99,6 @@ pub struct ApiResult<T> {
     pub code: i32,
     pub message: String,
     pub data: T,
-}
-
-pub fn join_query_params(url: &str, params: Option<&serde_json::Value>) -> String {
-    let mut url = Url::parse(url).unwrap();
-    if let Some(serde_json::Value::Object(map)) = params {
-        let params_str = url::form_urlencoded::Serializer::new(String::new())
-            .extend_pairs(map.iter().map(|(k, v)| (k.as_str(), v.to_string())))
-            .finish();
-        if !params_str.is_empty() {
-            url.set_query(Some(&params_str));
-        }
-    }
-    url.to_string()
 }
 
 async fn fetch_cookie() -> Result<(), Error> {
@@ -117,17 +126,16 @@ pub async fn handle_request<T>(
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
-    let url = join_query_params(url, params);
-
     let res = match data {
         Some(data) => {
             GLOBAL_CLIENT
-                .request(method.clone(), &url)
+                .request(method.clone(), url)
+                .query(&params)
                 .body(data.to_string())
                 .send()
                 .await?
         }
-        None => GLOBAL_CLIENT.request(method.clone(), &url).send().await?,
+        None => GLOBAL_CLIENT.request(method.clone(), url).send().await?,
     };
 
     let code = res.status();
