@@ -4,6 +4,7 @@ use tauri::{
     Manager,
 };
 use tauri_plugin_log::{Target, TargetKind};
+use log::warn;
 
 mod utils;
 
@@ -44,8 +45,7 @@ pub fn run() {
                         button_state: MouseButtonState::Up,
                         ..
                     } => {
-                        println!("left click pressed and released");
-                        // in this example, let's show and focus the main window when the tray is clicked
+                        // show and focus the main window when the tray is clicked
                         let app = tray.app_handle();
                         if let Some(window) = app.get_webview_window("main") {
                             let _ = window.show();
@@ -63,19 +63,16 @@ pub fn run() {
                 // handle menu events
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "open" => {
-                        println!("open menu item was clicked");
                         app.get_webview_window("main").unwrap().show().unwrap();
                     }
                     "hide" => {
-                        println!("hide menu item was clicked");
                         app.get_webview_window("main").unwrap().hide().unwrap();
                     }
                     "quit" => {
-                        println!("quit menu item was clicked");
                         app.exit(0);
                     }
                     _ => {
-                        println!("menu item {:?} not handled", event.id);
+                        warn!("menu item {:?} not handled", event.id);
                     }
                 })
                 .build(app)?;

@@ -1,6 +1,7 @@
 use crate::utils::request::Error;
 use serde::Serialize;
 use std::fs::File;
+use std::io;
 use std::io::Write;
 use std::time::Instant;
 use tauri::ipc::Channel;
@@ -26,7 +27,7 @@ pub enum DownloadEvent<'a> {
     Finished { download_id: usize },
 }
 
-pub fn write_buffer_to_file(file: &mut File, buffer: &mut Vec<u8>) -> Result<(), std::io::Error> {
+pub fn write_buffer_to_file(file: &mut File, buffer: &mut Vec<u8>) -> Result<(), io::Error> {
     file.write_all(&buffer)?;
     Ok(())
 }

@@ -1,5 +1,6 @@
 use crate::utils::wbi;
 use http::Method;
+use log::info;
 use once_cell::sync::Lazy;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
 use reqwest::Client;
@@ -8,9 +9,9 @@ use std::time::Duration;
 use thiserror;
 use url::Url;
 
+const HOST: &str = "https://www.bilibili.com";
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const REFERER_VALUE: &str = "https://www.bilibili.com";
 const ACCEPT_VALUE: &str = "Accept: application/json, text/plain, */*";
 const ACCEPT_ENCODING_VALUE: &str = "Accept-Encoding: gzip, deflate, br";
 
@@ -18,7 +19,7 @@ pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
     // 创建一个 HeaderMap
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, HeaderValue::from_static(UA));
-    headers.insert(REFERER, HeaderValue::from_static(REFERER_VALUE));
+    headers.insert(REFERER, HeaderValue::from_static(HOST));
     headers.insert(ACCEPT, HeaderValue::from_static(ACCEPT_VALUE));
     headers.insert(
         ACCEPT_ENCODING,
@@ -102,17 +103,16 @@ pub struct ApiResult<T> {
 }
 
 async fn fetch_cookie() -> Result<(), Error> {
-    let response = GLOBAL_CLIENT.get("https://www.bilibili.com").send().await?;
-    let cookies: Vec<_> = response.cookies().collect();
+    let response = GLOBAL_CLIENT.get(HOST).send().await?;
 
-    if cookies
-        .iter()
+    if response
+        .cookies()
         .any(|cookie| matches!(cookie.name(), "buvid3"))
     {
         Ok(())
     } else {
         Err(Error::Cookie(
-            "Cannot find name 'buvid3' in cookies".to_string(),
+            "Cannot find name 'buvid3' in cookies.".to_string(),
         ))
     }
 }
@@ -140,21 +140,24 @@ where
 
     let code = res.status();
 
-    println!(
-        "Handle request, url: {:?}, code: {:?}.",
-        &url,
+    info!(
+        "Handle request, url: {:?}, params: {:?}, data: {:?}, status code: {:?}.",
+        url,
+        params,
+        data,
         &code.as_u16()
     );
 
     // 无权限时重新获取 cookie
+    let sign_apis = vec![
+        "https://api.bilibili.com/x/web-interface/nav",
+        "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
+    ];
     if code.as_u16() == 412 {
         // 重新获取 cookie
         fetch_cookie().await?;
-        return Ok(Box::pin(handle_request(method, &url, params, data)).await?);
-    } else if (url == "https://api.bilibili.com/x/web-interface/nav"
-        || url == "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
-        && !code.is_success()
-    {
+        return Ok(Box::pin(handle_request(method, url, params, data)).await?);
+    } else if !sign_apis.contains(&url) && !code.is_success() {
         return Err(Error::StatusCode(res.status().to_string()));
     }
 

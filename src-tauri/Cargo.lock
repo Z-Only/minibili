@@ -2549,6 +2549,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "http",
+ "log",
  "md5",
  "once_cell",
  "regex",

@@ -8,6 +8,7 @@ use std::fs::File;
 use std::str::FromStr;
 use std::time::Instant;
 use tauri::ipc::Channel;
+use log::info;
 
 #[tauri::command]
 pub async fn fetch(
@@ -115,14 +116,11 @@ pub async fn geetest_get(
 ) -> Result<serde_json::Value, Error> {
     let request = GEETEST_CLIENT.get(url).query(&params);
 
-    // 打印请求的详细信息
-    println!("{:?}", request);
-
     let res = request.send().await?;
 
     let content = res.text().await?;
 
-    println!("url: {}, params: {:?}, content: {}", url, params, &content);
+    info!("url: {}, params: {:?}, content: {}", url, params, &content);
 
     // 定义正则表达式，匹配 geetest_时间戳() 中的内容
     let regex = Regex::new(r"geetest_\d+\((.*)\)").unwrap();
