@@ -95,8 +95,8 @@ async fn get_wbi_keys() -> Result<(String, String), request::Error> {
     .data;
 
     Ok((
-        take_filename(wbi_img.img_url).unwrap(),
-        take_filename(wbi_img.sub_url).unwrap(),
+        take_filename(&wbi_img.img_url).unwrap(),
+        take_filename(&wbi_img.sub_url).unwrap(),
     ))
 }
 
@@ -106,7 +106,7 @@ pub async fn initialize_wbi_keys() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn take_filename(url: String) -> Option<String> {
+fn take_filename(url: &str) -> Option<String> {
     url.rsplit_once('/')
         .and_then(|(_, s)| s.rsplit_once('.'))
         .map(|(s, _)| s.to_string())
@@ -165,9 +165,7 @@ mod tests {
     #[test]
     fn test_get_filename() {
         assert_eq!(
-            take_filename(
-                "https://i0.hdslb.com/bfs/wbi/7cd084941338484aae1ad9425b84077c.png".to_string()
-            ),
+            take_filename("https://i0.hdslb.com/bfs/wbi/7cd084941338484aae1ad9425b84077c.png"),
             Some("7cd084941338484aae1ad9425b84077c".to_string())
         );
     }

@@ -2,13 +2,14 @@ use crate::utils::download::{send_progress_event, write_buffer_to_file, Download
 use crate::utils::request::{request_with_sign, ApiResult, Error, GEETEST_CLIENT, GLOBAL_CLIENT};
 use futures_util::StreamExt;
 use http::Method;
+use log::info;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json;
 use std::fs::File;
 use std::str::FromStr;
 use std::time::Instant;
 use tauri::ipc::Channel;
-use log::info;
 
 #[tauri::command]
 pub async fn fetch(
@@ -18,7 +19,7 @@ pub async fn fetch(
     data: Option<serde_json::Value>,
 ) -> Result<ApiResult<serde_json::Value>, Error> {
     Ok(request_with_sign::<serde_json::Value>(
-        Method::from_str(method).unwrap(),
+        Method::from_str(method).unwrap_or(Method::GET),
         url,
         params.as_ref(),
         data.as_ref(),
@@ -48,13 +49,11 @@ pub async fn download(
         .unwrap_or(0);
 
     // 发送下载开始事件
-    on_event
-        .send(DownloadEvent::Started {
-            url,
-            download_id,
-            content_length,
-        })
-        .unwrap();
+    on_event.send(DownloadEvent::Started {
+        url,
+        download_id,
+        content_length,
+    })?;
 
     let mut stream = response.bytes_stream();
 
@@ -102,12 +101,13 @@ pub async fn download(
     }
 
     // 发送下载完成事件
-    on_event
-        .send(DownloadEvent::Finished { download_id })
-        .unwrap();
+    on_event.send(DownloadEvent::Finished { download_id })?;
 
     Ok(())
 }
+
+static GEETEST_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"geetest_\d+\((.*)\)").expect("Failed to new regex"));
 
 #[tauri::command]
 pub async fn geetest_get(
@@ -122,10 +122,7 @@ pub async fn geetest_get(
 
     info!("url: {}, params: {:?}, content: {}", url, params, &content);
 
-    // 定义正则表达式，匹配 geetest_时间戳() 中的内容
-    let regex = Regex::new(r"geetest_\d+\((.*)\)").unwrap();
-
-    if let Some(captures) = regex.captures(&content) {
+    if let Some(captures) = GEETEST_REGEX.captures(&content) {
         if let Some(json_str) = captures.get(1) {
             // 解析 JSON 数据
             return serde_json::from_str(json_str.as_str())

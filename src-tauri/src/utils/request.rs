@@ -5,6 +5,7 @@ use once_cell::sync::Lazy;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::io;
 use std::time::Duration;
 use thiserror;
 use url::Url;
@@ -14,6 +15,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const ACCEPT_VALUE: &str = "Accept: application/json, text/plain, */*";
 const ACCEPT_ENCODING_VALUE: &str = "Accept-Encoding: gzip, deflate, br";
+const MAX_RETRIES: u8 = 3;
 
 pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
     // 创建一个 HeaderMap
@@ -47,6 +49,7 @@ pub static GEETEST_CLIENT: Lazy<Client> = Lazy::new(|| {
 
     // 创建一个 Client
     Client::builder()
+        .default_headers(headers)
         .connect_timeout(CONNECT_TIMEOUT)
         .cookie_store(true)
         .build()
@@ -62,9 +65,11 @@ pub enum Error {
     #[error("cookie error: {0}")]
     Cookie(String),
     #[error(transparent)]
-    Io(#[from] std::io::Error),
+    Io(#[from] io::Error),
     #[error("parse error: {0}")]
     Parse(String),
+    #[error("tauri error: {0}")]
+    Tauri(#[from] tauri::Error),
 }
 
 #[derive(serde::Serialize)]
@@ -76,6 +81,7 @@ enum ErrorKind {
     Cookie(String),
     Io(String),
     Parse(String),
+    Tauri(String),
 }
 
 impl serde::Serialize for Error {
@@ -90,6 +96,7 @@ impl serde::Serialize for Error {
             Self::Cookie(_) => ErrorKind::Cookie(error_message),
             Self::Io(_) => ErrorKind::Io(error_message),
             Self::Parse(_) => ErrorKind::Parse(error_message),
+            Self::Tauri(_) => ErrorKind::Tauri(error_message),
         };
         error_kind.serialize(serializer)
     }
@@ -126,42 +133,46 @@ pub async fn handle_request<T>(
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
-    let res = match data {
-        Some(data) => {
-            GLOBAL_CLIENT
-                .request(method.clone(), url)
-                .query(&params)
-                .body(data.to_string())
-                .send()
-                .await?
+    let mut retries = 0;
+
+    loop {
+        let mut request = GLOBAL_CLIENT.request(method.clone(), url);
+
+        if let Some(params) = params {
+            request = request.query(params);
         }
-        None => GLOBAL_CLIENT.request(method.clone(), url).send().await?,
-    };
 
-    let code = res.status();
+        if let Some(data) = data {
+            request = request.body(data.to_string());
+        }
 
-    info!(
-        "Handle request, url: {:?}, params: {:?}, data: {:?}, status code: {:?}.",
-        url,
-        params,
-        data,
-        &code.as_u16()
-    );
+        let res = request.send().await?;
+        let status = res.status();
 
-    // 无权限时重新获取 cookie
-    let sign_apis = vec![
-        "https://api.bilibili.com/x/web-interface/nav",
-        "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
-    ];
-    if code.as_u16() == 412 {
-        // 重新获取 cookie
-        fetch_cookie().await?;
-        return Ok(Box::pin(handle_request(method, url, params, data)).await?);
-    } else if !sign_apis.contains(&url) && !code.is_success() {
-        return Err(Error::StatusCode(res.status().to_string()));
+        info!(
+            "Handle request, url: {:?}, params: {:?}, data: {:?}, status code: {:?}.",
+            url,
+            params,
+            data,
+            status.as_u16()
+        );
+
+        if status.as_u16() == 412 {
+            if retries < MAX_RETRIES {
+                retries += 1;
+                fetch_cookie().await?;
+                continue;
+            } else {
+                return Err(Error::StatusCode(status.to_string()));
+            }
+        }
+
+        if !status.is_success() {
+            return Err(Error::StatusCode(status.to_string()));
+        }
+
+        return Ok(res.json::<ApiResult<T>>().await?);
     }
-
-    Ok(res.json::<ApiResult<T>>().await?)
 }
 
 pub async fn request_with_sign<T>(
@@ -174,7 +185,7 @@ where
     T: for<'de> Deserialize<'de> + Serialize,
 {
     let signed_params = wbi::sign_params(params).await;
-    let mut url = Url::parse(url).unwrap();
+    let mut url = Url::parse(url).map_err(|e| Error::Parse(e.to_string()))?;
     url.set_query(Some(&signed_params));
-    Ok(handle_request::<T>(&method, &url.to_string(), None, data).await?)
+    handle_request::<T>(&method, &url.to_string(), None, data).await
 }
