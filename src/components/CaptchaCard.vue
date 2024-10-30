@@ -13,6 +13,7 @@ import {
     genRandomRt,
 } from '@/common/utils'
 import { ShallowRef } from 'vue'
+import { CaptchaCardData } from '@/common/types/emits'
 
 const captcha: ShallowRef<Captcha | null> = shallowRef(null)
 
@@ -35,9 +36,14 @@ const captchaCanvasReference =
  */
 const openDialog = async () => {
     dialogOpend.value = true
-    captchaClicked.value = false
-    points.value = []
 
+    await refreshCaptcha()
+}
+
+/**
+ * 初始化验证码数据
+ */
+const initializeCaptchaData = async () => {
     // 1. 获取验证码
     captcha.value = await fetchCaptcha()
     // 2.geetest gettype
@@ -80,11 +86,8 @@ const openDialog = async () => {
             `https://${imageServer}`
         ).toString()
     } else {
-        console.error('Static server or pic URL is undefined')
-        return
+        throw new Error('Static server or pic URL is undefined')
     }
-
-    await initializeCaptchaCanvas()
 }
 
 /**
@@ -94,6 +97,12 @@ const initializeCaptchaCanvas = async () => {
     await nextTick()
 
     const context = captchaCanvasReference.value?.getContext('2d')
+
+    console.log(
+        'w h: ',
+        captchaCanvasReference.value.width,
+        captchaCanvasReference.value.height
+    )
 
     if (!context) {
         console.error('Failed to get canvas context.')
@@ -139,7 +148,7 @@ const handleClick = (
 
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+    const y = event.clientY - rect.top - 30
 
     points.push({ x, y })
 
@@ -154,10 +163,28 @@ const handleClick = (
     context.fillText(`(${x}, ${y})`, x + 10, y)
 }
 
+// 重置数据
+const resetCaptchaData = () => {
+    captchaClicked.value = false
+    points.value = []
+}
+
+// 关闭并重置数据
+const closeCaptcha = () => {
+    dialogOpend.value = false
+    resetCaptchaData()
+}
+
+// 刷新验证码窗口
+const refreshCaptcha = async () => {
+    resetCaptchaData()
+
+    await initializeCaptchaData()
+    await initializeCaptchaCanvas()
+}
+
 // 验证验证码
 const geetestVerify = async () => {
-    dialogOpend.value = false
-
     // 移除点击事件监听器
     captchaCanvasReference.value?.removeEventListener('click', (event) =>
         handleClick(
@@ -179,6 +206,9 @@ const geetestVerify = async () => {
         genRandomRt().toString()
     )
 
+    // TODO: 选择合适的时机关闭验证码弹窗
+    closeCaptcha()
+
     // 发送验证请求
     const validate = await geetestAjaxPhp({
         gt: captcha.value?.geetest?.gt,
@@ -190,8 +220,16 @@ const geetestVerify = async () => {
         callback: getGeetestCallback(),
     })
 
-    console.log('validate result: ', validate)
+    emit('getCaptchaResult', {
+        token: captcha.value?.token,
+        challenge: captcha.value?.geetest?.challenge,
+        validate: validate.result,
+    })
 }
+
+const emit = defineEmits<{
+    getCaptchaResult: [result: CaptchaCardData]
+}>()
 
 onMounted(async () => {})
 </script>
@@ -200,13 +238,21 @@ onMounted(async () => {})
     <v-btn @click="openDialog">验证码</v-btn>
 
     <v-dialog v-model="dialogOpend" width="auto" persistent>
-        <v-card width="320" height="410" style="padding: 2%">
-            请在下图依次点击：<v-image
-                class="geetest_tip_img"
-                :src="captchaImgSrc"
-            ></v-image>
+        <v-card width="320" height="410">
+            <v-container>
+                请在下图依次点击：
+                <div class="geetest_tip_img_container">
+                    <img :src="captchaImgSrc" class="geetest_tip_img" />
+                </div>
+            </v-container>
             <div class="geetest_item">
-                <canvas ref="captchaCanvas" class="geetest_item_img"></canvas>
+                <!-- 默认长宽是 300 * 150，不能使用 css 修改，需要使用属性 -->
+                <canvas
+                    ref="captchaCanvas"
+                    class="geetest_item_img"
+                    width="306.55px"
+                    height="343.333px"
+                ></canvas>
             </div>
             <template v-slot:actions>
                 <v-tooltip location="top" text="关闭验证">
@@ -214,12 +260,17 @@ onMounted(async () => {})
                         <v-btn
                             v-bind="props"
                             icon="mdi-close-circle-outline"
+                            @click.prevent="closeCaptcha"
                         ></v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip location="top" text="刷新验证">
                     <template v-slot:activator="{ props }">
-                        <v-btn v-bind="props" icon="mdi-refresh"></v-btn>
+                        <v-btn
+                            v-bind="props"
+                            icon="mdi-refresh"
+                            @click.prevent="refreshCaptcha"
+                        ></v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip location="top" text="帮助反馈">
@@ -243,20 +294,24 @@ onMounted(async () => {})
 </template>
 
 <style scoped>
-.geetest_item {
-    width: 95.8%;
-}
-.geetest_tip_img {
-    display: block;
+/* TODO: 验证码图像样式 */
+.geetest_tip_img_container {
     width: 116px;
     height: 40px;
-    right: -116px;
-    top: -10px;
+    overflow: hidden;
+}
+.geetest_tip_img {
+    width: 100%; /* 使图像充满容器的宽度 */
+    height: auto; /* 保持图像的原始高宽比 */
+    object-fit: none; /* 保持其原有的尺寸 */
+    object-position: left 0px bottom 90px;
+}
+.geetest_item {
+    height: 311px;
+    margin: -40px 2.225px 40px 2.225px;
 }
 .geetest_item_img {
-    right: 0px;
-    top: 0px;
-    width: 100%;
-    height: 112%;
+    object-fit: cover;
+    object-position: left 0px top 36.783px;
 }
 </style>

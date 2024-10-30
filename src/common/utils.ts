@@ -1,4 +1,5 @@
 import { click_result } from '@/common/geetest/click'
+import { KJUR, KEYUTIL, RSAKey } from 'jsrsasign'
 
 /**
  * Formats a given timestamp into a human-readable publication date string.
@@ -163,3 +164,14 @@ export const generateW = (
     s: string,
     rt: string
 ): string => click_result(key, gt, challenge, JSON.stringify(c), s, rt)
+
+export const rsaEncryptPassword = (
+    publicKey: string,
+    salt: string,
+    password: string
+) =>
+    KJUR.crypto.Cipher.encrypt(
+        salt + password,
+        KEYUTIL.getKey(publicKey) as RSAKey,
+        'RSA'
+    )

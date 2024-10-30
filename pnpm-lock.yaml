@@ -26,6 +26,12 @@ importers:
       '@tauri-apps/plugin-store':
         specifier: 2.0.0-rc.1
         version: 2.0.0-rc.1
+      jsrsasign:
+        specifier: ^11.1.0
+        version: 11.1.0
+      jsrsasign-util:
+        specifier: ^1.0.5
+        version: 1.0.5
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -54,6 +60,9 @@ importers:
       '@tauri-apps/cli':
         specifier: '>=2.0.0-rc.0'
         version: 2.0.0-rc.17
+      '@types/jsrsasign':
+        specifier: ^10.5.14
+        version: 10.5.14
       '@types/node':
         specifier: ^22.7.4
         version: 22.7.4
@@ -96,9 +105,6 @@ importers:
       stylelint:
         specifier: ^16.10.0
         version: 16.10.0(typescript@5.6.2)
-      stylelint-config-prettier:
-        specifier: ^9.0.5
-        version: 9.0.5(stylelint@16.10.0(typescript@5.6.2))
       stylelint-config-standard-scss:
         specifier: ^13.1.0
         version: 13.1.0(postcss@8.4.47)(stylelint@16.10.0(typescript@5.6.2))
@@ -724,6 +730,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/jsrsasign@10.5.14':
+    resolution: {integrity: sha512-lppSlfK6etu+cuKs40K4rg8As79PH6hzIB+v55zSqImbSH3SE6Fm8MBHCiI91cWlAP3Z4igtJK1VL3fSN09blQ==}
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
@@ -1637,6 +1646,15 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  jsonc-parser@3.3.1:
+    resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
+
+  jsrsasign-util@1.0.5:
+    resolution: {integrity: sha512-e5Kp8aaT5GH2c5X8j4uaJruYmT4GcnaGb47nw8m60YqPywtnOtTISZ9hZgtZ3a+jh7B27bU2LCf3Y32wZyfhtQ==}
+
+  jsrsasign@11.1.0:
+    resolution: {integrity: sha512-Ov74K9GihaK9/9WncTe1mPmvrO7Py665TUfUKvraXBpu+xcTWitrtuOwcjf4KMU9maPaYn0OuaWy0HOzy/GBXg==}
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -2152,13 +2170,6 @@ packages:
 
   strip-literal@2.1.0:
     resolution: {integrity: sha512-Op+UycaUt/8FbN/Z2TWPBLge3jWrP3xj10f3fnYxf052bKuS3EKs1ZQcVGjnEMdsNVAM+plXRdmjrZ/KgG3Skw==}
-
-  stylelint-config-prettier@9.0.5:
-    resolution: {integrity: sha512-U44lELgLZhbAD/xy/vncZ2Pq8sh2TnpiPvo38Ifg9+zeioR+LAkHu0i6YORIOxFafZoVg0xqQwex6e6F25S5XA==}
-    engines: {node: '>= 12'}
-    hasBin: true
-    peerDependencies:
-      stylelint: '>= 11.x < 15'
 
   stylelint-config-recommended-scss@14.1.0:
     resolution: {integrity: sha512-bhaMhh1u5dQqSsf6ri2GVWWQW5iUjBYgcHkh7SgDDn92ijoItC/cfO/W+fpXshgTQWhwFkP1rVcewcv4jaftRg==}
@@ -3113,6 +3124,8 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/jsrsasign@10.5.14': {}
 
   '@types/linkify-it@5.0.0': {}
 
@@ -4121,6 +4134,15 @@ snapshots:
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+  jsonc-parser@3.3.1: {}
+
+  jsrsasign-util@1.0.5:
+    dependencies:
+      jsonc-parser: 3.3.1
+      jsrsasign: 11.1.0
+
+  jsrsasign@11.1.0: {}
+
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -4601,10 +4623,6 @@ snapshots:
   strip-literal@2.1.0:
     dependencies:
       js-tokens: 9.0.0
-
-  stylelint-config-prettier@9.0.5(stylelint@16.10.0(typescript@5.6.2)):
-    dependencies:
-      stylelint: 16.10.0(typescript@5.6.2)
 
   stylelint-config-recommended-scss@14.1.0(postcss@8.4.47)(stylelint@16.10.0(typescript@5.6.2)):
     dependencies:

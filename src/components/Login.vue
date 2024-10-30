@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import QRCode from 'qrcode'
 import { fetchQrcode, pollQrcode, ScanCode } from '@/apis/login/qrcode'
+import { CaptchaCardData } from '@/common/types/emits'
 
 const expiredTimeMs = 1_000 //180_000
 
@@ -83,6 +84,10 @@ const smsCode = ref('')
 
 const smsLogin = async () => {}
 
+const receiveCaptchaResult = (data: CaptchaCardData) => {
+    console.log('receiveCaptchaResult: ', data)
+}
+
 onMounted(async () => {
     await refreshQrCode()
 })
@@ -155,7 +160,9 @@ onBeforeUnmount(() => {
                                         ></template
                                     ></v-text-field
                                 >
-                                <captcha-card />
+                                <captcha-card
+                                    @getCaptchaResult="receiveCaptchaResult"
+                                />
                                 <v-btn @click="passwordLogin">注册</v-btn
                                 ><v-btn class="me-4" type="submit">
                                     登录
