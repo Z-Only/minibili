@@ -146,16 +146,28 @@ export const getGeetestCallback = () => `geetest_${Date.now()}`
 export const calculateKey = (points: { x: number; y: number }[]): string => {
     return points
         .map(({ x, y }) => ({
-            x: Math.round((x / 333.375) * 100.0 * 100.0),
-            y: Math.round((y / 333.375) * 100.0 * 100.0),
+            x: (x / 306.55) * 344,
+            y: (y / 306.55) * (384 - 40),
         }))
-        .map(({ x, y }) => `{${x}}_{${y}}`)
+        .map(({ x, y }) => ({
+            x: Math.round((x / 333.375) * 100 * 100),
+            y: Math.round((y / 333.375) * 100 * 100),
+        }))
+        .map(({ x, y }) => `${x}_${y}`)
         .join(',')
 }
 
-export const genRandomRt = (min: number = 100, max: number = 1000) =>
-    Math.floor(Math.random() * (max - min + 1) + min)
-
+/**
+ * Generates a result string by calling the `click_result` function with the provided parameters.
+ *
+ * @param key - A string representing the key.
+ * @param gt - A string representing the gt.
+ * @param challenge - A string representing the challenge.
+ * @param c - An array of numbers.
+ * @param s - A string representing the s.
+ * @param rt - A string representing the rt.
+ * @returns A string result from the `click_result` function.
+ */
 export const generateW = (
     key: string,
     gt: string,
@@ -165,6 +177,14 @@ export const generateW = (
     rt: string
 ): string => click_result(key, gt, challenge, JSON.stringify(c), s, rt)
 
+/**
+ * Encrypts a password using RSA encryption.
+ *
+ * @param publicKey - The RSA public key used for encryption.
+ * @param salt - A salt value to prepend to the password before encryption.
+ * @param password - The password to be encrypted.
+ * @returns The encrypted password.
+ */
 export const rsaEncryptPassword = (
     publicKey: string,
     salt: string,

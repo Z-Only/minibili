@@ -7,8 +7,19 @@ import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
 import { zhHans, en, ja, ko } from 'vuetify/locale'
 
-createApp(App)
-    .use(router)
+const app = createApp(App)
+
+// 自定义警告处理程序
+app.config.warnHandler = (msg, _vm, trace) => {
+    // 过滤掉包含特定关键字的警告
+    if (msg.includes('Vuetify: Translation key')) {
+        return
+    }
+    // 打印其他警告
+    console.warn(`[Vue warn]: ${msg}${trace}`)
+}
+
+app.use(router)
     .use(
         createVuetify({
             blueprint: md3,

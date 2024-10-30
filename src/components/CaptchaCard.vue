@@ -6,12 +6,7 @@ import {
     geetestAjaxPhp,
 } from '@/apis/login/geetest'
 import { GeetestGetData } from '@/apis/types/geetest'
-import {
-    getGeetestCallback,
-    generateW,
-    calculateKey,
-    genRandomRt,
-} from '@/common/utils'
+import { getGeetestCallback, generateW, calculateKey } from '@/common/utils'
 import { ShallowRef } from 'vue'
 import { CaptchaCardData } from '@/common/types/emits'
 
@@ -97,12 +92,6 @@ const initializeCaptchaCanvas = async () => {
     await nextTick()
 
     const context = captchaCanvasReference.value?.getContext('2d')
-
-    console.log(
-        'w h: ',
-        captchaCanvasReference.value.width,
-        captchaCanvasReference.value.height
-    )
 
     if (!context) {
         console.error('Failed to get canvas context.')
@@ -203,12 +192,13 @@ const geetestVerify = async () => {
         captcha.value?.geetest?.challenge as string,
         geetestGet.value?.c as number[],
         geetestGet.value?.s as string,
-        genRandomRt().toString()
+        '82253e788a7b95e9'
     )
 
     // TODO: 选择合适的时机关闭验证码弹窗
     closeCaptcha()
 
+    // FIXME: geetest_1730304530450({"status": "success", "data": {"result": "fail", "msg": ["unknown exception"]}})
     // 发送验证请求
     const validate = await geetestAjaxPhp({
         gt: captcha.value?.geetest?.gt,
@@ -221,8 +211,8 @@ const geetestVerify = async () => {
     })
 
     emit('getCaptchaResult', {
-        token: captcha.value?.token,
-        challenge: captcha.value?.geetest?.challenge,
+        token: captcha.value?.token as string,
+        challenge: captcha.value?.geetest?.challenge as string,
         validate: validate.result,
     })
 }
@@ -238,7 +228,7 @@ onMounted(async () => {})
     <v-btn @click="openDialog">验证码</v-btn>
 
     <v-dialog v-model="dialogOpend" width="auto" persistent>
-        <v-card width="320" height="410">
+        <v-card width="320" height="480">
             <v-container>
                 请在下图依次点击：
                 <div class="geetest_tip_img_container">
@@ -251,7 +241,7 @@ onMounted(async () => {})
                     ref="captchaCanvas"
                     class="geetest_item_img"
                     width="306.55px"
-                    height="343.333px"
+                    height="342.195px"
                 ></canvas>
             </div>
             <template v-slot:actions>
@@ -307,11 +297,11 @@ onMounted(async () => {})
     object-position: left 0px bottom 90px;
 }
 .geetest_item {
-    height: 311px;
+    height: 306.55px;
     margin: -40px 2.225px 40px 2.225px;
 }
 .geetest_item_img {
     object-fit: cover;
-    object-position: left 0px top 36.783px;
+    object-position: left 0px top 35.645px;
 }
 </style>

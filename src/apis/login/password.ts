@@ -1,7 +1,19 @@
-import { get } from '@/apis/http'
-import { PasswordLoginKeyData } from '@/apis/types/password-login'
+import { get, post } from '@/apis/http'
+import {
+    PasswordLoginKeyData,
+    PasswordLoginParams,
+    PasswordLoginData,
+} from '@/apis/types/password-login'
 
 export const fetchPasswordLoginKey = async (): Promise<PasswordLoginKeyData> =>
     await get<PasswordLoginKeyData>(
         'https://passport.bilibili.com/x/passport-login/key'
+    )
+
+export const passwordLogin = async (
+    params: PasswordLoginParams
+): Promise<PasswordLoginData> =>
+    await post<PasswordLoginData, PasswordLoginParams>(
+        'https://passport.bilibili.com/x/passport-login/web/login',
+        params
     )
