@@ -4,6 +4,7 @@ import { useLocale } from 'vuetify'
 import { Store } from '@tauri-apps/plugin-store'
 
 const router = useRouter()
+const route = useRoute()
 
 const vuetifyTheme = useTheme()
 
@@ -18,6 +19,14 @@ const toSearch = (keyword: string, zone: string = 'all') => {
 
 const toLogin = () => {
     router.push({ name: 'Login' })
+}
+
+const toHome = () => {
+    router.push({ name: 'Home' })
+}
+
+const toSetting = () => {
+    router.push({ name: 'Setting' })
 }
 
 const store = new Store('settings.json')
@@ -105,14 +114,6 @@ onMounted(async () => {
 })
 
 watch(
-    ref(router.options.history.state),
-    () => {
-        updateArrowDisabled()
-    },
-    { immediate: true, deep: true }
-)
-
-watch(
     ref(window.matchMedia('(prefers-color-scheme: dark)').matches),
     async () => {
         await store.get('theme').then(async (storedTheme) => {
@@ -128,6 +129,16 @@ watch(
                 await toggleColorScheme()
             }
         })
+    },
+    { immediate: true }
+)
+
+// 监听路由变化
+watch(
+    route,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (to, from) => {
+        updateArrowDisabled()
     },
     { immediate: true }
 )
@@ -148,10 +159,6 @@ watch(
                     @click.prevent="router.forward()"
                 />
                 <v-btn icon="mdi-refresh" @click.prevent="router.go(0)" />
-                <v-btn
-                    icon="mdi-home-outline"
-                    @click.prevent="router.push({ name: 'Home' })"
-                />
 
                 <v-spacer />
 
@@ -220,15 +227,36 @@ watch(
                 </v-avatar>
             </v-app-bar>
 
-            <v-navigation-drawer>
-                <v-list>
-                    <v-list-item title="Navigation drawer" />
+            <v-navigation-drawer :rail="true" permanent>
+                <v-list density="compact" nav color="primary" rounded="xl">
+                    <v-list-item
+                        prepend-icon="mdi-home-outline"
+                        title="Home"
+                        value="home"
+                        @click.prevent="toHome"
+                        ><v-list-item-title
+                            >主页</v-list-item-title
+                        ></v-list-item
+                    >
+                    <v-list-item
+                        prepend-icon="mdi-cog"
+                        title="Setting"
+                        value="setting"
+                        @click.prevent="toSetting"
+                        ><v-list-item-title
+                            >设置</v-list-item-title
+                        ></v-list-item
+                    >
                 </v-list>
             </v-navigation-drawer>
 
             <v-main>
                 <v-container>
-                    <router-view />
+                    <router-view v-slot="{ Component }">
+                        <transition name="fade">
+                            <component :is="Component" />
+                        </transition>
+                    </router-view>
                 </v-container>
             </v-main>
         </v-app>
