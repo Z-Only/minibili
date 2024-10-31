@@ -28,7 +28,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::fetch,
             commands::download,
-            commands::geetest_get
+            commands::geetest_get,
+            commands::open_devtools
         ])
         .setup(|app| {
             // 创建菜单项

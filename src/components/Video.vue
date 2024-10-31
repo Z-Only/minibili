@@ -8,9 +8,10 @@ import { PlayerInfo } from '@/apis/types/player-info'
 import { fetchPlayerInfo } from '@/apis/video/player'
 import { fetchPlayUrl, VideoFormatFlag } from '@/apis/video/stream'
 import { PlayUrl } from '@/apis/types/play-url'
-import { invoke, Channel } from '@tauri-apps/api/core'
+import { Channel } from '@tauri-apps/api/core'
 import { getFileNameFromUrl, formatBytes, formatDuration } from '@/common/utils'
 import { videoDir, join } from '@tauri-apps/api/path'
+import { download, DownloadEvent } from '@/common/commands'
 
 // 获取路由参数
 const route = useRoute()
@@ -40,23 +41,6 @@ const openDialog = async () => {
     console.log('打开路径:', path)
     await store.set('download_path', path)
 }
-
-type DownloadEvent =
-    | {
-          event: 'started'
-          data: { url: string; downloadId: number; contentLength: number }
-      }
-    | {
-          event: 'progress'
-          data: {
-              downloadId: number
-              downloadedBytes: number
-              speed: number
-              costTime: number
-              estimatedTime: number
-          }
-      }
-    | { event: 'finished'; data: { downloadId: number } }
 
 const contentLength = ref(0)
 const downloadedBytes = ref(0)
@@ -109,11 +93,7 @@ const downloadVideo = async () => {
         getFileNameFromUrl(src.value)
     )
     console.log('正在下载视频至:', downloadPath)
-    await invoke('download', {
-        url: src.value,
-        savePath: downloadPath,
-        onEvent,
-    })
+    await download(src.value, downloadPath, onEvent)
 }
 
 /**

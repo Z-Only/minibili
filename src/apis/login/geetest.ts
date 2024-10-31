@@ -1,4 +1,4 @@
-import { geetestGet } from '@/apis/http'
+import { geetestGet } from '@/common/commands'
 import {
     GeetestGetTypeParams,
     GeetestGetTypeData,
