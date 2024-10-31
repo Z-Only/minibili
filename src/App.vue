@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
 import { useLocale } from 'vuetify'
-import { Store } from '@tauri-apps/plugin-store'
+import {
+    setStoreTheme,
+    setStoreLocale,
+    getStoreTheme,
+    getStoreLocale,
+} from '@/store/settings'
 
 const router = useRouter()
 const route = useRoute()
@@ -29,8 +34,6 @@ const toSetting = () => {
     router.push({ name: 'Setting' })
 }
 
-const store = new Store('settings.json')
-
 const backDisabled = ref(true)
 const forwardDisabled = ref(true)
 
@@ -45,9 +48,9 @@ const toggleColorScheme = async (useSystemTheme: boolean = true) => {
     darkEnabled.value = !darkEnabled.value
     vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
     if (useSystemTheme) {
-        await store.set('theme', 'system')
+        await setStoreTheme('system')
     } else {
-        await store.set('theme', darkEnabled.value ? 'dark' : 'light')
+        await setStoreTheme(darkEnabled.value ? 'dark' : 'light')
     }
 }
 
@@ -84,14 +87,14 @@ const updateLocale = async (locale: string) => {
     }
     curLocale.value = locale
     current.value = curLocale.value
-    await store.set('locale', curLocale.value)
+    await setStoreLocale(curLocale.value)
 }
 
 onMounted(async () => {
-    await store.get('theme').then(async (storedTheme) => {
+    await getStoreTheme().then(async (storedTheme) => {
         if (!storedTheme) {
             storedTheme = 'system'
-            await store.set('theme', storedTheme)
+            await setStoreTheme(storedTheme)
         }
         console.log('store theme:', storedTheme)
         let currentTheme = storedTheme
@@ -107,7 +110,7 @@ onMounted(async () => {
         }
     })
 
-    await store.get('locale').then(async (storedLocale) => {
+    await getStoreLocale().then(async (storedLocale) => {
         console.log('store locale:', storedLocale)
         await updateLocale(storedLocale as string)
     })
@@ -116,7 +119,7 @@ onMounted(async () => {
 watch(
     ref(window.matchMedia('(prefers-color-scheme: dark)').matches),
     async () => {
-        await store.get('theme').then(async (storedTheme) => {
+        await getStoreTheme().then(async (storedTheme) => {
             if (storedTheme !== 'system') {
                 return
             }
