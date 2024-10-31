@@ -5,68 +5,88 @@ import { VideoCardData } from '@/common/types/props'
 import { getDataGridSlice } from '@/common/utils'
 import { ShallowRef } from 'vue'
 
+// 获取路由参数
 const route = useRoute()
-
 const videoZone = route.params.zone as string
 const keyword = route.query.keyword as string
 
-console.log('videoZone: %s, keyword: %s', videoZone, keyword)
+// 定义响应式数据
+const searchResults: ShallowRef<SearchAll | null> = shallowRef(null)
+const videos: ShallowRef<Datum[]> = shallowRef([])
+const columnsPerRow = 3 // 每行显示的列数
 
-const searchAll: ShallowRef<SearchAll | null> = shallowRef<SearchAll | null>(
-    null
-)
-
-const videoDatums: ShallowRef<Datum[]> = shallowRef<Datum[]>([])
-
-const colCount = 3
-
-const convertToVideoData = (item: Datum): VideoCardData => {
-    const data: VideoCardData = {
-        id: item.id,
-        bvid: item.bvid,
-        url: item.arcurl,
-        author_name: item.author,
-        avatar_url: item.upic,
-        title: item.title,
-        pic_url: item.pic,
-        view: item.play,
-        danmaku: item.danmaku,
-        duration: item.duration,
-        pubdate: item.pubdate,
+/**
+ * 将原始数据转换为适合展示的格式
+ */
+function transformDatum(datum: Datum): VideoCardData {
+    return {
+        id: datum.id,
+        bvid: datum.bvid,
+        url: datum.arcurl,
+        author_name: datum.author,
+        avatar_url: datum.upic,
+        title: datum.title,
+        pic_url: datum.pic,
+        view: datum.play,
+        danmaku: datum.danmaku,
+        duration: datum.duration,
+        pubdate: datum.pubdate,
         is_followed: false,
     }
-    return data
+}
+
+/**
+ * 初始化时加载搜索结果
+ */
+async function loadSearchResults() {
+    try {
+        const response = await fetchSearchAll({ keyword })
+        searchResults.value = response
+
+        if (searchResults.value && searchResults.value.result) {
+            const videoResult = searchResults.value.result.find(
+                (result) => result.result_type === 'video'
+            )
+            if (videoResult) {
+                videos.value = videoResult.data
+            }
+        }
+    } catch (error) {
+        console.error('Failed to fetch search results', error)
+    }
 }
 
 onMounted(async () => {
-    await fetchSearchAll({ keyword }).then((res) => {
-        searchAll.value = res
-        videoDatums.value = searchAll.value?.result.find(
-            (item) => item.result_type === 'video'
-        )!.data
-    })
+    console.log('videoZone:', videoZone)
+    console.log('keyword:', keyword)
+    // 页面挂载时加载数据
+    await loadSearchResults()
 })
 </script>
 
 <template>
     <v-container>
+        <!-- 遍历每一行 -->
         <v-row
-            v-for="n in Math.floor(videoDatums.length / colCount)"
-            :key="n"
+            v-for="rowIndex in Math.ceil(videos.length / columnsPerRow)"
+            :key="rowIndex"
             no-gutters
         >
+            <!-- 遍历每列 -->
             <v-col
-                v-for="(item, i) in getDataGridSlice(videoDatums, n - 1, 3)"
-                :key="i"
+                v-for="(datum, index) in getDataGridSlice(
+                    videos,
+                    rowIndex - 1,
+                    columnsPerRow
+                )"
+                :key="index"
                 cols="12"
                 sm="4"
             >
                 <v-responsive>
-                    <v-sheet class="ma-2 pa-2"
-                        ><video-card
-                            :video="convertToVideoData(item)"
-                        ></video-card
-                    ></v-sheet>
+                    <v-sheet class="ma-2 pa-2">
+                        <video-card :video="transformDatum(datum)" />
+                    </v-sheet>
                 </v-responsive>
             </v-col>
         </v-row>

@@ -10,29 +10,43 @@ const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
 
 let freshIdx = 1
 
+/**
+ * 获取首页视频推荐数据并更新到 recommendations 中。
+ */
 const getHomeVideoRecommendations = async (params: RecommendParams) => {
-    await fetchVideoRecommendations(params).then((data) => {
-        recommendations.value.push(...data.item)
-        // 手动触发更新
-        recommendations.value = [...recommendations.value]
-        freshIdx++
-        console.log('freshIdx: %d', freshIdx)
-    })
+    await fetchVideoRecommendations(params)
+        .then((data) => {
+            recommendations.value.push(...data.item)
+
+            // 手动触发更新
+            recommendations.value = [...recommendations.value]
+
+            freshIdx++
+            console.log('freshIdx: %d', freshIdx)
+        })
+        .catch((error) => {
+            console.error('Failed to fetch video recommendations:', error)
+        })
 }
 
 type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error' // Define the type
 
 // FIXME: 滚动到底不会自动加载，手动模式有效
+/**
+ * 加载更多数据的方法。
+ */
 const load = async ({
     done,
 }: {
     done: (status: InfiniteScrollStatus) => void
 }) => {
-    console.log('load')
-    // 第一次进入时不加载
+    console.log('Loading more items...')
+
+    // 首次加载时跳过
     if (freshIdx <= 1) {
         return
     }
+
     await getHomeVideoRecommendations({
         ps: 6,
         fresh_idx: freshIdx,
@@ -45,10 +59,16 @@ const load = async ({
         })
 }
 
+/**
+ * 计算实际索引位置。
+ */
 const getRealIndex = (rowIndex: number, colCount: number, colIndex: number) => {
     return rowIndex * colCount + colIndex
 }
 
+/**
+ * 将 Item 转换成 VideoCardData 类型的数据。
+ */
 const convertToVideoData = (item: Item): VideoCardData => {
     const data: VideoCardData = {
         id: item.id,

@@ -31,7 +31,6 @@ const captchaCanvasReference =
  */
 const openDialog = async () => {
     dialogOpend.value = true
-
     await refreshCaptcha()
 }
 
