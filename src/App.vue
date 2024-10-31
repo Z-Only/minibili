@@ -137,7 +137,7 @@ watch(
 watch(
     route,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (to, from) => {
+    (_to, _from) => {
         updateArrowDisabled()
     },
     { immediate: true }
