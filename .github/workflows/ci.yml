@@ -1,0 +1,44 @@
+name: CI
+
+on:
+    workflow_dispatch:
+    pull_request:
+    push:
+        branches:
+            - dev
+
+jobs:
+    CI:
+        strategy:
+            fail-fast: false
+
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+
+            - name: install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
+
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: 'pnpm'
+
+            - name: install frontend dependencies
+              run: pnpm i --frozen-lockfile
+
+            - name: check formatting
+              run: pnpm format:check
+
+            - name: run linter
+              run: pnpm lint
+
+            - name: build
+              run: pnpm build
+
+            #- name: run tests
+            #  run: pnpm test

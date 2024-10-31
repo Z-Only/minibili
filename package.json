@@ -10,7 +10,8 @@
         "tauri": "tauri",
         "test": "vitest",
         "lint": "eslint",
-        "prettier": "prettier . --write --ignore-unknown",
+        "format": "prettier . --write --ignore-unknown",
+        "format:check": "prettier . --check --ignore-unknown",
         "prepare": "husky",
         "docs:dev": "vitepress dev docs --host",
         "docs:build": "vitepress build docs",
@@ -65,5 +66,5 @@
         "vitest": "^2.1.1",
         "vue-tsc": "^2.0.22"
     },
-    "packageManager": "pnpm@9.12.1"
+    "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
 }
