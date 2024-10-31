@@ -7,6 +7,7 @@ const routes = [
         name: 'Home',
         component: Home,
     },
+    // 重定向到主页的路由配置
     { path: '/home', redirect: '/' },
     {
         path: '/setting',

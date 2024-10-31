@@ -7,6 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { vite as vidstack } from 'vidstack/plugins'
+import { chunkSplitPlugin } from 'vite-plugin-chunk-split'
 
 const host = process.env.TAURI_DEV_HOST
 
@@ -40,6 +41,15 @@ export default defineConfig(({ mode }) => {
                 filename: './dist/stats.html',
             }),
             vidstack({ include: /player\// }),
+            chunkSplitPlugin({
+                strategy: 'default',
+                customSplitting: {
+                    // // `react` and `react-dom` 会被打包到一个名为`render-vendor`的 chunk 里面(包括它们的一些依赖，如 object-assign)
+                    // 'react-vendor': ['react', 'react-dom'],
+                    // // 源码中 utils 目录的代码都会打包进 `utils` 这个 chunk 中
+                    // utils: [/src\/utils/],
+                },
+            }),
         ],
         resolve: {
             alias: {

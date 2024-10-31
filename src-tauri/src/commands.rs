@@ -18,13 +18,13 @@ pub async fn fetch(
     params: Option<serde_json::Value>,
     data: Option<serde_json::Value>,
 ) -> Result<ApiResult<serde_json::Value>, Error> {
-    Ok(request_with_sign::<serde_json::Value>(
+    request_with_sign::<serde_json::Value>(
         Method::from_str(method).unwrap_or(Method::GET),
         url,
         params.as_ref(),
         data.as_ref(),
     )
-    .await?)
+    .await
 }
 
 #[tauri::command]
@@ -34,13 +34,17 @@ pub async fn download(
     on_event: Channel<DownloadEvent<'_>>,
 ) -> Result<(), Error> {
     let download_id = 1;
+    const BUFFER_SIZE: usize = 1024 * 1024; // 1MB 缓冲区大小
 
+    // 获取响应
     let response = GLOBAL_CLIENT.get(url).send().await?;
 
+    // 检查状态码是否成功
     if !response.status().is_success() {
         return Err(Error::StatusCode(response.status().to_string()));
     }
 
+    // 提取 Content-Length 头信息
     let content_length = response
         .headers()
         .get("Content-Length")
@@ -55,27 +59,27 @@ pub async fn download(
         content_length,
     })?;
 
-    let mut stream = response.bytes_stream();
-
-    // 1MB 缓冲区
-    let mut buffer = Vec::with_capacity(1024 * 1024);
-
-    // 下载的字节数
-    let mut downloaded_bytes = 0;
-
-    // 创建文件进行写入
+    // 初始化缓冲区和文件
+    let mut buffer = vec![0; BUFFER_SIZE];
     let mut file = File::create(save_path)?;
-
+    let mut downloaded_bytes = 0;
     let start_time = Instant::now();
 
-    while let Some(bytes_res) = stream.next().await {
-        let bytes = bytes_res?;
-        buffer.extend_from_slice(&bytes);
+    // 开始下载循环
+    let mut stream = response.bytes_stream();
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk?;
 
-        if buffer.len() >= 1024 * 1024 {
+        // 将数据追加到缓冲区
+        buffer.extend_from_slice(&chunk);
+
+        // 当缓冲区满时写入文件并清空缓冲区
+        if buffer.len() >= BUFFER_SIZE {
             write_buffer_to_file(&mut file, &mut buffer)?;
-            downloaded_bytes += buffer.len();
+            downloaded_bytes += BUFFER_SIZE;
             buffer.clear();
+
+            // 发送进度更新事件
             send_progress_event(
                 &on_event,
                 download_id,
@@ -86,7 +90,7 @@ pub async fn download(
         }
     }
 
-    // 将剩余的缓冲区内容写入文件
+    // 清理剩余缓冲区
     if !buffer.is_empty() {
         write_buffer_to_file(&mut file, &mut buffer)?;
         downloaded_bytes += buffer.len();
@@ -114,20 +118,24 @@ pub async fn geetest_get(
     url: &str,
     params: Option<serde_json::Value>,
 ) -> Result<serde_json::Value, Error> {
+    // 构建请求
     let request = GEETEST_CLIENT.get(url).query(&params);
 
+    // 发送请求并获取文本内容
     let res = request.send().await?;
-
     let content = res.text().await?;
 
+    // 记录日志
     info!("url: {}, params: {:?}, content: {}", url, params, &content);
 
+    // 匹配正则表达式并解析 JSON 数据
     if let Some(captures) = GEETEST_REGEX.captures(&content) {
         if let Some(json_str) = captures.get(1) {
-            // 解析 JSON 数据
             return serde_json::from_str(json_str.as_str())
                 .map_err(|e| Error::Parse(e.to_string()));
         }
     }
-    Err(Error::Parse("Geetest response parse error.".to_string()))
+
+    // 返回错误
+    Err(Error::Parse("GeeTest response parse error".to_string()))
 }

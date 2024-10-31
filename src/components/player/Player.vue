@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ShallowRef } from 'vue'
-
-// auto-import the styles and elements required
 import 'vidstack/bundle'
 import type { MediaPlayerElement } from 'vidstack/elements'
 import { PlayerData } from '@/common/types/props'
 
+// 定义组件接收的 props
 const props = defineProps<{ data: PlayerData }>()
 
-// 该 prop 变更时计算属性也会自动更新
+// 计算属性，当 props 中的 data 发生变化时会自动更新
 const playerData = computed(() => props.data)
 
-// 初始化 player
+// 播放器实例引用
 let player: ShallowRef<MediaPlayerElement | null>
 
 onMounted(async () => {
@@ -20,7 +19,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    // This call will destroy the player and all child instances.
+    // 销毁播放器实例
     if (player.value) {
         player.value.destroy()
     }
@@ -43,7 +42,7 @@ onBeforeUnmount(() => {
             <media-poster
                 class="vds-poster"
                 :src="playerData?.pic"
-                alt="Girl walks into campfire with gnomes surrounding her friend ready for their next meal!"
+                :alt="playerData?.title"
             />
         </media-provider>
         <!-- Layouts -->

@@ -1,68 +1,90 @@
 <script setup lang="ts">
 import QRCode from 'qrcode'
-import { fetchQrcode, pollQrcode, ScanCode } from '@/apis/login/qrcode'
+import {
+    fetchQrcode,
+    pollQrcode,
+    ScanCode,
+    PollQrcode,
+} from '@/apis/login/qrcode'
 import { CaptchaCardData } from '@/common/types/emits'
 
-const expiredTimeMs = 1_000 //180_000
+// 二维码有效期（单位毫秒）
+const EXPIRED_TIME_MS = 5_000 // HACK: 官方默认时间是 180s，为了不影响测试，这里设置为 5s
+// 轮询间隔时间（单位毫秒）
+const INTERVAL_TIME_MS = 1000
 
+// 定义响应式数据
 const expired = ref(false)
-
 const qrUrl = ref('')
-
 const qrcodeKey = ref('')
-
-let timer: ReturnType<typeof setTimeout>
-
-const intervalTimeMs = 1_000
-
-let interval: ReturnType<typeof setInterval>
-
 const statusMessage = ref('')
 
+// 定义定时器相关变量
+let refreshTimer: ReturnType<typeof setTimeout>
+let pollingInterval: ReturnType<typeof setInterval>
+
+/**
+ * 刷新二维码
+ */
 const refreshQrCode = async () => {
-    const qrcode = await fetchQrcode()
-    qrUrl.value = await QRCode.toDataURL(qrcode.url).then((url) => {
+    try {
+        const qrcodeResponse = await fetchQrcode()
+        const imageUrl = await QRCode.toDataURL(qrcodeResponse.url)
+
+        // 更新状态信息
         expired.value = false
-        qrcodeKey.value = qrcode.qrcode_key
-        return url
-    })
+        qrcodeKey.value = qrcodeResponse.qrcode_key
+        qrUrl.value = imageUrl
 
-    if (timer !== undefined) {
-        clearTimeout(timer)
-    }
-    timer = setTimeout(() => {
-        expired.value = true
-        qrcodeKey.value = ''
-    }, expiredTimeMs)
+        // 清理旧的定时器
+        clearTimeout(refreshTimer)
+        clearInterval(pollingInterval)
 
-    if (interval !== undefined) {
-        clearInterval(interval)
+        // 设置新的定时器
+        refreshTimer = setTimeout(() => {
+            expired.value = true
+            qrcodeKey.value = ''
+        }, EXPIRED_TIME_MS)
+
+        pollingInterval = setInterval(async () => {
+            const pollRes = await pollQrcode({ qrcode_key: qrcodeKey.value })
+            // 处理轮询结果
+            handlePollStatus(pollRes)
+        }, INTERVAL_TIME_MS)
+    } catch (error) {
+        console.error('Failed to refresh QR code:', error)
     }
-    interval = setInterval(async () => {
-        const res = await pollQrcode({ qrcode_key: qrcodeKey.value })
-        switch (res.code) {
-            case ScanCode.NotScanned:
-                break
-            case ScanCode.QrCodeExpired:
-                statusMessage.value = '二维码失效 点击刷新'
-                clearInterval(interval)
-                break
-            case ScanCode.QrCodeScannedNotConfirmed:
-                statusMessage.value = '扫描成功 请在手机上确认'
-                break
-            case ScanCode.Success:
-                statusMessage.value = '登录成功'
-                clearInterval(interval)
-                // TODO: 存储cookie
-                toHome()
-                break
-            default:
-                break
-        }
-    }, intervalTimeMs)
 }
 
-const toHome = async () => {
+/**
+ * 根据轮询结果更新状态消息
+ * @param res - 轮询返回的结果对象
+ */
+function handlePollStatus(res: PollQrcode) {
+    switch (res.code) {
+        case ScanCode.NotScanned:
+            break
+        case ScanCode.QrCodeExpired:
+            statusMessage.value = '二维码已失效，请点击刷新'
+            clearInterval(pollingInterval)
+            break
+        case ScanCode.QrCodeScannedNotConfirmed:
+            statusMessage.value = '扫描成功，请在手机上确认'
+            break
+        case ScanCode.Success:
+            statusMessage.value = '登录成功'
+            clearInterval(pollingInterval)
+            toHome() // 成功后跳转到首页
+            break
+        default:
+            break
+    }
+}
+
+/**
+ * 跳转到主页
+ */
+const toHome = () => {
     useRouter().push({ name: 'Home' })
 }
 
@@ -93,8 +115,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    clearTimeout(timer)
-    clearInterval(interval)
+    clearTimeout(refreshTimer)
+    clearInterval(pollingInterval)
 })
 </script>
 
