@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { open } from '@tauri-apps/plugin-dialog'
-import { Store } from '@tauri-apps/plugin-store'
 import { ShallowRef } from 'vue'
 import { fetchVideoDetails } from '@/apis/video/info'
 import { VideoDetails } from '@/apis/types/video-details'
@@ -12,11 +11,11 @@ import { Channel } from '@tauri-apps/api/core'
 import { getFileNameFromUrl, formatBytes, formatDuration } from '@/common/utils'
 import { videoDir, join } from '@tauri-apps/api/path'
 import { download, DownloadEvent } from '@/common/commands'
+import { setStoreDownloadPath, getStoreDownloadPath } from '@/store/settings'
 
 // 获取路由参数
 const route = useRoute()
 const bvid = route.params.bvid as string
-const store = new Store('settings.json')
 const format = VideoFormatFlag.MP4
 
 // 视频详情数据
@@ -39,7 +38,9 @@ const openDialog = async () => {
         defaultPath: await videoDir(),
     })
     console.log('打开路径:', path)
-    await store.set('download_path', path)
+    if (path) {
+        await setStoreDownloadPath(path)
+    }
 }
 
 const contentLength = ref(0)
@@ -84,7 +85,7 @@ onEvent.onmessage = (message) => {
  * 下载视频
  */
 const downloadVideo = async () => {
-    const downloadDir = (await store.get('download_path')) || ''
+    const downloadDir = await getStoreDownloadPath()
     if (!downloadDir) {
         throw new Error('下载路径未设置.')
     }
