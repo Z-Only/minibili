@@ -19,8 +19,8 @@
         ],
         "security": {
             "assetProtocol": {
-                "scope": ["$APPDATA/**", "$RESOURCE/../**", "**"],
-                "enable": true
+                "enable": true,
+                "scope": ["$APPDATA/**", "$RESOURCE/../**", "**"]
             },
             "csp": null
         }
