@@ -18,6 +18,10 @@
             }
         ],
         "security": {
+            "assetProtocol": {
+                "scope": ["$APPDATA/**", "$RESOURCE/../**", "**"],
+                "enable": true
+            },
             "csp": null
         }
     },
@@ -31,10 +35,9 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ],
-        "windows": {
-            "wix": {
-                "language": "zh-CN"
-            }
-        }
+        "publisher": "MiniBili",
+        "copyright": "GNU General Public License v3.0",
+        "category": "Video",
+        "shortDescription": "A Third-party Bilibili client."
     }
 }
