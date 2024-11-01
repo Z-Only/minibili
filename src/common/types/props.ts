@@ -4,6 +4,7 @@ export interface VideoCardData {
     id: number
     bvid: string
     url: string
+    mid: number
     author_name: string
     avatar_url: string
     title: string

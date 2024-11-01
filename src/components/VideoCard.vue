@@ -13,7 +13,11 @@ const navigateToVideo = (bvid: string) => {
     router.push({ name: 'Video', params: { bvid } })
 }
 
-defineProps<{
+const navigateToSpace = (mid: number) => {
+    router.push({ name: 'Space', params: { mid } })
+}
+
+const { video } = defineProps<{
     video: VideoCardData
 }>()
 </script>
@@ -58,7 +62,7 @@ defineProps<{
 
         <!-- 作者信息 -->
         <v-card-actions>
-            <div @click.prevent="navigateToVideo(video.bvid)">
+            <div @click.prevent="navigateToSpace(video.mid)">
                 <!-- 用户头像 -->
                 <v-avatar size="24">
                     <v-img

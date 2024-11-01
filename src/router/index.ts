@@ -29,6 +29,11 @@ const routes = [
         name: 'Login',
         component: () => import('@/components/Login.vue'),
     },
+    {
+        path: '/space/:mid',
+        name: 'Space',
+        component: () => import('@/components/Space.vue'),
+    },
 ]
 
 const router = createRouter({

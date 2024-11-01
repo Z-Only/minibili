@@ -74,6 +74,7 @@ const convertToVideoData = (item: Item): VideoCardData => {
         id: item.id,
         bvid: item.bvid,
         url: item.uri,
+        mid: item.owner.mid,
         author_name: item.owner.name,
         avatar_url: item.owner.face,
         title: item.title,

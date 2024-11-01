@@ -1,5 +1,3 @@
-import { Owner } from '@/apis/types/apis'
-
 /**
  * @description 视频详细信息(web端)
  */
@@ -77,6 +75,12 @@ export interface Honor {
     desc?: string
     type?: number
     weekly_recommend_num?: number
+}
+
+export interface Owner {
+    face: string
+    mid: number
+    name: string
 }
 
 export interface DataPage {

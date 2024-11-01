@@ -71,15 +71,6 @@ export enum ErrorCode {
 }
 
 /**
- * Represents the owner of a resource.
- */
-export interface Owner {
-    face: string
-    mid: number
-    name: string
-}
-
-/**
  * Represents the result of a Geetest API call.
  *
  * @template T - The type of the data returned by the API.

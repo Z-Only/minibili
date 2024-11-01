@@ -23,6 +23,7 @@ const transformDatum = (datum: Datum): VideoCardData => {
         id: datum.id,
         bvid: datum.bvid,
         url: datum.arcurl,
+        mid: datum.mid,
         author_name: datum.author,
         avatar_url: datum.upic,
         title: datum.title,
