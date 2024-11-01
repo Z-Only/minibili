@@ -1,4 +1,4 @@
-import { get } from '@/apis/http'
+import { get } from '@/service/request'
 import { PlayUrl } from '@/apis/types/play-url'
 
 // https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/videostream_url.md

@@ -1,4 +1,4 @@
-import { fetch } from '@/common/commands'
+import { fetch } from '@/service/commands'
 
 /**
  * 发起GET请求

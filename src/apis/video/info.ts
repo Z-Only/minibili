@@ -1,4 +1,4 @@
-import { get } from '@/apis/http'
+import { get } from '@/service/request'
 import { VideoDetails } from '@/apis/types/video-details'
 
 /**

@@ -1,4 +1,4 @@
-import { get } from '@/apis/http'
+import { get } from '@/service/request'
 import { SearchAll } from '@/apis/types/search-all'
 
 /**

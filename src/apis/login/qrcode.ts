@@ -1,4 +1,4 @@
-import { get } from '@/apis/http'
+import { get } from '@/service/request'
 
 export interface QrCode {
     qrcode_key: string

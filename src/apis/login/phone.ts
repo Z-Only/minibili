@@ -1,4 +1,4 @@
-import { get, post } from '@/apis/http'
+import { get, post } from '@/service/request'
 import {
     GenericCountryList,
     SendSmsForm,

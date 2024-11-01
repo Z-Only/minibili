@@ -10,8 +10,11 @@ import { PlayUrl } from '@/apis/types/play-url'
 import { Channel } from '@tauri-apps/api/core'
 import { getFileNameFromUrl, formatBytes, formatDuration } from '@/common/utils'
 import { videoDir, join } from '@tauri-apps/api/path'
-import { download, DownloadEvent } from '@/common/commands'
-import { setStoreDownloadPath, getStoreDownloadPath } from '@/store/settings'
+import { download, DownloadEvent } from '@/service/commands'
+import {
+    setStoreDownloadPath,
+    getStoreDownloadPath,
+} from '@/service/tauri-store'
 
 // 获取路由参数
 const route = useRoute()

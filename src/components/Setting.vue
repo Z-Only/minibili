@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { openDevTools } from '@/common/commands'
+import { openDevTools } from '@/service/commands'
 </script>
 
 <template>

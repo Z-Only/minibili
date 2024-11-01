@@ -1,4 +1,4 @@
-import { get } from '@/apis/http'
+import { get } from '@/service/request'
 import { PlayerInfo } from '../types/player-info'
 
 /**

@@ -6,7 +6,7 @@ import {
     setStoreLocale,
     getStoreTheme,
     getStoreLocale,
-} from '@/store/settings'
+} from '@/service/tauri-store'
 
 const router = useRouter()
 const route = useRoute()
