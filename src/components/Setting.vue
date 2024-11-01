@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { openDevTools } from '@/service/commands'
+import { setStoreTheme, getStoreTheme } from '@/service/tauri-store'
+
+const enableSystemTheme = ref(false)
+
+// FIXME: 需要全局状态管理
+watchEffect(async () => {
+    if (enableSystemTheme.value) {
+        await setStoreTheme('system')
+    } else {
+        await setStoreTheme('light')
+    }
+})
+
+onMounted(async () => {
+    enableSystemTheme.value = (await getStoreTheme()) === 'system'
+})
 </script>
 
 <template>
@@ -8,6 +24,12 @@ import { openDevTools } from '@/service/commands'
         <v-card class="mx-auto" width="600">
             <v-list>
                 <v-list-subheader>系统设置</v-list-subheader>
+
+                <v-list-item title="深色跟随系统">
+                    <template v-slot:append>
+                        <v-switch v-model="enableSystemTheme"></v-switch>
+                    </template>
+                </v-list-item>
 
                 <v-list-item title="开发者工具">
                     <template v-slot:append>
