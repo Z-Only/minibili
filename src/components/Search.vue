@@ -18,7 +18,7 @@ const columnsPerRow = 3 // 每行显示的列数
 /**
  * 将原始数据转换为适合展示的格式
  */
-function transformDatum(datum: Datum): VideoCardData {
+const transformDatum = (datum: Datum): VideoCardData => {
     return {
         id: datum.id,
         bvid: datum.bvid,
@@ -38,7 +38,7 @@ function transformDatum(datum: Datum): VideoCardData {
 /**
  * 初始化时加载搜索结果
  */
-async function loadSearchResults() {
+const loadSearchResults = async () => {
     try {
         const response = await fetchSearchAll({ keyword })
         searchResults.value = response
@@ -49,6 +49,10 @@ async function loadSearchResults() {
             )
             if (videoResult) {
                 videos.value = videoResult.data
+                // 防止生产中 devServer URL 为 tauri://localhost/ 导致没有加协议名以 // 开头的图片无法正常加载
+                videos.value.forEach((video) => {
+                    video.pic = video.pic.replace(/^\/\//, 'https://')
+                })
             }
         }
     } catch (error) {
