@@ -26,9 +26,18 @@ defineProps<{
             class="align-end text-white"
             height="200px"
             :src="video.pic_url"
+            lazy-src="https://i0.hdslb.com/bfs/archive/c8fd97a40bf79f03e7b76cbc87236f612caef7b2.png"
             cover
             @click.prevent="navigateToVideo(video.bvid)"
         >
+            <template v-slot:placeholder>
+                <div class="d-flex align-center justify-center fill-height">
+                    <v-progress-circular
+                        color="grey-lighten-4"
+                        indeterminate
+                    ></v-progress-circular>
+                </div>
+            </template>
             <!-- 显示播放次数和时长 -->
             <v-icon icon="mdi-play-box">{{ formatView(video.view) }}</v-icon>
             <v-icon icon="mdi-message-text-fast">{{ video.danmaku }}</v-icon>

@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.1.0",
     "author": "z",
-    "description": "A Third-party Bilibili Client.",
+    "description": "A Third-party Bilibili client.",
     "type": "module",
     "license": "GPL-3.0-only",
     "repository": {
