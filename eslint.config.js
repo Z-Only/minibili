@@ -13,6 +13,7 @@ export default [
             'src/vite-env.d.ts',
             'src-tauri/**',
             'src/common/geetest/click.js',
+            'docs/**',
         ],
     },
     {
