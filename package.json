@@ -29,6 +29,7 @@
         "@tauri-apps/plugin-store": "~2",
         "jsrsasign": "^11.1.0",
         "jsrsasign-util": "^1.0.5",
+        "pinia": "^2.2.5",
         "qrcode": "^1.5.4",
         "vidstack": "^1.12.11",
         "vite-plugin-vuetify": "^2.0.4",
