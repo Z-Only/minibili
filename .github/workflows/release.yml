@@ -65,8 +65,19 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-                  releaseName: 'App v__VERSION__'
-                  releaseBody: 'See the assets to download this version and install.'
+                  releaseName: 'MiniBili nightly v__VERSION__'
+                  releaseBody: |
+                      ## 我应该下载哪个版本？
+
+                      ### MacOS
+                      - MacOS intel芯片: x64.dmg/x64.app.tar.gz
+                      - MacOS apple M芯片: aarch64.dmg/aarch64.app.tar.gz
+
+                      ### Linux
+                      - Linux 64位: amd64.deb/x86_64.rpm/amd64.AppImage
+
+                      ### Windows
+                      - Windows 64位: x64-setup.exe/x64.msi
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.args }}
