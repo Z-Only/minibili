@@ -7,14 +7,16 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppBar: typeof import('./src/components/layout/AppBar.vue')['default']
     CaptchaCard: typeof import('./src/components/CaptchaCard.vue')['default']
-    Home: typeof import('./src/components/Home.vue')['default']
+    Home: typeof import('./src/components/pages/Home.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
     Player: typeof import('./src/components/player/Player.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./src/components/Search.vue')['default']
     Setting: typeof import('./src/components/Setting.vue')['default']
+    SideBar: typeof import('./src/components/layout/SideBar.vue')['default']
     Space: typeof import('./src/components/Space.vue')['default']
     Video: typeof import('./src/components/Video.vue')['default']
     VideoCard: typeof import('./src/components/VideoCard.vue')['default']

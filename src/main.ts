@@ -6,6 +6,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
 import { zhHans, en, ja, ko } from 'vuetify/locale'
+import { createPinia } from 'pinia'
 
 /**
  * 创建 Vue 应用实例
@@ -28,28 +29,29 @@ app.config.warnHandler = function (msg, _vm, trace) {
 }
 
 /**
- * 使用路由和 Vuetify 插件配置应用
+ * 使用路由、pinia 和 Vuetify 插件配置应用
  */
 app.use(router)
-app.use(
-    createVuetify({
-        blueprint: md3,
-        locale: {
-            locale: 'zhHans', // 默认语言设置为简体中文
-            fallback: 'en', // 备选语言为英文
-            messages: {
-                // 支持的语言包
-                zhHans,
-                en,
-                ja,
-                ko,
+    .use(createPinia())
+    .use(
+        createVuetify({
+            blueprint: md3,
+            locale: {
+                locale: 'zhHans', // 默认语言设置为简体中文
+                fallback: 'en', // 备选语言为英文
+                messages: {
+                    // 支持的语言包
+                    zhHans,
+                    en,
+                    ja,
+                    ko,
+                },
             },
-        },
-        theme: {
-            defaultTheme: 'light', // 默认主题为亮色
-        },
-    })
-)
+            theme: {
+                defaultTheme: 'light', // 默认主题为亮色
+            },
+        })
+    )
 
 /**
  * 挂载应用到指定 DOM 节点
