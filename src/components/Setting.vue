@@ -1,21 +1,16 @@
 <script setup lang="ts">
 import { openDevTools } from '@/service/commands'
-import { setStoreTheme, getStoreTheme } from '@/service/tauri-store'
+import { useThemeStore } from '@/store/theme'
 
-const enableSystemTheme = ref(false)
+const themeStore = useThemeStore()
 
-// FIXME: 需要全局状态管理
-watchEffect(async () => {
-    if (enableSystemTheme.value) {
-        await setStoreTheme('system')
-    } else {
-        await setStoreTheme('light')
-    }
+themeStore.$subscribe((_mutation, state) => {
+    enableSystemTheme.value = state.theme === 'auto'
 })
 
-onMounted(async () => {
-    enableSystemTheme.value = (await getStoreTheme()) === 'system'
-})
+const enableSystemTheme = ref(themeStore.isAuto)
+
+onMounted(async () => {})
 </script>
 
 <template>

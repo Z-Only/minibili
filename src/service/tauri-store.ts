@@ -8,7 +8,7 @@ const initStore = async () => {
     }
 }
 
-type StoreValueType = string | null | undefined
+export type StoreValueType = string | null | undefined
 
 export const setStoreTheme = async (value: string) => {
     await initStore()

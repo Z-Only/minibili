@@ -2,14 +2,32 @@
 import { useTheme } from 'vuetify'
 import { useLocale } from 'vuetify'
 import {
-    setStoreTheme,
     setStoreLocale,
-    getStoreTheme,
     getStoreLocale,
+    getStoreTheme,
 } from '@/service/tauri-store'
+import { Theme, useThemeStore } from '@/store/theme'
 
 const router = useRouter()
 const route = useRoute()
+
+const themeStore = useThemeStore()
+
+themeStore.$subscribe((_mutation, state) => {
+    // 每当状态发生变化时，改变主题。
+    changeDarkModeWithConfig(state.theme)
+})
+
+const changeDarkModeWithConfig = (theme: Theme) => {
+    if (theme === 'auto') {
+        darkEnabled.value = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+        ).matches
+    } else {
+        darkEnabled.value = theme === 'dark'
+    }
+    vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
+}
 
 const vuetifyTheme = useTheme()
 
@@ -34,16 +52,13 @@ const updateArrowDisabled = () => {
     forwardDisabled.value = router.options.history.state.forward == null
 }
 
+// 记录 vuetify 主题是否为 dark
 const darkEnabled = ref(false)
 
-const toggleColorScheme = async (useSystemTheme: boolean = true) => {
+const toggleColorScheme = async () => {
     darkEnabled.value = !darkEnabled.value
     vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
-    if (useSystemTheme) {
-        await setStoreTheme('system')
-    } else {
-        await setStoreTheme(darkEnabled.value ? 'dark' : 'light')
-    }
+    themeStore.setTheme(darkEnabled.value ? 'dark' : 'light')
 }
 
 const localeList = [
@@ -83,24 +98,9 @@ const updateLocale = async (locale: string) => {
 }
 
 onMounted(async () => {
-    await getStoreTheme().then(async (storedTheme) => {
-        if (!storedTheme) {
-            storedTheme = 'system'
-            await setStoreTheme(storedTheme)
-        }
-        console.log('store theme:', storedTheme)
-        let currentTheme = storedTheme
-        if (storedTheme === 'system') {
-            currentTheme = window.matchMedia('(prefers-color-scheme: dark)')
-                .matches
-                ? 'dark'
-                : 'light'
-        }
-        console.log('current theme:', currentTheme)
-        if ((currentTheme === 'dark') !== darkEnabled.value) {
-            await toggleColorScheme(storedTheme === 'system')
-        }
-    })
+    // 初始化主题
+    const theme = await themeStore.getTheme()
+    changeDarkModeWithConfig(theme)
 
     await getStoreLocale().then(async (storedLocale) => {
         console.log('store locale:', storedLocale)
@@ -124,8 +124,7 @@ watch(
                 await toggleColorScheme()
             }
         })
-    },
-    { immediate: true }
+    }
 )
 
 // 监听路由变化
