@@ -1,17 +1,39 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
 import { useLocale } from 'vuetify'
-import {
-    setStoreLocale,
-    getStoreLocale,
-    getStoreTheme,
-} from '@/service/tauri-store'
 import { Theme, useThemeStore } from '@/store/theme'
+import { useLocaleStore, Locale } from '@/store/locale'
 
 const router = useRouter()
 const route = useRoute()
 
+const backDisabled = ref(true)
+const forwardDisabled = ref(true)
+
 const themeStore = useThemeStore()
+const vuetifyTheme = useTheme()
+// 记录 vuetify 主题是否为 dark
+const darkEnabled = ref(false)
+
+const localeStore = useLocaleStore()
+const { current: vuetifyLocale } = useLocale()
+const curLocale: Ref<Locale> = ref('zh-Hans')
+
+const searchBarPlaceholder = ref('搜索')
+const searchLoading = ref(false)
+
+const toSearch = (keyword: string, zone: string = 'all') => {
+    router.push({ name: 'Search', params: { zone }, query: { keyword } })
+}
+
+const toLogin = () => {
+    router.push({ name: 'Login' })
+}
+
+const updateArrowDisabled = () => {
+    backDisabled.value = router.options.history.state.back == null
+    forwardDisabled.value = router.options.history.state.forward == null
+}
 
 themeStore.$subscribe((_mutation, state) => {
     // 每当状态发生变化时，改变主题。
@@ -29,39 +51,19 @@ const changeDarkModeWithConfig = (theme: Theme) => {
     vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
 }
 
-const vuetifyTheme = useTheme()
-
-const { current } = useLocale()
-
-const searchBarPlaceholder = ref('搜索')
-const searchLoading = ref(false)
-
-const toSearch = (keyword: string, zone: string = 'all') => {
-    router.push({ name: 'Search', params: { zone }, query: { keyword } })
-}
-
-const toLogin = () => {
-    router.push({ name: 'Login' })
-}
-
-const backDisabled = ref(true)
-const forwardDisabled = ref(true)
-
-const updateArrowDisabled = () => {
-    backDisabled.value = router.options.history.state.back == null
-    forwardDisabled.value = router.options.history.state.forward == null
-}
-
-// 记录 vuetify 主题是否为 dark
-const darkEnabled = ref(false)
-
 const toggleColorScheme = async () => {
     darkEnabled.value = !darkEnabled.value
     vuetifyTheme.global.name.value = darkEnabled.value ? 'dark' : 'light'
     themeStore.setTheme(darkEnabled.value ? 'dark' : 'light')
 }
 
-const localeList = [
+interface LocaleItem {
+    name: string
+    locale: Locale
+    languages: string[]
+}
+
+const localeList: LocaleItem[] = [
     {
         name: '简体中文',
         locale: 'zh-Hans',
@@ -72,29 +74,31 @@ const localeList = [
     { name: '한국어', locale: 'ko', languages: ['ko'] },
 ]
 
-const curLocale = ref('')
-const getLocaleName = () => {
-    return (
-        localeList.find((item) => item.locale === curLocale.value)?.name ||
-        'zh-Hans'
-    )
-}
-const matchLocaleForLanguage = (language: string) => {
+const matchLocaleByLanguage = (language: string): Locale => {
     return (
         localeList.find((item) => item.languages.includes(language))?.locale ||
         'zh-Hans'
     )
 }
 
-const updateLocale = async (locale: string) => {
-    if (!locale) {
-        const systemLanguage = navigator.language
-        console.log('system language:', systemLanguage)
-        locale = matchLocaleForLanguage(systemLanguage)
+localeStore.$subscribe((_mutation, state) => {
+    // 每当状态发生变化时，改变主题。
+    changeLocaleWithConfig(state.locale)
+})
+
+const changeLocaleWithConfig = async (locale: Locale) => {
+    if (locale === 'auto') {
+        curLocale.value = matchLocaleByLanguage(navigator.language)
+    } else {
+        curLocale.value = locale
     }
+    vuetifyLocale.value = curLocale.value
+}
+
+const selectLocale = async (locale: Locale) => {
     curLocale.value = locale
-    current.value = curLocale.value
-    await setStoreLocale(curLocale.value)
+    vuetifyLocale.value = curLocale.value
+    localeStore.setLocale(curLocale.value)
 }
 
 onMounted(async () => {
@@ -102,30 +106,24 @@ onMounted(async () => {
     const theme = await themeStore.getTheme()
     changeDarkModeWithConfig(theme)
 
-    await getStoreLocale().then(async (storedLocale) => {
-        console.log('store locale:', storedLocale)
-        await updateLocale(storedLocale as string)
-    })
+    const locale = await localeStore.getLocale()
+    changeLocaleWithConfig(locale)
 })
 
+// TODO: 没测试过，不知道是否有效
 watch(
     ref(window.matchMedia('(prefers-color-scheme: dark)').matches),
     async () => {
-        await getStoreTheme().then(async (storedTheme) => {
-            if (storedTheme !== 'system') {
-                return
-            }
-            const currentTheme = window.matchMedia(
-                '(prefers-color-scheme: dark)'
-            ).matches
-                ? 'dark'
-                : 'light'
-            if ((currentTheme === 'dark') !== darkEnabled.value) {
-                await toggleColorScheme()
-            }
-        })
+        if (themeStore.isAuto) {
+            changeDarkModeWithConfig('auto')
+        }
     }
 )
+watch(ref(navigator.language), async () => {
+    if (localeStore.isAuto) {
+        changeLocaleWithConfig('auto')
+    }
+})
 
 // 监听路由变化
 watch(
@@ -173,16 +171,22 @@ watch(
 
         <v-menu open-on-hover>
             <template #activator="{ props }">
-                <v-btn v-bind="props" prepend-icon="mdi-translate">{{
-                    getLocaleName()
-                }}</v-btn>
+                <v-btn
+                    v-bind="props"
+                    prepend-icon="mdi-translate"
+                    append-icon="mdi-chevron-down"
+                ></v-btn>
             </template>
             <v-list>
-                <v-list-item v-for="(item, index) in localeList" :key="index">
+                <v-list-item
+                    v-for="(item, index) in localeList"
+                    :key="index"
+                    :active="curLocale === item.locale"
+                >
                     <v-list-item-title>
                         <v-btn
                             variant="plain"
-                            @click="updateLocale(item.locale)"
+                            @click.prevent="selectLocale(item.locale)"
                         >
                             {{ item.name }}
                         </v-btn>

@@ -1,14 +1,31 @@
 <script setup lang="ts">
 import { openDevTools } from '@/service/commands'
 import { useThemeStore } from '@/store/theme'
+import { useLocaleStore } from '@/store/locale'
 
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
+
+const enableSystemTheme = ref(themeStore.isAuto)
+const enableSystemLocale = ref(localeStore.isAuto)
 
 themeStore.$subscribe((_mutation, state) => {
     enableSystemTheme.value = state.theme === 'auto'
 })
+localeStore.$subscribe((_mutation, state) => {
+    enableSystemLocale.value = state.locale === 'auto'
+})
 
-const enableSystemTheme = ref(themeStore.isAuto)
+watch(enableSystemTheme, async (value) => {
+    if (value) {
+        await themeStore.setTheme('auto')
+    }
+})
+watch(enableSystemLocale, async (value) => {
+    if (value) {
+        await localeStore.setLocale('auto')
+    }
+})
 
 onMounted(async () => {})
 </script>
@@ -23,6 +40,12 @@ onMounted(async () => {})
                 <v-list-item title="深色跟随系统">
                     <template v-slot:append>
                         <v-switch v-model="enableSystemTheme"></v-switch>
+                    </template>
+                </v-list-item>
+
+                <v-list-item title="跟随系统语言">
+                    <template v-slot:append>
+                        <v-switch v-model="enableSystemLocale"></v-switch>
                     </template>
                 </v-list-item>
 

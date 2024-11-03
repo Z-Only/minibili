@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { setStoreTheme, getStoreTheme } from '@/service/tauri-store'
 
-export type Theme = 'light' | 'dark' | 'auto'
+export type Theme = 'auto' | 'light' | 'dark'
 
 const themes: Theme[] = ['light', 'dark', 'auto']
 
