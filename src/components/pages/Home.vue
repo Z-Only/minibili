@@ -33,7 +33,6 @@ const getHomeVideoRecommendations = async (params: RecommendParams) => {
 
 type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error' // Define the type
 
-// FIXME: 滚动到底不会自动加载，手动模式有效
 /**
  * 加载更多数据的方法。
  */
@@ -107,47 +106,41 @@ onMounted(async () => {
 </script>
 
 <template>
-    <v-container
-        ><v-infinite-scroll
-            mode="manual"
-            :items="recommendations"
-            :onLoad="load"
+    <v-infinite-scroll :items="recommendations" :onLoad="load">
+        <template
+            v-for="n in Math.floor(recommendations.length / colCount)"
+            :key="n"
         >
-            <template
-                v-for="n in Math.floor(recommendations.length / colCount)"
-                :key="n"
-            >
-                <v-row no-gutters>
-                    <v-col
-                        v-for="(item, i) in getDataGridSlice(
-                            recommendations,
-                            n - 1,
-                            colCount
-                        )"
-                        :key="i"
-                        cols="12"
-                        sm="4"
+            <v-row no-gutters>
+                <v-col
+                    v-for="(item, i) in getDataGridSlice(
+                        recommendations,
+                        n - 1,
+                        colCount
+                    )"
+                    :key="i"
+                    cols="12"
+                    sm="4"
+                >
+                    <v-skeleton-loader
+                        :loading="
+                            getRealIndex(n - 1, colCount, i) >=
+                            recommendations.length
+                        "
+                        type="card-avatar, actions"
                     >
-                        <v-skeleton-loader
-                            :loading="
-                                getRealIndex(n - 1, colCount, i) >=
-                                recommendations.length
-                            "
-                            type="card-avatar, actions"
-                        >
-                            <v-responsive>
-                                <v-sheet class="ma-2 pa-2"
-                                    ><video-card
-                                        :video="convertToVideoData(item)"
-                                    ></video-card
-                                ></v-sheet>
-                            </v-responsive>
-                        </v-skeleton-loader>
-                    </v-col>
-                </v-row>
-            </template>
-        </v-infinite-scroll>
-    </v-container>
+                        <v-responsive>
+                            <v-sheet class="ma-2 pa-2"
+                                ><video-card
+                                    :video="convertToVideoData(item)"
+                                ></video-card
+                            ></v-sheet>
+                        </v-responsive>
+                    </v-skeleton-loader>
+                </v-col>
+            </v-row>
+        </template>
+    </v-infinite-scroll>
 </template>
 
 <style scoped>

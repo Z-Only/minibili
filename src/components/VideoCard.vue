@@ -49,11 +49,12 @@ const { video } = defineProps<{
         </v-img>
 
         <!-- 标题部分 -->
-        <v-card-title
-            class="title"
-            @click.prevent="navigateToVideo(video.bvid)"
-        >
-            <div v-html="video.title"></div>
+        <v-card-title @click.prevent="navigateToVideo(video.bvid)">
+            <div
+                v-html="video.title"
+                class="d-inline-block text-truncate"
+                style="max-width: 100%"
+            ></div>
             <!-- 提示框显示完整标题 -->
             <v-tooltip activator="parent" location="bottom">
                 <div v-html="video.title"></div>
