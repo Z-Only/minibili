@@ -34,6 +34,11 @@ const routes = [
         name: 'Space',
         component: () => import('@/components/pages/Space.vue'),
     },
+    {
+        path: '/:pathMatch(.*)*', // 匹配所有未命中的路径
+        name: 'NotFound',
+        component: () => import('@/components/pages/NotFound.vue'),
+    },
 ]
 
 const router = createRouter({

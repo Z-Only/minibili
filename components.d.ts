@@ -7,17 +7,20 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    '[...404]': typeof import('./src/components/pages/[...404].vue')['default']
     AppBar: typeof import('./src/components/layout/AppBar.vue')['default']
     CaptchaCard: typeof import('./src/components/CaptchaCard.vue')['default']
     Home: typeof import('./src/components/pages/Home.vue')['default']
     Login: typeof import('./src/components/pages/Login.vue')['default']
+    NotFound: typeof import('./src/components/pages/NotFound.vue')['default']
+    Pages: typeof import('./src/components/pages/index.vue')['default']
     Player: typeof import('./src/components/player/Player.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./src/components/pages/Search.vue')['default']
     Setting: typeof import('./src/components/pages/Setting.vue')['default']
     SideBar: typeof import('./src/components/layout/SideBar.vue')['default']
-    Space: typeof import('./src/components/pages/Space.vuece.vue')['default']
+    Space: typeof import('./src/components/pages/Space.vue')['default']
     Video: typeof import('./src/components/pages/Video.vue')['default']
     VideoCard: typeof import('./src/components/VideoCard.vue')['default']
   }
