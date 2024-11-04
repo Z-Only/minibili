@@ -12,27 +12,27 @@ const routes = [
     {
         path: '/setting',
         name: 'Setting',
-        component: () => import('@/components/Setting.vue'),
+        component: () => import('@/components/pages/Setting.vue'),
     },
     {
         path: '/video/:bvid',
         name: 'Video',
-        component: () => import('@/components/Video.vue'),
+        component: () => import('@/components/pages/Video.vue'),
     },
     {
         path: '/search/:zone',
         name: 'Search',
-        component: () => import('@/components/Search.vue'),
+        component: () => import('@/components/pages/Search.vue'),
     },
     {
         path: '/login',
         name: 'Login',
-        component: () => import('@/components/Login.vue'),
+        component: () => import('@/components/pages/Login.vue'),
     },
     {
         path: '/space/:mid',
         name: 'Space',
-        component: () => import('@/components/Space.vue'),
+        component: () => import('@/components/pages/Space.vue'),
     },
 ]
 
