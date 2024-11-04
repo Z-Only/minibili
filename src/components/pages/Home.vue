@@ -8,6 +8,8 @@ import { ShallowRef } from 'vue'
 
 const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
 
+const colCount = ref(3)
+
 let freshIdx = 1
 
 /**
@@ -48,8 +50,12 @@ const load = async ({
     }
 
     await getHomeVideoRecommendations({
-        ps: 6,
+        ps: 12,
         fresh_idx: freshIdx,
+        fresh_idx_1h: freshIdx,
+        fetch_row:
+            1 +
+            Math.floor((recommendations.value.length + 12) / colCount.value),
     })
         .then(() => {
             done('ok')
@@ -92,6 +98,10 @@ onMounted(async () => {
     await getHomeVideoRecommendations({
         ps: 12,
         fresh_idx: 1,
+        fresh_idx_1h: 1,
+        fetch_row:
+            1 +
+            Math.floor((recommendations.value.length + 12) / colCount.value),
     })
 })
 </script>
@@ -104,7 +114,7 @@ onMounted(async () => {
             :onLoad="load"
         >
             <template
-                v-for="n in Math.floor(recommendations.length / 3)"
+                v-for="n in Math.floor(recommendations.length / colCount)"
                 :key="n"
             >
                 <v-row no-gutters>
@@ -112,7 +122,7 @@ onMounted(async () => {
                         v-for="(item, i) in getDataGridSlice(
                             recommendations,
                             n - 1,
-                            3
+                            colCount
                         )"
                         :key="i"
                         cols="12"
@@ -120,7 +130,7 @@ onMounted(async () => {
                     >
                         <v-skeleton-loader
                             :loading="
-                                getRealIndex(n - 1, 3, i) >=
+                                getRealIndex(n - 1, colCount, i) >=
                                 recommendations.length
                             "
                             type="card-avatar, actions"
