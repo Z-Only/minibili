@@ -28,8 +28,8 @@ const { video } = defineProps<{
         <!-- 封面图片 -->
         <v-img
             class="align-end text-white"
-            height="200px"
             :src="video.pic_url"
+            :aspect-ratio="4 / 3"
             lazy-src="https://i0.hdslb.com/bfs/archive/c8fd97a40bf79f03e7b76cbc87236f612caef7b2.png"
             cover
             @click.prevent="navigateToVideo(video.bvid)"

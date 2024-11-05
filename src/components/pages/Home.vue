@@ -1,137 +1,169 @@
 <script setup lang="ts">
-import { fetchVideoRecommendations } from '@/apis/video/recommend'
-import { Item } from '@/apis/types/video-recommendations'
-import { RecommendParams } from '@/apis/video/recommend'
-import { VideoCardData } from '@/common/types/props'
-import { getDataGridSlice } from '@/common/utils'
-import { ShallowRef } from 'vue'
+const tab = ref('tab-recommend')
 
-const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
-
-const colCount = ref(3)
-
-const pageSize = 12
-
-/**
- * 获取首页视频推荐数据并更新到 recommendations 中。
- */
-const getHomeVideoRecommendations = async (params: RecommendParams) => {
-    await fetchVideoRecommendations(params)
-        .then((data) => {
-            recommendations.value.push(...data.item)
-
-            // 手动触发更新
-            recommendations.value = [...recommendations.value]
-        })
-        .catch((error) => {
-            console.error('Failed to fetch video recommendations:', error)
-        })
+type TabItem = {
+    icon: string
+    text: string
+    value: string
 }
 
-type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error' // Define the type
+const rankingTabs: Ref<TabItem[]> = ref([
+    {
+        icon: 'mdi-animation',
+        text: '动画',
+        value: 'tab-douga',
+    },
+    {
+        icon: 'mdi-fan-clock',
+        text: '番剧',
+        value: 'tab-anime',
+    },
+    {
+        icon: 'mdi-waves',
+        text: '国创',
+        value: 'tab-guochuang',
+    },
+    {
+        icon: 'mdi-music',
+        text: '音乐',
+        value: 'tab-music',
+    },
+    {
+        icon: 'mdi-dance-pole',
+        text: '舞蹈',
+        value: 'tab-dance',
+    },
+    {
+        icon: 'mdi-gamepad',
+        text: '游戏',
+        value: 'tab-game',
+    },
+    {
+        icon: 'mdi-owl',
+        text: '知识',
+        value: 'tab-knowledge',
+    },
+    {
+        icon: 'mdi-flashlight',
+        text: '科技',
+        value: 'tab-tech',
+    },
+    {
+        icon: 'mdi-lifebuoy',
+        text: '运动',
+        value: 'tab-sports',
+    },
+    {
+        icon: 'mdi-car',
+        text: '汽车',
+        value: 'tab-car',
+    },
+    {
+        icon: 'mdi-duck',
+        text: '生活',
+        value: 'tab-life',
+    },
+    {
+        icon: 'mdi-food',
+        text: '美食',
+        value: 'tab-food',
+    },
+    {
+        icon: 'mdi-panda',
+        text: '动物圈',
+        value: 'tab-animal',
+    },
+    {
+        icon: 'mdi-chess-king',
+        text: '鬼畜',
+        value: 'tab-kichiku',
+    },
+    {
+        icon: 'mdi-tshirt-v',
+        text: '时尚',
+        value: 'tab-fashion',
+    },
+    {
+        icon: 'mdi-mushroom',
+        text: '娱乐',
+        value: 'tab-ent',
+    },
+    {
+        icon: 'mdi-theater',
+        text: '影视',
+        value: 'tab-cinephile',
+    },
+    {
+        icon: 'mdi-nature-people',
+        text: '纪录片',
+        value: 'tab-documentary',
+    },
+    {
+        icon: 'mdi-movie',
+        text: '电影',
+        value: 'tab-movie',
+    },
+    {
+        icon: 'mdi-television',
+        text: '电视剧',
+        value: 'tab-tv',
+    },
+])
 
-/**
- * 加载更多数据的方法。
- */
-const load = async ({
-    done,
-}: {
-    done: (status: InfiniteScrollStatus) => void
-}) => {
-    const freshIdx = 1 + Math.round(recommendations.value.length / pageSize)
-
-    const fetchRow =
-        1 +
-        Math.round((recommendations.value.length + pageSize) / colCount.value)
-
-    console.log(
-        'Loading more items, freshIdx: %s, fetchRow: %s.',
-        freshIdx,
-        fetchRow
-    )
-
-    await getHomeVideoRecommendations({
-        ps: pageSize,
-        fresh_idx: freshIdx,
-        fresh_idx_1h: freshIdx,
-        fetch_row: fetchRow,
-    })
-        .then(() => {
-            done('ok')
-        })
-        .catch(() => {
-            done('error')
-        })
-}
-
-/**
- * 计算实际索引位置。
- */
-const getRealIndex = (rowIndex: number, colCount: number, colIndex: number) => {
-    return rowIndex * colCount + colIndex
-}
-
-/**
- * 将 Item 转换成 VideoCardData 类型的数据。
- */
-const convertToVideoData = (item: Item): VideoCardData => {
-    const data: VideoCardData = {
-        id: item.id,
-        bvid: item.bvid,
-        url: item.uri,
-        mid: item.owner.mid,
-        author_name: item.owner.name,
-        avatar_url: item.owner.face,
-        title: item.title,
-        pic_url: item.pic,
-        view: item.stat.view,
-        danmaku: item.stat.danmaku,
-        duration: item.duration,
-        pubdate: item.pubdate,
-        is_followed: item.is_followed === 0 ? false : true,
-    }
-    return data
-}
+const tabs: Ref<TabItem[]> = ref([
+    {
+        icon: 'mdi-balloon',
+        text: '推荐',
+        value: 'tab-recommend',
+    },
+    {
+        icon: 'mdi-fire',
+        text: '热门',
+        value: 'tab-hot',
+    },
+    {
+        icon: 'mdi-fan',
+        text: '排行榜',
+        value: 'tab-ranking',
+    },
+    ...rankingTabs.value,
+])
 
 onMounted(async () => {})
 </script>
 
 <template>
-    <v-infinite-scroll :items="recommendations" :onLoad="load">
-        <template
-            v-for="n in Math.floor(recommendations.length / colCount)"
-            :key="n"
+    <!-- FIXME: 滚动条显示问题 -->
+    <div class="d-flex flex-row">
+        <v-tabs
+            v-model="tab"
+            :items="tabs"
+            direction="vertical"
+            align-tabs="center"
+            color="white"
+            height="60"
+            slider-color="#f78166"
         >
-            <v-row no-gutters>
-                <v-col
-                    v-for="(item, i) in getDataGridSlice(
-                        recommendations,
-                        n - 1,
-                        colCount
-                    )"
-                    :key="i"
-                    cols="12"
-                    sm="4"
-                >
-                    <v-skeleton-loader
-                        :loading="
-                            getRealIndex(n - 1, colCount, i) >=
-                            recommendations.length
-                        "
-                        type="card-avatar, actions"
-                    >
-                        <v-responsive>
-                            <v-sheet class="ma-2 pa-2"
-                                ><video-card
-                                    :video="convertToVideoData(item)"
-                                ></video-card
-                            ></v-sheet>
-                        </v-responsive>
-                    </v-skeleton-loader>
-                </v-col>
-            </v-row>
-        </template>
-    </v-infinite-scroll>
+            <template v-slot:tab="{ item }: { item: TabItem }">
+                <v-tab
+                    :prepend-icon="item.icon"
+                    :text="item.text"
+                    :value="item.value"
+                    class="text-none"
+                ></v-tab>
+            </template>
+
+            <template v-slot:item="{ item }: { item: TabItem }">
+                <v-tabs-window-item :value="item.value" class="pa-4">
+                    <recommand
+                        v-if="item.value === 'tab-recommend'"
+                    ></recommand>
+                    <hot v-else-if="item.value === 'tab-hot'"></hot>
+                    <rank v-else-if="item.value === 'tab-ranking'"></rank>
+                </v-tabs-window-item>
+            </template>
+        </v-tabs>
+    </div>
 </template>
 
 <style scoped></style>
