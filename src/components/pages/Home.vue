@@ -10,7 +10,7 @@ const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
 
 const colCount = ref(3)
 
-let freshIdx = 1
+const pageSize = 12
 
 /**
  * 获取首页视频推荐数据并更新到 recommendations 中。
@@ -22,9 +22,6 @@ const getHomeVideoRecommendations = async (params: RecommendParams) => {
 
             // 手动触发更新
             recommendations.value = [...recommendations.value]
-
-            freshIdx++
-            console.log('freshIdx: %d', freshIdx)
         })
         .catch((error) => {
             console.error('Failed to fetch video recommendations:', error)
@@ -41,15 +38,23 @@ const load = async ({
 }: {
     done: (status: InfiniteScrollStatus) => void
 }) => {
-    console.log('Loading more items...')
+    const freshIdx = 1 + Math.round(recommendations.value.length / pageSize)
+
+    const fetchRow =
+        1 +
+        Math.round((recommendations.value.length + pageSize) / colCount.value)
+
+    console.log(
+        'Loading more items, freshIdx: %s, fetchRow: %s.',
+        freshIdx,
+        fetchRow
+    )
 
     await getHomeVideoRecommendations({
-        ps: 12,
+        ps: pageSize,
         fresh_idx: freshIdx,
         fresh_idx_1h: freshIdx,
-        fetch_row:
-            1 +
-            Math.floor((recommendations.value.length + 12) / colCount.value),
+        fetch_row: fetchRow,
     })
         .then(() => {
             done('ok')

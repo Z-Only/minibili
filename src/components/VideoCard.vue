@@ -63,7 +63,7 @@ const { video } = defineProps<{
 
         <!-- 作者信息 -->
         <v-card-actions>
-            <div @click.prevent="navigateToSpace(video.mid)">
+            <div @click.prevent="navigateToSpace(video.mid)" class="d-flex">
                 <!-- 用户头像 -->
                 <v-avatar size="24">
                     <v-img
@@ -76,7 +76,14 @@ const { video } = defineProps<{
                     >已关注</v-icon
                 >
                 <!-- 作者名和发布时间 -->
-                {{ video.author_name }} {{ formatPubDate(video.pubdate) }}
+                <div class="text-truncate mx-auto">
+                    &nbsp;{{ video.author_name }}
+                    {{ formatPubDate(video.pubdate) }}
+                    <v-tooltip activator="parent" location="bottom">
+                        {{ video.author_name }}
+                        {{ formatPubDate(video.pubdate) }}
+                    </v-tooltip>
+                </div>
             </div>
         </v-card-actions>
     </v-card>
