@@ -43,11 +43,6 @@ const load = async ({
 }) => {
     console.log('Loading more items...')
 
-    // 首次加载时跳过
-    if (freshIdx <= 1) {
-        return
-    }
-
     await getHomeVideoRecommendations({
         ps: 12,
         fresh_idx: freshIdx,
@@ -93,16 +88,7 @@ const convertToVideoData = (item: Item): VideoCardData => {
     return data
 }
 
-onMounted(async () => {
-    await getHomeVideoRecommendations({
-        ps: 12,
-        fresh_idx: 1,
-        fresh_idx_1h: 1,
-        fetch_row:
-            1 +
-            Math.floor((recommendations.value.length + 12) / colCount.value),
-    })
-})
+onMounted(async () => {})
 </script>
 
 <template>
