@@ -3,7 +3,11 @@ import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
 import { VideoCardData } from '@/common/types/props'
-import { getDataGridSlice } from '@/common/utils'
+import {
+    getDataGridSlice,
+    getRealIndex,
+    InfiniteScrollStatus,
+} from '@/common/utils'
 import { ShallowRef } from 'vue'
 
 const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
@@ -17,21 +21,22 @@ const pageSize = 6
  */
 const getHomeVideoRecommendations = async (
     params: RecommendParams
-): Promise<number> => {
+): Promise<boolean> => {
     return await fetchVideoRecommendations(params)
         .then((data) => {
+            if (data.item.length === 0) {
+                return false
+            }
             recommendations.value.push(...data.item)
             // 手动触发响应式更新
             recommendations.value = [...recommendations.value]
-            return data.item.length
+            return true
         })
         .catch((error) => {
-            console.error('Failed to fetch video recommendations:', error)
-            return 0
+            console.error('Failed to fetch video recommendations: ', error)
+            return false
         })
 }
-
-type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error' // Define the type
 
 /**
  * 加载更多数据的方法。
@@ -60,7 +65,7 @@ const load = async ({
         fetch_row: fetchRow,
     })
         .then((res) => {
-            if (res < 1) {
+            if (!res) {
                 done('empty')
             } else {
                 done('ok')
@@ -69,13 +74,6 @@ const load = async ({
         .catch(() => {
             done('error')
         })
-}
-
-/**
- * 计算实际索引位置。
- */
-const getRealIndex = (rowIndex: number, colCount: number, colIndex: number) => {
-    return rowIndex * colCount + colIndex
 }
 
 /**

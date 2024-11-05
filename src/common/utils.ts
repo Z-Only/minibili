@@ -91,6 +91,17 @@ export const getDataGridSlice = <T>(
 }
 
 /**
+ * 计算实际索引位置。
+ */
+export const getRealIndex = (
+    rowIndex: number,
+    colCount: number,
+    colIndex: number
+) => {
+    return rowIndex * colCount + colIndex
+}
+
+/**
  * 从URL中提取文件名。
  * @param url URL地址
  * @returns 文件名
@@ -181,3 +192,5 @@ export const rsaEncryptPassword = (
 
     return KJUR.crypto.Cipher.encrypt(fullTextToEncrypt, rsaPublicKey, 'RSA')
 }
+
+export type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error'
