@@ -143,14 +143,4 @@ onMounted(async () => {
     </v-infinite-scroll>
 </template>
 
-<style scoped>
-.title {
-    word-break: break-all;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-}
-</style>
+<style scoped></style>
