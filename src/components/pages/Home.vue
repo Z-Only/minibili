@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const tab = ref('tab-recommend')
 
-type TabItem = {
+interface VTabItem {
     icon: string
     text: string
     value: string
 }
 
-const rankingTabs: Ref<TabItem[]> = ref([
+const rankingTabs: Ref<VTabItem[]> = ref([
     {
         icon: 'mdi-animation',
         text: '动画',
@@ -110,7 +110,7 @@ const rankingTabs: Ref<TabItem[]> = ref([
     },
 ])
 
-const tabs: Ref<TabItem[]> = ref([
+const tabs: Ref<VTabItem[]> = ref([
     {
         icon: 'mdi-balloon',
         text: '推荐',
@@ -144,7 +144,7 @@ onMounted(async () => {})
             height="60"
             slider-color="#f78166"
         >
-            <template v-slot:tab="{ item }: { item: TabItem }">
+            <template v-slot:tab="{ item }: { item: any }">
                 <v-tab
                     :prepend-icon="item.icon"
                     :text="item.text"
@@ -153,7 +153,7 @@ onMounted(async () => {})
                 ></v-tab>
             </template>
 
-            <template v-slot:item="{ item }: { item: TabItem }">
+            <template v-slot:item="{ item }: { item: any }">
                 <v-tabs-window-item :value="item.value" class="pa-4">
                     <recommand
                         v-if="item.value === 'tab-recommend'"
