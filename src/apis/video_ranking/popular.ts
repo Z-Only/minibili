@@ -1,5 +1,9 @@
 import { get } from '@/service/request'
-import { PopularData } from '@/apis/types/video-popular'
+import {
+    PopularData,
+    PopularSeriesList,
+    PopularSeriesOneData,
+} from '@/apis/types/video-popular'
 
 export interface PopularParams {
     pn: number
@@ -12,5 +16,20 @@ export const fetchPopular = async (
     return await get<PopularData, PopularParams>(
         'https://api.bilibili.com/x/web-interface/popular',
         params
+    )
+}
+
+export const fetchPopularSeriesList = async (): Promise<PopularSeriesList> => {
+    return await get<PopularSeriesList>(
+        'https://api.bilibili.com/x/web-interface/popular/series/list'
+    )
+}
+
+export const fetchPopularSeriesOne = async (
+    number: number
+): Promise<PopularSeriesOneData> => {
+    return await get<PopularSeriesOneData, { number: number }>(
+        'https://api.bilibili.com/x/web-interface/popular/series/one',
+        { number }
     )
 }

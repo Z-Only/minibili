@@ -1,4 +1,4 @@
-import { Owner } from '@/apis/types/video-details'
+import { Owner, Stat } from '@/apis/types/video-details'
 
 /**
  * @description 首页视频推荐列表（web端）
@@ -40,11 +40,4 @@ export interface Item {
     vt_display: string
     dislike_switch: number
     dislike_switch_pc: number
-}
-
-interface Stat {
-    view: number
-    like: number
-    danmaku: number
-    vt: number
 }

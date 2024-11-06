@@ -35,7 +35,7 @@ export interface VideoDetails {
     pubdate: number
     rights: DataRights
     season_id: number
-    stat: DataStat
+    stat: Stat
     state: number
     subtitle: Subtitle
     teenage_mode: number
@@ -122,7 +122,7 @@ export interface DataRights {
     ugc_pay_preview: number
 }
 
-export interface DataStat {
+export interface Stat {
     aid: number
     coin: number
     danmaku: number

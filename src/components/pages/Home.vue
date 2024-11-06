@@ -122,6 +122,11 @@ const tabs: Ref<VTabItem[]> = ref([
         value: 'tab-hot',
     },
     {
+        icon: 'mdi-television-classic',
+        text: '每周必看',
+        value: 'tab-must-see',
+    },
+    {
         icon: 'mdi-fan',
         text: '排行榜',
         value: 'tab-ranking',
@@ -155,11 +160,13 @@ onMounted(async () => {})
 
             <template v-slot:item="{ item }: { item: any }">
                 <v-tabs-window-item :value="item.value" class="pa-4">
-                    <recommand
+                    <recommend
                         v-if="item.value === 'tab-recommend'"
-                    ></recommand>
-                    <hot v-else-if="item.value === 'tab-hot'"></hot>
-                    <rank v-else-if="item.value === 'tab-ranking'"></rank>
+                    ></recommend>
+                    <popular v-else-if="item.value === 'tab-hot'"></popular>
+                    <popular-series
+                        v-else-if="item.value === 'tab-must-see'"
+                    ></popular-series>
                 </v-tabs-window-item>
             </template>
         </v-tabs>

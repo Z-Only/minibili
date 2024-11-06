@@ -40,7 +40,7 @@ const load = async ({
     const pageNumber = 1 + Math.round(popularVideos.value.length / pageSize)
 
     console.log(
-        'Loading more items, pageNumber: %s, pageSize: %s.',
+        'Loading more items, pageNumber: %d, pageSize: %d.',
         pageNumber,
         pageSize
     )
