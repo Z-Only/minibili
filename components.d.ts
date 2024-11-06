@@ -14,6 +14,7 @@ declare module 'vue' {
     NotFound: typeof import('./src/components/pages/NotFound.vue')['default']
     Player: typeof import('./src/components/player/Player.vue')['default']
     Popular: typeof import('./src/components/Popular.vue')['default']
+    PopularPrecious: typeof import('./src/components/PopularPrecious.vue')['default']
     PopularSeries: typeof import('./src/components/PopularSeries.vue')['default']
     Rank: typeof import('./src/components/Rank.vue')['default']
     Recommend: typeof import('./src/components/Recommend.vue')['default']

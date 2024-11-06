@@ -10,7 +10,7 @@ export interface VideoDetails {
     ctime: number
     desc: string
     desc_v2: DescV2[]
-    dimension: DataDimension
+    dimension: Dimension
     disable_show_up_info: boolean
     duration: number
     dynamic: string
@@ -33,7 +33,7 @@ export interface VideoDetails {
     pic: string
     premiere: null
     pubdate: number
-    rights: DataRights
+    rights: Rights
     season_id: number
     stat: Stat
     state: number
@@ -60,7 +60,7 @@ export interface DescV2 {
     type?: number
 }
 
-export interface DataDimension {
+export interface Dimension {
     height: number
     rotate: number
     width: number
@@ -101,7 +101,7 @@ export interface PurpleDimension {
     width: number
 }
 
-export interface DataRights {
+export interface Rights {
     arc_pay: number
     autoplay: number
     bp: number

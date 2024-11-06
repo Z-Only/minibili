@@ -117,10 +117,11 @@ const tabs: Ref<VTabItem[]> = ref([
         value: 'tab-recommend',
     },
     {
-        icon: 'mdi-fire',
-        text: '热门',
-        value: 'tab-hot',
+        icon: 'mdi-gift-outline',
+        text: '入站必刷',
+        value: 'tab-precious',
     },
+    { icon: 'mdi-fire', text: '热门', value: 'tab-hot' },
     {
         icon: 'mdi-television-classic',
         text: '每周必看',
@@ -164,6 +165,9 @@ onMounted(async () => {})
                         v-if="item.value === 'tab-recommend'"
                     ></recommend>
                     <popular v-else-if="item.value === 'tab-hot'"></popular>
+                    <popular-precious
+                        v-else-if="item.value === 'tab-precious'"
+                    ></popular-precious>
                     <popular-series
                         v-else-if="item.value === 'tab-must-see'"
                     ></popular-series>

@@ -8,7 +8,7 @@ import {
 import {
     PopularSeriesList,
     PopularSeriesOneData,
-    List,
+    PopularSeries,
 } from '@/apis/types/video-popular'
 import { VideoCardData } from '@/common/types/props'
 
@@ -67,7 +67,7 @@ const load = async ({
 /**
  * 将 PopularSeriesOneData 中的 List 转换成 VideoCardData 类型的数据。
  */
-const convertToVideoData = (item: List): VideoCardData => {
+const convertToVideoData = (item: PopularSeries): VideoCardData => {
     const data: VideoCardData = {
         id: item.aid,
         bvid: item.bvid,

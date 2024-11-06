@@ -1,11 +1,17 @@
-import { Owner, Stat } from '@/apis/types/video-details'
+import {
+    Owner,
+    Stat,
+    Dimension,
+    VideoDetails,
+    Rights,
+} from '@/apis/types/video-details'
 
 export interface PopularData {
     list: PopularItem[]
     no_more: boolean
 }
 
-export interface PopularItem {
+export interface PopularItem extends VideoDetails {
     ai_rcmd: null
     aid: number
     bvid: string
@@ -40,32 +46,9 @@ export interface PopularItem {
     videos: number
 }
 
-export interface Dimension {
-    height: number
-    rotate: number
-    width: number
-}
-
 export interface RcmdReason {
     content: string
     corner_mark: number
-}
-
-export interface Rights {
-    arc_pay: number
-    autoplay: number
-    bp: number
-    download: number
-    elec: number
-    hd5: number
-    is_cooperation: number
-    movie: number
-    no_background: number
-    no_reprint: number
-    pay: number
-    pay_free_watch: number
-    ugc_pay: number
-    ugc_pay_preview: number
 }
 
 export interface PopularSeriesList {
@@ -81,7 +64,7 @@ export interface PopularSeries {
 
 export interface PopularSeriesOneData {
     config: Config
-    list: List[]
+    list: PopularSeries[]
     reminder: string
 }
 
@@ -103,7 +86,7 @@ export interface Config {
     type: string
 }
 
-export interface List {
+export interface PopularSeries {
     ai_rcmd: null
     aid: number
     bvid: string
@@ -138,19 +121,46 @@ export interface List {
     videos: number
 }
 
-export interface Rights {
-    arc_pay: number
-    autoplay: number
-    bp: number
-    download: number
-    elec: number
-    hd5: number
-    is_cooperation: number
-    movie: number
-    no_background: number
-    no_reprint: number
-    pay: number
-    pay_free_watch: number
-    ugc_pay: number
-    ugc_pay_preview: number
+export interface PopularPreciousData {
+    explain: string
+    list: PopularPrecious[]
+    media_id: number
+    title: string
+}
+
+export interface PopularPrecious extends VideoDetails {
+    achievement: string
+    ai_rcmd: null
+    aid: number
+    bvid: string
+    cid: number
+    copyright: number
+    cover43: string
+    ctime: number
+    desc: string
+    dimension: Dimension
+    duration: number
+    dynamic: string
+    enable_vt: number
+    first_frame: string
+    is_ogv: boolean
+    mission_id: number
+    ogv_info: null
+    order_id?: number
+    owner: Owner
+    pic: string
+    pub_location: string
+    pubdate: number
+    rcmd_reason: string
+    rights: Rights
+    season_id: number
+    season_type: number
+    short_link_v2: string
+    stat: Stat
+    state: number
+    tid: number
+    title: string
+    tname: string
+    up_from_v2: number
+    videos: number
 }

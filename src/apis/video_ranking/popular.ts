@@ -3,6 +3,7 @@ import {
     PopularData,
     PopularSeriesList,
     PopularSeriesOneData,
+    PopularPreciousData,
 } from '@/apis/types/video-popular'
 
 export interface PopularParams {
@@ -31,5 +32,11 @@ export const fetchPopularSeriesOne = async (
     return await get<PopularSeriesOneData, { number: number }>(
         'https://api.bilibili.com/x/web-interface/popular/series/one',
         { number }
+    )
+}
+
+export const fetchPopularPrecious = async (): Promise<PopularPreciousData> => {
+    return await get<PopularPreciousData>(
+        'https://api.bilibili.com/x/web-interface/popular/precious'
     )
 }
