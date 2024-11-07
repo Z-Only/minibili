@@ -1,3 +1,5 @@
+import { VideoDetails } from './video-details'
+
 export interface SearchAll {
     app_display_option: AppDisplayOption
     cost_time: CostTime
@@ -196,7 +198,7 @@ export interface Result {
     result_type: string
 }
 
-export interface Datum {
+export interface Datum extends VideoDetails {
     aid: number
     arcrank: string
     arcurl: string

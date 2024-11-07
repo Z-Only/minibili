@@ -1,7 +1,7 @@
 import { VideoFormatFlag } from '@/apis/video/stream'
 
 export interface VideoCardData {
-    id: number
+    aid: number
     bvid: string
     mid: number
     author_name: string

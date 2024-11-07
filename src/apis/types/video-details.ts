@@ -12,7 +12,7 @@ export interface VideoDetails {
     desc_v2: DescV2[]
     dimension: Dimension
     disable_show_up_info: boolean
-    duration: number
+    duration: number | string
     dynamic: string
     enable_vt: number
     honor_reply: HonorReply
@@ -37,7 +37,7 @@ export interface VideoDetails {
     season_id: number
     stat: Stat
     state: number
-    subtitle: Subtitle
+    subtitle: Subtitle | string
     teenage_mode: number
     tid: number
     title: string
@@ -49,6 +49,11 @@ export interface VideoDetails {
     // 子类中新增的字段
     short_link_v2?: string
     is_followed?: number
+    mid?: number
+    author?: string
+    upic?: string
+    play?: number
+    danmaku?: number
 }
 
 export interface ArgueInfo {

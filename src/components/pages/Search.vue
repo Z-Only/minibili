@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { fetchSearchAll } from '@/apis/search/all'
 import { SearchAll, Datum } from '@/apis/types/search-all'
-import { VideoCardData } from '@/common/types/props'
-import { getDataGridSlice } from '@/common/utils'
+import { getDataGridSlice, convertToVideoData } from '@/common/utils'
 import { ShallowRef } from 'vue'
 
 // 获取路由参数
@@ -14,27 +13,6 @@ const keyword = route.query.keyword as string
 const searchResults: ShallowRef<SearchAll | null> = shallowRef(null)
 const videos: ShallowRef<Datum[]> = shallowRef([])
 const columnsPerRow = 3 // 每行显示的列数
-
-/**
- * 将原始数据转换为适合展示的格式
- */
-const transformDatum = (datum: Datum): VideoCardData => {
-    return {
-        id: datum.id,
-        bvid: datum.bvid,
-        url: datum.arcurl,
-        mid: datum.mid,
-        author_name: datum.author,
-        avatar_url: datum.upic,
-        title: datum.title,
-        pic_url: datum.pic,
-        view: datum.play,
-        danmaku: datum.danmaku,
-        duration: datum.duration,
-        pubdate: datum.pubdate,
-        is_followed: false,
-    }
-}
 
 /**
  * 初始化时加载搜索结果
@@ -90,7 +68,7 @@ onMounted(async () => {
             >
                 <v-responsive>
                     <v-sheet class="ma-2 pa-2">
-                        <video-card :video="transformDatum(datum)" />
+                        <video-card :video="convertToVideoData(datum)" />
                     </v-sheet>
                 </v-responsive>
             </v-col>

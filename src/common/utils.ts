@@ -204,15 +204,15 @@ export const convertToVideoData = <T extends VideoDetails>(
     item: T
 ): VideoCardData => {
     const data: VideoCardData = {
-        id: item.aid,
+        aid: item.aid,
         bvid: item.bvid,
-        mid: item.owner.mid,
-        author_name: item.owner.name,
-        avatar_url: item.owner.face,
+        mid: item?.owner?.mid ?? item?.mid,
+        author_name: item?.owner?.name ?? item?.author,
+        avatar_url: item?.owner?.face ?? item?.upic,
         title: item.title,
         pic_url: item.pic,
-        view: item.stat.view,
-        danmaku: item.stat.danmaku,
+        view: item?.stat?.view ?? item?.play,
+        danmaku: item?.stat?.danmaku ?? item?.danmaku,
         duration: item.duration,
         pubdate: item.pubdate,
         is_followed: item?.is_followed ?? 0,
