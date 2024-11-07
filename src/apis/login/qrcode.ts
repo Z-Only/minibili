@@ -30,7 +30,9 @@ export interface PollQrcode {
     url: string
 }
 
-export const pollQrcode = async (pollQrcodeParams: PollQrcodeParams) => {
+export const pollQrcode = async (
+    pollQrcodeParams: PollQrcodeParams
+): Promise<PollQrcode> => {
     return await get<PollQrcode, PollQrcodeParams>(
         'https://passport.bilibili.com/x/passport-login/web/qrcode/poll',
         pollQrcodeParams

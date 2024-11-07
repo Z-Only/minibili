@@ -3,6 +3,7 @@ import { useTheme } from 'vuetify'
 import { useLocale } from 'vuetify'
 import { Theme, useThemeStore } from '@/store/theme'
 import { useLocaleStore, Locale } from '@/store/locale'
+import { fetchSearchDefault } from '@/apis/search/hot'
 
 const router = useRouter()
 const route = useRoute()
@@ -19,7 +20,7 @@ const localeStore = useLocaleStore()
 const { current: vuetifyLocale } = useLocale()
 const curLocale: Ref<Locale> = ref('zh-Hans')
 
-const searchBarPlaceholder = ref('搜索')
+const searchBarPlaceholder = ref('')
 const searchLoading = ref(false)
 
 const toSearch = (keyword: string, zone: string = 'all') => {
@@ -108,6 +109,11 @@ onMounted(async () => {
 
     const locale = await localeStore.getLocale()
     changeLocaleWithConfig(locale)
+
+    // 默认搜索词
+    await fetchSearchDefault().then((res) => {
+        searchBarPlaceholder.value = res.show_name
+    })
 })
 
 // TODO: 没测试过，不知道是否有效

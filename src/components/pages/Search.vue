@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { fetchSearchAll } from '@/apis/search/all'
-import { SearchAll, Datum } from '@/apis/types/search-all'
+import { fetchSearchAll } from '@/apis/search/search'
+import { SearchAll, Datum } from '@/apis/types/search'
 import {
     getDataGridSlice,
     getRealIndex,
@@ -28,14 +28,20 @@ const gotoTop = () => {
 onMounted(async () => {
     console.log('videoZone:', videoZone)
     console.log('keyword:', keyword)
+
     // 页面挂载时加载数据
     await fetchSearchAll({ keyword })
         .then((res) => {
-            searchResults.value = res
-            const videoResult = res.result.find(
-                (result) => result.result_type === 'video'
-            ).data
-            searchVideos.value = videoResult
+            if (res.result) {
+                searchResults.value = res
+                const result = res.result.find(
+                    (result) => result.result_type === 'video'
+                )
+                if (result) {
+                    const videoResult = result.data
+                    searchVideos.value = videoResult
+                }
+            }
         })
         .catch((error) => {
             console.error('Failed to fetch search results, ', error)
