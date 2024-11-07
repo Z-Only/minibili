@@ -43,8 +43,9 @@ const { video } = defineProps<{
                 </div>
             </template>
             <!-- 显示播放次数和时长 -->
-            <v-icon icon="mdi-play-box">{{ formatView(video.view) }}</v-icon>
-            <v-icon icon="mdi-message-text-fast">{{ video.danmaku }}</v-icon>
+            <v-icon icon="mdi-play-box"></v-icon>{{ formatView(video.view) }}
+            <v-icon icon="mdi-message-text-fast"></v-icon>
+            {{ video.danmaku }}
             {{ formatDuration(video.duration) }}
         </v-img>
 

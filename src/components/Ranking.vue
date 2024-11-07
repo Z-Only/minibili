@@ -7,6 +7,7 @@ import {
 } from '@/common/utils'
 import { fetchRanking } from '@/apis/video_ranking/ranking'
 import { Ranking } from '@/apis/types/video-popular'
+import { useGoTo } from 'vuetify'
 
 const { rid } = defineProps<{
     rid: number | undefined
@@ -15,6 +16,11 @@ const { rid } = defineProps<{
 const colCount = ref(2)
 
 const rankingVideos: ShallowRef<Ranking[]> = ref([])
+
+const goTo = useGoTo()
+const gotoTop = () => {
+    goTo(0, { container: '#goto-container' })
+}
 
 onMounted(async () => {
     await fetchRanking(rid)
@@ -28,7 +34,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <v-infinite-scroll :items="rankingVideos">
+    <v-infinite-scroll :items="rankingVideos" id="goto-container">
         <template
             v-for="n in Math.floor(rankingVideos.length / colCount)"
             :key="n"
@@ -61,6 +67,11 @@ onMounted(async () => {
                     </v-skeleton-loader>
                 </v-col>
             </v-row>
-        </template>
-    </v-infinite-scroll>
+        </template> </v-infinite-scroll
+    ><v-fab
+        icon="mdi-chevron-double-up"
+        location="bottom end"
+        absolute
+        @click="gotoTop"
+    ></v-fab>
 </template>

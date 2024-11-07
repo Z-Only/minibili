@@ -9,6 +9,7 @@ import {
     convertToVideoData,
 } from '@/common/utils'
 import { ShallowRef } from 'vue'
+import { useGoTo } from 'vuetify'
 
 const recommendations: ShallowRef<Item[]> = shallowRef<Item[]>([])
 
@@ -53,7 +54,7 @@ const load = async ({
         Math.round((recommendations.value.length + pageSize) / colCount.value)
 
     console.log(
-        'Loading more items, freshIdx: %s, fetchRow: %s.',
+        'Loading more recommendations, freshIdx: %s, fetchRow: %s.',
         freshIdx,
         fetchRow
     )
@@ -75,10 +76,19 @@ const load = async ({
             done('error')
         })
 }
+
+const goTo = useGoTo()
+const gotoTop = () => {
+    goTo(0, { container: '#goto-container' })
+}
 </script>
 
 <template>
-    <v-infinite-scroll :items="recommendations" :onLoad="load">
+    <v-infinite-scroll
+        :items="recommendations"
+        :onLoad="load"
+        id="goto-container"
+    >
         <template
             v-for="n in Math.floor(recommendations.length / colCount)"
             :key="n"
@@ -113,4 +123,10 @@ const load = async ({
             </v-row>
         </template>
     </v-infinite-scroll>
+    <v-fab
+        icon="mdi-chevron-double-up"
+        location="bottom end"
+        absolute
+        @click="gotoTop"
+    ></v-fab>
 </template>

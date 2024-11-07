@@ -8,6 +8,7 @@ import {
 } from '@/common/utils'
 import { fetchPopular, PopularParams } from '@/apis/video_ranking/popular'
 import { PopularItem } from '@/apis/types/video-popular'
+import { useGoTo } from 'vuetify'
 
 const popularVideos: ShallowRef<PopularItem[]> = shallowRef<PopularItem[]>([])
 
@@ -60,10 +61,19 @@ const load = async ({
             done('error')
         })
 }
+
+const goTo = useGoTo()
+const gotoTop = () => {
+    goTo(0, { container: '#goto-container' })
+}
 </script>
 
 <template>
-    <v-infinite-scroll :items="popularVideos" :onLoad="load">
+    <v-infinite-scroll
+        :items="popularVideos"
+        :onLoad="load"
+        id="goto-container"
+    >
         <template
             v-for="n in Math.floor(popularVideos.length / colCount)"
             :key="n"
@@ -96,6 +106,11 @@ const load = async ({
                     </v-skeleton-loader>
                 </v-col>
             </v-row>
-        </template>
-    </v-infinite-scroll>
+        </template> </v-infinite-scroll
+    ><v-fab
+        icon="mdi-chevron-double-up"
+        location="bottom end"
+        absolute
+        @click="gotoTop"
+    ></v-fab>
 </template>

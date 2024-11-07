@@ -167,7 +167,6 @@ const addItem = (item: TabItem) => {
 </script>
 
 <template>
-    <!-- FIXME: 滚动条显示问题 -->
     <v-layout class="d-flex flex-row">
         <v-tabs v-model="tab" direction="vertical">
             <v-tab
@@ -207,16 +206,20 @@ const addItem = (item: TabItem) => {
                 :key="item.value"
                 :value="item.value"
             >
-                <recommend v-if="item.value === 'tab-recommend'"></recommend>
-                <popular v-else-if="item.value === 'tab-hot'"></popular>
-                <popular-precious
-                    v-else-if="item.value === 'tab-precious'"
-                ></popular-precious>
-                <popular-series
-                    v-else-if="item.value === 'tab-must-see'"
-                ></popular-series>
-                <!-- 排行榜的入口 -->
-                <ranking v-else :rid="item.rid"></ranking>
+                <v-layout style="height: calc(100vh - 64px)">
+                    <recommend
+                        v-if="item.value === 'tab-recommend'"
+                    ></recommend>
+                    <popular v-else-if="item.value === 'tab-hot'"></popular>
+                    <popular-precious
+                        v-else-if="item.value === 'tab-precious'"
+                    ></popular-precious>
+                    <popular-series
+                        v-else-if="item.value === 'tab-must-see'"
+                    ></popular-series>
+                    <!-- 排行榜的入口 -->
+                    <ranking v-else :rid="item.rid"></ranking
+                ></v-layout>
             </v-tabs-window-item>
         </v-tabs-window>
     </v-layout>

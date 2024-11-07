@@ -13,6 +13,7 @@ import {
     PopularSeriesList,
     PopularSeriesOneData,
 } from '@/apis/types/video-popular'
+import { useGoTo } from 'vuetify'
 
 const popularSeriesList: ShallowRef<PopularSeriesList | null> =
     shallowRef<PopularSeriesList | null>(null)
@@ -66,6 +67,11 @@ const load = async ({
         })
 }
 
+const goTo = useGoTo()
+const gotoTop = () => {
+    goTo(0, { container: '#goto-container' })
+}
+
 onMounted(async () => {
     await fetchPopularSeriesList()
         .then((data) => {
@@ -80,7 +86,11 @@ onMounted(async () => {
 </script>
 
 <template>
-    <v-infinite-scroll :items="popularSeriesData" :onLoad="load">
+    <v-infinite-scroll
+        :items="popularSeriesData"
+        :onLoad="load"
+        id="goto-container"
+    >
         <template
             v-for="series in popularSeriesData"
             :key="series.config.number"
@@ -112,6 +122,11 @@ onMounted(async () => {
                     </v-responsive>
                 </v-col>
             </v-row>
-        </template>
-    </v-infinite-scroll>
+        </template> </v-infinite-scroll
+    ><v-fab
+        icon="mdi-chevron-double-up"
+        location="bottom end"
+        absolute
+        @click="gotoTop"
+    ></v-fab>
 </template>
