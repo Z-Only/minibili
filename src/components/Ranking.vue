@@ -5,36 +5,38 @@ import {
     getRealIndex,
     convertToVideoData,
 } from '@/common/utils'
-import { fetchPopularPrecious } from '@/apis/video_ranking/popular'
-import { PopularPrecious } from '@/apis/types/video-popular'
+import { fetchRanking } from '@/apis/video_ranking/ranking'
+import { Ranking } from '@/apis/types/video-popular'
 
-const popularPreciousVideos: ShallowRef<PopularPrecious[]> = shallowRef<
-    PopularPrecious[]
->([])
+const { rid } = defineProps<{
+    rid: number | undefined
+}>()
 
 const colCount = ref(2)
 
+const rankingVideos: ShallowRef<Ranking[]> = ref([])
+
 onMounted(async () => {
-    await fetchPopularPrecious()
+    await fetchRanking(rid)
         .then((data) => {
-            popularPreciousVideos.value = data.list
+            rankingVideos.value = data.list
         })
         .catch((error) => {
-            console.error('Failed to fetch popular videos: ', error)
+            console.error('Failed to fetch ranking list: ', error)
         })
 })
 </script>
 
 <template>
-    <v-infinite-scroll :items="popularPreciousVideos">
+    <v-infinite-scroll :items="rankingVideos">
         <template
-            v-for="n in Math.floor(popularPreciousVideos.length / colCount)"
+            v-for="n in Math.floor(rankingVideos.length / colCount)"
             :key="n"
         >
             <v-row no-gutters>
                 <v-col
                     v-for="(item, i) in getDataGridSlice(
-                        popularPreciousVideos,
+                        rankingVideos,
                         n - 1,
                         colCount
                     )"
@@ -45,7 +47,7 @@ onMounted(async () => {
                     <v-skeleton-loader
                         :loading="
                             getRealIndex(n - 1, colCount, i) >=
-                            popularPreciousVideos.length
+                            rankingVideos.length
                         "
                         type="card-avatar, actions"
                     >

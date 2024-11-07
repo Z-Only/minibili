@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ShallowRef } from 'vue'
-import { getDataGridSlice, InfiniteScrollStatus } from '@/common/utils'
+import {
+    getDataGridSlice,
+    InfiniteScrollStatus,
+    convertToVideoData,
+} from '@/common/utils'
 import {
     fetchPopularSeriesList,
     fetchPopularSeriesOne,
@@ -8,9 +12,7 @@ import {
 import {
     PopularSeriesList,
     PopularSeriesOneData,
-    PopularSeries,
 } from '@/apis/types/video-popular'
-import { VideoCardData } from '@/common/types/props'
 
 const popularSeriesList: ShallowRef<PopularSeriesList | null> =
     shallowRef<PopularSeriesList | null>(null)
@@ -62,28 +64,6 @@ const load = async ({
         .catch(() => {
             done('error')
         })
-}
-
-/**
- * 将 PopularSeriesOneData 中的 List 转换成 VideoCardData 类型的数据。
- */
-const convertToVideoData = (item: PopularSeries): VideoCardData => {
-    const data: VideoCardData = {
-        id: item.aid,
-        bvid: item.bvid,
-        url: item.short_link_v2,
-        mid: item.owner.mid,
-        author_name: item.owner.name,
-        avatar_url: item.owner.face,
-        title: item.title,
-        pic_url: item.pic,
-        view: item.stat.view,
-        danmaku: item.stat.danmaku,
-        duration: item.duration,
-        pubdate: item.pubdate,
-        is_followed: false,
-    }
-    return data
 }
 
 onMounted(async () => {

@@ -1,4 +1,4 @@
-import { Owner, Stat } from '@/apis/types/video-details'
+import { VideoDetails, Owner, Stat } from '@/apis/types/video-details'
 
 /**
  * @description 首页视频推荐列表（web端）
@@ -13,7 +13,7 @@ export interface VideoRecommendations {
     mid: number
 }
 
-export interface Item {
+export interface Item extends VideoDetails {
     id: number
     bvid: string
     cid: number

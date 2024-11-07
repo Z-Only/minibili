@@ -1,5 +1,7 @@
 import { click_result } from '@/common/geetest/click'
 import { KJUR, KEYUTIL, RSAKey } from 'jsrsasign'
+import { VideoCardData } from '@/common/types/props'
+import { VideoDetails } from '@/apis/types/video-details'
 
 /**
  * 格式化时间戳为相对时间字符串。
@@ -194,3 +196,26 @@ export const rsaEncryptPassword = (
 }
 
 export type InfiniteScrollStatus = 'ok' | 'empty' | 'loading' | 'error'
+
+/**
+ * 将 Item 转换成 VideoCardData 类型的数据。
+ */
+export const convertToVideoData = <T extends VideoDetails>(
+    item: T
+): VideoCardData => {
+    const data: VideoCardData = {
+        id: item.aid,
+        bvid: item.bvid,
+        mid: item.owner.mid,
+        author_name: item.owner.name,
+        avatar_url: item.owner.face,
+        title: item.title,
+        pic_url: item.pic,
+        view: item.stat.view,
+        danmaku: item.stat.danmaku,
+        duration: item.duration,
+        pubdate: item.pubdate,
+        is_followed: item?.is_followed ?? 0,
+    }
+    return data
+}

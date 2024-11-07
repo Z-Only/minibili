@@ -4,10 +4,10 @@ import {
     getDataGridSlice,
     getRealIndex,
     InfiniteScrollStatus,
+    convertToVideoData,
 } from '@/common/utils'
 import { fetchPopular, PopularParams } from '@/apis/video_ranking/popular'
 import { PopularItem } from '@/apis/types/video-popular'
-import { VideoCardData } from '@/common/types/props'
 
 const popularVideos: ShallowRef<PopularItem[]> = shallowRef<PopularItem[]>([])
 
@@ -59,28 +59,6 @@ const load = async ({
         .catch(() => {
             done('error')
         })
-}
-
-/**
- * 将 Item 转换成 VideoCardData 类型的数据。
- */
-const convertToVideoData = (item: PopularItem): VideoCardData => {
-    const data: VideoCardData = {
-        id: item.aid,
-        bvid: item.bvid,
-        url: item.short_link_v2,
-        mid: item.owner.mid,
-        author_name: item.owner.name,
-        avatar_url: item.owner.face,
-        title: item.title,
-        pic_url: item.pic,
-        view: item.stat.view,
-        danmaku: item.stat.danmaku,
-        duration: item.duration,
-        pubdate: item.pubdate,
-        is_followed: false,
-    }
-    return data
 }
 </script>
 

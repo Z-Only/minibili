@@ -106,6 +106,7 @@ impl serde::Serialize for Error {
 pub struct ApiResult<T> {
     pub code: i32,
     pub message: String,
+    pub ttl: i32,
     pub data: T,
 }
 

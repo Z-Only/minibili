@@ -2,11 +2,11 @@
 import { fetchVideoRecommendations } from '@/apis/video/recommend'
 import { Item } from '@/apis/types/video-recommendations'
 import { RecommendParams } from '@/apis/video/recommend'
-import { VideoCardData } from '@/common/types/props'
 import {
     getDataGridSlice,
     getRealIndex,
     InfiniteScrollStatus,
+    convertToVideoData,
 } from '@/common/utils'
 import { ShallowRef } from 'vue'
 
@@ -74,28 +74,6 @@ const load = async ({
         .catch(() => {
             done('error')
         })
-}
-
-/**
- * 将 Item 转换成 VideoCardData 类型的数据。
- */
-const convertToVideoData = (item: Item): VideoCardData => {
-    const data: VideoCardData = {
-        id: item.id,
-        bvid: item.bvid,
-        url: item.uri,
-        mid: item.owner.mid,
-        author_name: item.owner.name,
-        avatar_url: item.owner.face,
-        title: item.title,
-        pic_url: item.pic,
-        view: item.stat.view,
-        danmaku: item.stat.danmaku,
-        duration: item.duration,
-        pubdate: item.pubdate,
-        is_followed: item.is_followed === 0 ? false : true,
-    }
-    return data
 }
 </script>
 

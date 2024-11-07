@@ -46,6 +46,9 @@ export interface VideoDetails {
     user_garb: UserGarb
     videos: number
     vt_display: string
+    // 子类中新增的字段
+    short_link_v2?: string
+    is_followed?: number
 }
 
 export interface ArgueInfo {

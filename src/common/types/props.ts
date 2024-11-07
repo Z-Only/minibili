@@ -3,7 +3,6 @@ import { VideoFormatFlag } from '@/apis/video/stream'
 export interface VideoCardData {
     id: number
     bvid: string
-    url: string
     mid: number
     author_name: string
     avatar_url: string
@@ -13,7 +12,7 @@ export interface VideoCardData {
     view: number
     danmaku: number
     pubdate: number
-    is_followed: boolean
+    is_followed: number
 }
 
 export interface PlayerData {

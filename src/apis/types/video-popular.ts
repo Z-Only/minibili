@@ -64,7 +64,7 @@ export interface PopularSeries {
 
 export interface PopularSeriesOneData {
     config: Config
-    list: PopularSeries[]
+    list: PopularSeriesOne[]
     reminder: string
 }
 
@@ -86,7 +86,7 @@ export interface Config {
     type: string
 }
 
-export interface PopularSeries {
+export interface PopularSeriesOne extends VideoDetails {
     ai_rcmd: null
     aid: number
     bvid: string
@@ -155,6 +155,41 @@ export interface PopularPrecious extends VideoDetails {
     rights: Rights
     season_id: number
     season_type: number
+    short_link_v2: string
+    stat: Stat
+    state: number
+    tid: number
+    title: string
+    tname: string
+    up_from_v2: number
+    videos: number
+}
+
+export interface RankingData {
+    list: Ranking[]
+    note: string
+}
+
+export interface Ranking extends VideoDetails {
+    aid: number
+    bvid: string
+    cid: number
+    copyright: number
+    ctime: number
+    desc: string
+    dimension: Dimension
+    duration: number
+    dynamic: string
+    first_frame: string
+    mission_id: number
+    owner: Owner
+    pic: string
+    pub_location: string
+    pubdate: number
+    rights: Rights
+    score: number
+    season_id: number
+    short_link: string
     short_link_v2: string
     stat: Stat
     state: number

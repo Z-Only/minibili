@@ -16,7 +16,7 @@ declare module 'vue' {
     Popular: typeof import('./src/components/Popular.vue')['default']
     PopularPrecious: typeof import('./src/components/PopularPrecious.vue')['default']
     PopularSeries: typeof import('./src/components/PopularSeries.vue')['default']
-    Rank: typeof import('./src/components/Rank.vue')['default']
+    Ranking: typeof import('./src/components/Ranking.vue')['default']
     Recommend: typeof import('./src/components/Recommend.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
