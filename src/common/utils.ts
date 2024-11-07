@@ -217,5 +217,9 @@ export const convertToVideoData = <T extends VideoDetails>(
         pubdate: item.pubdate,
         is_followed: item?.is_followed ?? 0,
     }
+    // 防止生产中 devServer URL 为 tauri://localhost/ 导致没有加协议名以 // 开头的图片无法正常加载
+    if (data.pic_url.startsWith('//')) {
+        data.pic_url = 'https:' + data.pic_url
+    }
     return data
 }

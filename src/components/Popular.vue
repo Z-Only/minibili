@@ -75,7 +75,7 @@ const gotoTop = () => {
         id="goto-container"
     >
         <template
-            v-for="n in Math.floor(popularVideos.length / colCount)"
+            v-for="n in Math.round(popularVideos.length / colCount)"
             :key="n"
         >
             <v-row no-gutters>

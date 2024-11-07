@@ -15,6 +15,11 @@ const popularPreciousVideos: ShallowRef<PopularPrecious[]> = shallowRef<
 
 const colCount = ref(2)
 
+const goTo = useGoTo()
+const gotoTop = () => {
+    goTo(0, { container: '#goto-container' })
+}
+
 onMounted(async () => {
     await fetchPopularPrecious()
         .then((data) => {
@@ -24,11 +29,6 @@ onMounted(async () => {
             console.error('Failed to fetch popular videos: ', error)
         })
 })
-
-const goTo = useGoTo()
-const gotoTop = () => {
-    goTo(0, { container: '#goto-container' })
-}
 </script>
 
 <template>
