@@ -223,3 +223,10 @@ export const convertToVideoData = <T extends VideoDetails>(
     }
     return data
 }
+
+export interface TabItem {
+    text: string
+    value: string
+    icon?: string
+    rid?: number
+}

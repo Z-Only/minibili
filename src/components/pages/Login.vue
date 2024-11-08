@@ -146,80 +146,76 @@ onBeforeUnmount(() => {
         </v-col>
         <v-col>
             <v-sheet>
-                <v-card>
-                    <v-tabs
-                        v-model="tab"
-                        align-tabs="center"
-                        color="deep-purple-accent-4"
-                    >
-                        <v-tab :value="1">密码登录</v-tab>
-                        <v-tab :value="2">短信登录</v-tab>
-                    </v-tabs>
+                <v-tabs
+                    v-model="tab"
+                    align-tabs="center"
+                    color="deep-purple-accent-4"
+                >
+                    <v-tab :value="1">密码登录</v-tab>
+                    <v-tab :value="2">短信登录</v-tab>
+                </v-tabs>
 
-                    <v-tabs-window v-model="tab">
-                        <v-tabs-window-item :value="1"
-                            ><form @submit.prevent="passwordLogin">
-                                <v-text-field
-                                    v-model="account"
-                                    label="账号"
-                                    placeholder="请输入账号"
-                                    :rules="[required]"
-                                    clearable
-                                ></v-text-field>
-                                <v-text-field
-                                    v-model="password"
-                                    label="密码"
-                                    placeholder="请输入密码"
-                                    :rules="[required]"
-                                    :type="passwordShow ? 'text' : 'password'"
-                                    :append-icon="
-                                        passwordShow ? 'mdi-eye' : 'mdi-eye-off'
-                                    "
-                                    @click:append="passwordShow = !passwordShow"
-                                    ><template v-slot:append>
-                                        <v-btn variant="text"
-                                            >忘记密码？</v-btn
-                                        ></template
-                                    ></v-text-field
-                                >
-                                <captcha-card
-                                    @getCaptchaResult="receiveCaptchaResult"
-                                />
-                                <v-btn @click="passwordLogin">注册</v-btn
-                                ><v-btn class="me-4" type="submit">
-                                    登录
-                                </v-btn>
-                            </form>
-                        </v-tabs-window-item>
-                        <v-tabs-window-item :value="2"
-                            ><form @submit.prevent="smsLogin">
-                                <v-text-field
-                                    v-model="phone"
-                                    label="手机号"
-                                    placeholder="请输入手机号"
-                                    :rules="[required]"
-                                    clearable
-                                    ><template v-slot:append>
-                                        <v-btn
-                                            variant="text"
-                                            :disabled="phone.length !== 11"
-                                            >获取验证码</v-btn
-                                        ></template
-                                    ></v-text-field
-                                >
-                                <v-text-field
-                                    v-model="smsCode"
-                                    label="验证码"
-                                    placeholder="请输入验证码"
-                                    :rules="[required]"
-                                ></v-text-field>
-                                <v-btn class="me-4" type="submit">
-                                    登录/注册
-                                </v-btn>
-                            </form></v-tabs-window-item
-                        >
-                    </v-tabs-window>
-                </v-card>
+                <v-tabs-window v-model="tab">
+                    <v-tabs-window-item :value="1"
+                        ><form @submit.prevent="passwordLogin">
+                            <v-text-field
+                                v-model="account"
+                                label="账号"
+                                placeholder="请输入账号"
+                                :rules="[required]"
+                                clearable
+                            ></v-text-field>
+                            <v-text-field
+                                v-model="password"
+                                label="密码"
+                                placeholder="请输入密码"
+                                :rules="[required]"
+                                :type="passwordShow ? 'text' : 'password'"
+                                :append-icon="
+                                    passwordShow ? 'mdi-eye' : 'mdi-eye-off'
+                                "
+                                @click:append="passwordShow = !passwordShow"
+                                ><template v-slot:append>
+                                    <v-btn variant="text"
+                                        >忘记密码？</v-btn
+                                    ></template
+                                ></v-text-field
+                            >
+                            <captcha-card
+                                @getCaptchaResult="receiveCaptchaResult"
+                            />
+                            <v-btn @click="passwordLogin">注册</v-btn
+                            ><v-btn class="me-4" type="submit"> 登录 </v-btn>
+                        </form>
+                    </v-tabs-window-item>
+                    <v-tabs-window-item :value="2"
+                        ><form @submit.prevent="smsLogin">
+                            <v-text-field
+                                v-model="phone"
+                                label="手机号"
+                                placeholder="请输入手机号"
+                                :rules="[required]"
+                                clearable
+                                ><template v-slot:append>
+                                    <v-btn
+                                        variant="text"
+                                        :disabled="phone.length !== 11"
+                                        >获取验证码</v-btn
+                                    ></template
+                                ></v-text-field
+                            >
+                            <v-text-field
+                                v-model="smsCode"
+                                label="验证码"
+                                placeholder="请输入验证码"
+                                :rules="[required]"
+                            ></v-text-field>
+                            <v-btn class="me-4" type="submit">
+                                登录/注册
+                            </v-btn>
+                        </form></v-tabs-window-item
+                    >
+                </v-tabs-window>
             </v-sheet>
         </v-col>
     </v-row>

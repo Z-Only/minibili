@@ -191,7 +191,7 @@ watch(
                 >
                     <v-list-item-title>
                         <v-btn
-                            variant="plain"
+                            variant="text"
                             @click.prevent="selectLocale(item.locale)"
                         >
                             {{ item.name }}
@@ -216,11 +216,13 @@ watch(
             </template>
         </v-tooltip>
 
-        <v-avatar @click.prevent="toLogin">
-            <v-img
-                alt="akari"
-                src="https://static.hdslb.com/images/akari.jpg"
-            />
-        </v-avatar>
+        <v-btn icon="mdi-account" @click.prevent="toLogin">
+            <v-avatar>
+                <v-img
+                    alt="akari"
+                    src="https://static.hdslb.com/images/akari.jpg"
+                />
+            </v-avatar>
+        </v-btn>
     </v-app-bar>
 </template>
