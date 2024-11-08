@@ -1,5 +1,9 @@
 import { get } from '@/service/request'
-import { SearchAll } from '@/apis/types/search'
+import {
+    SearchAll,
+    SearchSuggestParams,
+    SearchSuggestData,
+} from '@/apis/types/search'
 
 /**
  * Fetches search results for all categories.
@@ -61,4 +65,13 @@ export const fetchTypeSearch = async (keyword: string): Promise<SearchAll> => {
     >('https://api.bilibili.com/x/web-interface/wbi/search/all/v2', {
         keyword,
     })
+}
+
+export const fetchSearchSuggest = async (
+    params: SearchSuggestParams
+): Promise<SearchSuggestData> => {
+    return await get<SearchSuggestData, SearchSuggestParams>(
+        'https://s.search.bilibili.com/main/suggest',
+        params
+    )
 }

@@ -374,3 +374,44 @@ export interface TypeSearchParams {
     tids?: number
     user_type?: number
 }
+
+export interface SearchSuggestParams {
+    bangumi_acc_num?: number
+    bangumi_num?: number
+    buvid?: string
+    func?: string
+    highlight?: string
+    main_ver?: string
+    rnd?: number
+    special_acc_num?: number
+    special_num?: number
+    spmid?: string
+    sub_type?: string
+    suggest_type?: string
+    tag_num?: number
+    term: string
+    topic_acc_num?: number
+    upuser_acc_num?: number
+    upuser_num?: number
+    userid?: number
+}
+
+export interface SearchSuggestApiResult {
+    code: number
+    exp_str: string
+    result: Result
+    stoken: string
+}
+
+export interface SearchSuggestData {
+    tag: Tag[]
+}
+
+export interface Tag {
+    name: string
+    ref: number
+    spid: number
+    term: string
+    type: string
+    value: string
+}
