@@ -7,7 +7,9 @@ import { fetch } from '@/service/commands'
  * @returns 返回请求数据
  */
 export const get = async <T, P = null>(url: string, params?: P): Promise<T> => {
-    return await fetch<T, P>('GET', url, params).then((result) => result.data)
+    return await fetch<T, P>('GET', url, params).then(
+        (res) => (res?.data ?? res?.result) as T
+    )
 }
 
 /**
@@ -23,6 +25,6 @@ export const post = async <T, P = null, D = null>(
     data?: D
 ): Promise<T> => {
     return await fetch<T, P, D>('POST', url, params, data).then(
-        (result) => result.data
+        (res) => (res?.data ?? res?.result) as T
     )
 }

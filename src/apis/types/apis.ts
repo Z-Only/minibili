@@ -6,12 +6,15 @@
  * @property {string} message - A message accompanying the API response.
  * @property {number} ttl - Time to live for the API response.
  * @property {T} data - The data returned by the API.
+ * @property {T} result - The data returned by the API.
  */
 export interface ApiResult<T> {
     code: number
     message?: string
     ttl?: number
-    data: T
+    data?: T
+    // 兼容搜索建议接口
+    result?: T
 }
 
 // 错误码枚举

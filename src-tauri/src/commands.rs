@@ -1,5 +1,5 @@
 use crate::utils::download::{send_progress_event, write_buffer_to_file, DownloadEvent};
-use crate::utils::request::{request_with_sign, ApiResult, Error, GEETEST_CLIENT, GLOBAL_CLIENT};
+use crate::utils::request::{request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT};
 use futures_util::StreamExt;
 use http::Method;
 use log::info;
@@ -19,7 +19,7 @@ pub async fn fetch(
     url: &str,
     params: Option<serde_json::Value>,
     data: Option<serde_json::Value>,
-) -> Result<ApiResult<serde_json::Value>, Error> {
+) -> Result<serde_json::Value, Error> {
     request_with_sign::<serde_json::Value>(
         Method::from_str(method).unwrap_or(Method::GET),
         url,

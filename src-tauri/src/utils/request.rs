@@ -102,14 +102,6 @@ impl serde::Serialize for Error {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ApiResult<T> {
-    pub code: i32,
-    pub message: String,
-    pub ttl: i32,
-    pub data: T,
-}
-
 async fn fetch_cookie() -> Result<(), Error> {
     let response = GLOBAL_CLIENT.get(HOST).send().await?;
 
@@ -130,7 +122,7 @@ pub async fn handle_request<T>(
     url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
-) -> Result<ApiResult<T>, Error>
+) -> Result<T, Error>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
@@ -172,7 +164,7 @@ where
             return Err(Error::StatusCode(status.to_string()));
         }
 
-        return Ok(res.json::<ApiResult<T>>().await?);
+        return Ok(res.json::<T>().await?);
     }
 }
 
@@ -181,7 +173,7 @@ pub async fn request_with_sign<T>(
     url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
-) -> Result<ApiResult<T>, Error>
+) -> Result<T, Error>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {

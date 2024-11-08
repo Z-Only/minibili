@@ -84,8 +84,16 @@ fn _encode_wbi(
     query + &format!("&w_rid={}", web_sign)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ApiResult<T> {
+    pub code: i32,
+    pub message: String,
+    pub ttl: i32,
+    pub data: T,
+}
+
 async fn get_wbi_keys() -> Result<(String, String), request::Error> {
-    let Data { wbi_img } = request::handle_request::<Data>(
+    let Data { wbi_img } = request::handle_request::<ApiResult<Data>>(
         &Method::GET,
         "https://api.bilibili.com/x/web-interface/nav",
         None,
