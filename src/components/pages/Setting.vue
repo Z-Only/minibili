@@ -31,8 +31,8 @@ onMounted(async () => {})
 </script>
 
 <template>
-    <v-container class="d-flex flex-column justify-start align-center">
-        <v-img width="200" cover src="/icon.png" alt="LOGO"></v-img>
+    <v-sheet class="d-flex flex-column justify-start align-center">
+        <v-img width="150" cover src="/icon.png" alt="LOGO"></v-img>
         <v-card class="mx-auto" width="600">
             <v-list>
                 <v-list-subheader>系统设置</v-list-subheader>
@@ -75,7 +75,7 @@ onMounted(async () => {})
                 </v-list-item>
             </v-list>
         </v-card>
-    </v-container>
+    </v-sheet>
 </template>
 
 <style scoped></style>

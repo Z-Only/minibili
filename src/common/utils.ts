@@ -62,15 +62,15 @@ export const formatDuration = (duration: number | string): string => {
 }
 
 /**
- * 格式化观看次数。
- * @param view 观看次数
- * @returns 格式化的观看次数字符串
+ * 格式化数量，如观看次数、弹幕数。
+ * @param times 次数
+ * @returns 格式化的次数字符串
  */
-export const formatView = (view: number): string => {
-    if (view < 10000) {
-        return view.toString()
+export const formatAmount = (times: number): string => {
+    if (times < 10000) {
+        return times.toString()
     } else {
-        return `${(view / 10000).toFixed(1)}万`
+        return `${(times / 10000).toFixed(1)}万`
     }
 }
 

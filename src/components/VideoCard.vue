@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatDuration, formatPubDate, formatView } from '@/common/utils'
+import { formatDuration, formatPubDate, formatAmount } from '@/common/utils'
 import { VideoCardData } from '@/common/types/props'
 
 // 获取路由实例
@@ -43,9 +43,9 @@ const { video } = defineProps<{
                 </div>
             </template>
             <!-- 显示播放次数和时长 -->
-            <v-icon icon="mdi-play-box"></v-icon>{{ formatView(video.view) }}
+            <v-icon icon="mdi-play-box"></v-icon>{{ formatAmount(video.view) }}
             <v-icon icon="mdi-message-text-fast"></v-icon>
-            {{ video.danmaku }}
+            {{ formatAmount(video.danmaku) }}
             {{ formatDuration(video.duration) }}
         </v-img>
 

@@ -1,4 +1,13 @@
-import { VideoDetails } from './video-details'
+import {
+    SearchResponseVideo,
+    SearchResponseDramasOrMovies,
+    SearchResponseLiveRoom,
+    SearchResponseLiveUser,
+    SearchResponseArticle,
+    SearchResponseTopic,
+    SearchResponseUser,
+    SearchResponsePhoto,
+} from '@/apis/types/search-response'
 
 export interface SearchAll {
     app_display_option: AppDisplayOption
@@ -198,128 +207,138 @@ export interface Result {
     result_type: string
 }
 
-export interface Datum extends VideoDetails {
-    aid: number
-    arcrank: string
-    arcurl: string
-    area: number
-    areas: string
-    author: string
-    badgepay: boolean
-    badges: Badge[]
-    biz_data: null
-    button_text: string
-    bvid: string
-    cate_name: string
-    corner: number | string
-    cover: string
-    cv: string
-    danmaku: number
-    desc: string
-    description: string
-    display_info: DisplayInfo[]
-    duration: string
-    enable_vt: number
-    ep_size: number
-    episode_count_text: string
-    eps: null
-    favorites: number
-    fix_pubtime_str: string
-    goto_url: string
-    hit_columns: string[]
-    hit_epids: string
-    id: number
-    index_show: string
-    is_avid: boolean
-    is_charge_video: number
-    is_follow: number
-    is_intervene: number
-    is_live_room_inline: number
-    is_pay: number
-    is_selection: number
-    is_union_video: number
-    like: number
-    live_status: number
-    live_time: string
-    media_id: number
-    media_mode: number
-    media_score: MediaScore
-    media_type: number
-    mid: number
-    new_rec_tags: string[]
-    online: number
-    org_title: string
-    parent_area_id: number
-    parent_area_name: string
-    pgc_season_id: number
-    pic: string
-    play: number
-    pubdate: number
-    pubtime: number
-    rank_index: number
-    rank_offset: number
-    rank_score: number
-    rec_reason: string
-    rec_tags: null
-    release_status: number
-    review: number
-    roomid: number
-    season_id: number
-    season_type: number
-    season_type_name: string
-    selection_style: string
-    senddate: number
-    short_id: number
-    spread_id: number
-    staff: string
-    style: number
-    styles: string
-    subtitle: string
-    tag: string
-    tags: string
-    title: string
-    type: string
-    typeid: string
-    typename: string
-    uface: string
-    uid: number
-    uname: string
-    upic: string
-    url: string
-    user_cover: string
-    video_review: number
-    view_type: string
-    vt: number
-    vt_display: string
-    watched_show: null
-}
+export type Datum =
+    | SearchResponseVideo
+    | SearchResponseDramasOrMovies
+    | SearchResponseLiveRoom
+    | SearchResponseLiveUser
+    | SearchResponseArticle
+    | SearchResponseTopic
+    | SearchResponseUser
+    | SearchResponsePhoto
 
-export interface Badge {
-    bg_color: string
-    bg_color_night: string
-    bg_style: number
-    border_color: string
-    border_color_night: string
-    text: string
-    text_color: string
-    text_color_night: string
-}
+// export interface Datum extends VideoDetails {
+//     aid: number
+//     arcrank: string
+//     arcurl: string
+//     area: number
+//     areas: string
+//     author: string
+//     badgepay: boolean
+//     badges: Badge[]
+//     biz_data: null
+//     button_text: string
+//     bvid: string
+//     cate_name: string
+//     corner: number | string
+//     cover: string
+//     cv: string
+//     danmaku: number
+//     desc: string
+//     description: string
+//     display_info: DisplayInfo[]
+//     duration: string
+//     enable_vt: number
+//     ep_size: number
+//     episode_count_text: string
+//     eps: null
+//     favorites: number
+//     fix_pubtime_str: string
+//     goto_url: string
+//     hit_columns: string[]
+//     hit_epids: string
+//     id: number
+//     index_show: string
+//     is_avid: boolean
+//     is_charge_video: number
+//     is_follow: number
+//     is_intervene: number
+//     is_live_room_inline: number
+//     is_pay: number
+//     is_selection: number
+//     is_union_video: number
+//     like: number
+//     live_status: number
+//     live_time: string
+//     media_id: number
+//     media_mode: number
+//     media_score: MediaScore
+//     media_type: number
+//     mid: number
+//     new_rec_tags: string[]
+//     online: number
+//     org_title: string
+//     parent_area_id: number
+//     parent_area_name: string
+//     pgc_season_id: number
+//     pic: string
+//     play: number
+//     pubdate: number
+//     pubtime: number
+//     rank_index: number
+//     rank_offset: number
+//     rank_score: number
+//     rec_reason: string
+//     rec_tags: null
+//     release_status: number
+//     review: number
+//     roomid: number
+//     season_id: number
+//     season_type: number
+//     season_type_name: string
+//     selection_style: string
+//     senddate: number
+//     short_id: number
+//     spread_id: number
+//     staff: string
+//     style: number
+//     styles: string
+//     subtitle: string
+//     tag: string
+//     tags: string
+//     title: string
+//     type: string
+//     typeid: string
+//     typename: string
+//     uface: string
+//     uid: number
+//     uname: string
+//     upic: string
+//     url: string
+//     user_cover: string
+//     video_review: number
+//     view_type: string
+//     vt: number
+//     vt_display: string
+//     watched_show: null
+// }
 
-export interface DisplayInfo {
-    bg_color: string
-    bg_color_night: string
-    bg_style: number
-    border_color: string
-    border_color_night: string
-    text: string
-    text_color: string
-    text_color_night: string
-}
+// export interface Badge {
+//     bg_color: string
+//     bg_color_night: string
+//     bg_style: number
+//     border_color: string
+//     border_color_night: string
+//     text: string
+//     text_color: string
+//     text_color_night: string
+// }
 
-export interface MediaScore {
-    score: number | number
-    user_count: number
-}
+// export interface DisplayInfo {
+//     bg_color: string
+//     bg_color_night: string
+//     bg_style: number
+//     border_color: string
+//     border_color_night: string
+//     text: string
+//     text_color: string
+//     text_color_night: string
+// }
+
+// export interface MediaScore {
+//     score: number | number
+//     user_count: number
+// }
 
 export interface TopTlist {
     activity: number
@@ -342,4 +361,16 @@ export interface TopTlist {
     upuser: number
     user: number
     video: number
+}
+
+export interface TypeSearchParams {
+    category_id?: number
+    duration?: number
+    keyword: string
+    order?: string
+    order_sort?: number
+    page?: number
+    search_type: string
+    tids?: number
+    user_type?: number
 }

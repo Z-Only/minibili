@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { fetchSearchAll } from '@/apis/search/search'
 import { SearchAll, Datum } from '@/apis/types/search'
+import { SearchResponseVideo } from '@/apis/types/search-response'
 import {
     getDataGridSlice,
     getRealIndex,
@@ -63,7 +64,7 @@ onMounted(async () => {
     console.log('keyword:', keyword)
 
     // 页面挂载时加载数据
-    await fetchSearchAll({ keyword })
+    await fetchSearchAll(keyword)
         .then((res) => {
             if (res.result) {
                 searchResults.value = res
@@ -133,7 +134,9 @@ onMounted(async () => {
                                             <v-sheet class="ma-2 pa-2"
                                                 ><video-card
                                                     :video="
-                                                        convertToVideoData(item)
+                                                        convertToVideoData(
+                                                            item as SearchResponseVideo
+                                                        )
                                                     "
                                                 ></video-card
                                             ></v-sheet>
