@@ -157,7 +157,6 @@ const addItem = (item: TabItem) => {
     nextTick(() => {
         tab.value = item.value
     })
-    console.log(item)
 }
 </script>
 

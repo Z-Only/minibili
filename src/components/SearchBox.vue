@@ -23,7 +23,6 @@ const getSearchSuggest = async () => {
     loading.value = true
     await fetchSearchSuggest({ term: searchKeyword.value })
         .then((res) => {
-            console.log('suggest', res)
             sugggestList.value = res.tag
         })
         .finally(() => {
@@ -31,7 +30,7 @@ const getSearchSuggest = async () => {
         })
 }
 
-const clickSuggest = (keyword: string) => {
+const acceptSuggest = (keyword: string) => {
     searchKeyword.value = keyword
     toSearch(keyword)
 }
@@ -45,15 +44,15 @@ onMounted(async () => {
 </script>
 
 <template>
-    <v-menu>
+    <v-menu transition="slide-y-transition">
         <template v-slot:activator="{ props }"
             ><v-text-field
                 v-bind="props"
                 v-model="searchKeyword"
                 :placeholder="placeholder"
                 :loading="loading"
+                @focus="getSearchSuggest"
                 @input="getSearchSuggest"
-                @blur="sugggestList = []"
                 append-inner-icon="mdi-magnify"
                 clear-icon="mdi-close-circle"
                 type="text"
@@ -69,7 +68,7 @@ onMounted(async () => {
                 "
             />
         </template>
-        <v-list>
+        <v-list density="compact">
             <v-list-item v-if="sugggestList.length === 0" class="text-center"
                 >暂无搜索历史</v-list-item
             >
@@ -79,9 +78,10 @@ onMounted(async () => {
                 :value="index"
                 prepend-icon="mdi-magnify"
             >
-                <v-list-item-title @click.prevent="clickSuggest(item.value)">{{
-                    item.value
-                }}</v-list-item-title>
+                <span
+                    v-html="item.name"
+                    @click.prevent="acceptSuggest(item.value)"
+                ></span>
             </v-list-item>
         </v-list>
     </v-menu>

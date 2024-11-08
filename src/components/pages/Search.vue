@@ -13,7 +13,6 @@ import { useGoTo } from 'vuetify'
 
 // 获取路由参数
 const route = useRoute()
-const videoZone = route.params.zone as string
 const keyword = route.query.keyword as string
 
 // 定义响应式数据
@@ -59,10 +58,31 @@ const tabs: Ref<TabItem[]> = ref([
 ])
 const tab = ref('tab-' + tabs.value[0].value)
 
-onMounted(async () => {
-    console.log('videoZone:', videoZone)
-    console.log('keyword:', keyword)
+onBeforeRouteUpdate(async (to, _from, next) => {
+    // 当路由参数发生变化时，重新获取数据
+    const keyword = to.query.keyword as string
+    await fetchSearchAll(keyword)
+        .then((res) => {
+            if (res.result) {
+                searchResults.value = res
+                const result = res.result.find(
+                    (result) => result.result_type === 'video'
+                )
+                if (result) {
+                    const videoResult = result.data
+                    searchVideos.value = videoResult
+                }
+            }
+        })
+        .catch((error) => {
+            console.error('Failed to fetch search results, ', error)
+        })
+        .finally(() => {
+            next()
+        })
+})
 
+onMounted(async () => {
     // 页面挂载时加载数据
     await fetchSearchAll(keyword)
         .then((res) => {
