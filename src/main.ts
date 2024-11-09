@@ -1,12 +1,13 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import { createPinia } from 'pinia'
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
 import { zhHans, en, ja, ko } from 'vuetify/locale'
-import { createPinia } from 'pinia'
+import '@/styles/global.scss'
 
 /**
  * 创建 Vue 应用实例

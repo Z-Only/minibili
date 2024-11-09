@@ -11,12 +11,16 @@ const loading = ref(false)
 
 const sugggestList: Ref<Tag[]> = ref<Tag[]>([])
 
+const searchInputRef = useTemplateRef<HTMLElement>('searchInput')
+
 const toSearch = (keyword: string, zone: string = 'all') => {
+    // 移除焦点
+    searchInputRef.value?.blur()
     router.push({ name: 'Search', params: { zone }, query: { keyword } })
 }
 
 const getSearchSuggest = async () => {
-    if (searchKeyword.value === '') {
+    if (!searchKeyword.value) {
         sugggestList.value = []
         return
     }
@@ -44,16 +48,15 @@ onMounted(async () => {
 </script>
 
 <template>
-    <v-menu transition="slide-y-transition">
+    <v-menu transition="slide-y-transition" :open-on-focus="true">
         <template v-slot:activator="{ props }"
             ><v-text-field
+                ref="searchInput"
                 v-bind="props"
                 v-model="searchKeyword"
                 :placeholder="placeholder"
                 :loading="loading"
-                @focus="getSearchSuggest"
-                @input="getSearchSuggest"
-                append-inner-icon="mdi-magnify"
+                append-inner-icon="mdi-chevron-right"
                 clear-icon="mdi-close-circle"
                 type="text"
                 variant="solo"
@@ -63,10 +66,16 @@ onMounted(async () => {
                 clearable
                 hide-details
                 single-line
-                @click:append-inner="
-                    toSearch(searchKeyword ? searchKeyword : placeholder)
+                @focus="getSearchSuggest"
+                @update:modelValue="getSearchSuggest"
+                @keydown.enter="
+                    acceptSuggest(searchKeyword ? searchKeyword : placeholder)
                 "
-            />
+                @click:append-inner="
+                    acceptSuggest(searchKeyword ? searchKeyword : placeholder)
+                "
+            >
+            </v-text-field>
         </template>
         <v-list density="compact">
             <v-list-item v-if="sugggestList.length === 0" class="text-center"
