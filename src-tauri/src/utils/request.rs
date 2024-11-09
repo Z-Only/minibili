@@ -150,6 +150,14 @@ where
             status.as_u16()
         );
 
+        // // 获取响应头
+        // let headers: HeaderMap = res.headers().clone();
+
+        // // 打印响应头
+        // for (key, value) in headers.iter() {
+        //     info!("{}: {}", key, value.to_str().unwrap_or("Invalid UTF-8"));
+        // }
+
         if status.as_u16() == 412 {
             if retries < MAX_RETRIES {
                 retries += 1;

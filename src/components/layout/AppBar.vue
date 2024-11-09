@@ -30,7 +30,7 @@ const updateArrowDisabled = () => {
 
 themeStore.$subscribe((_mutation, state) => {
     // 每当状态发生变化时，改变主题。
-    changeDarkModeWithConfig(state.theme)
+    changeDarkModeWithConfig(state.theme.value)
 })
 
 const changeDarkModeWithConfig = (theme: Theme) => {
@@ -76,7 +76,7 @@ const matchLocaleByLanguage = (language: string): Locale => {
 
 localeStore.$subscribe((_mutation, state) => {
     // 每当状态发生变化时，改变主题。
-    changeLocaleWithConfig(state.locale)
+    changeLocaleWithConfig(state.locale.value)
 })
 
 const changeLocaleWithConfig = async (locale: Locale) => {

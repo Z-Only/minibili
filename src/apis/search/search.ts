@@ -3,6 +3,7 @@ import {
     SearchAll,
     SearchSuggestParams,
     SearchSuggestData,
+    TypeSearchParams,
 } from '@/apis/types/search'
 
 /**
@@ -56,15 +57,13 @@ export const SearchType = [
     },
 ]
 
-export const fetchTypeSearch = async (keyword: string): Promise<SearchAll> => {
-    return await get<
-        SearchAll,
-        {
-            keyword: string
-        }
-    >('https://api.bilibili.com/x/web-interface/wbi/search/all/v2', {
-        keyword,
-    })
+export const fetchTypeSearch = async (
+    params: TypeSearchParams
+): Promise<SearchAll> => {
+    return await get<SearchAll, TypeSearchParams>(
+        'https://api.bilibili.com/x/web-interface/wbi/search/type',
+        params
+    )
 }
 
 export const fetchSearchSuggest = async (

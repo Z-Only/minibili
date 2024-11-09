@@ -43,10 +43,21 @@ const { video } = defineProps<{
                 </div>
             </template>
             <!-- 显示播放次数和时长 -->
-            <v-icon icon="mdi-play-box"></v-icon>{{ formatAmount(video.view) }}
-            <v-icon icon="mdi-message-text-fast"></v-icon>
-            {{ formatAmount(video.danmaku) }}
-            {{ formatDuration(video.duration) }}
+            <div class="d-flex pa-2 video-card-stats">
+                <div class="video-card-stats-left">
+                    <span>
+                        <v-icon icon="mdi-play-box"></v-icon
+                        >{{ formatAmount(video.view) }}
+                    </span>
+                    <span
+                        ><v-icon icon="mdi-message-text-fast"></v-icon>
+                        {{ formatAmount(video.danmaku) }}</span
+                    >
+                </div>
+                <span>
+                    {{ formatDuration(video.duration) }}
+                </span>
+            </div>
         </v-img>
 
         <!-- 标题部分 -->
@@ -89,3 +100,16 @@ const { video } = defineProps<{
         </v-card-actions>
     </v-card>
 </template>
+
+<style scoped>
+.video-card-stats {
+    width: 100%;
+    background-image: linear-gradient(
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+}
+.video-card-stats-left {
+    flex: 1;
+}
+</style>

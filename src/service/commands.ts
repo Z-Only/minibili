@@ -19,7 +19,20 @@ export const fetch = async <T, P = null, D = null>(
     data?: D
 ): Promise<ApiResult<T>> => {
     // 调用invoke执行实际的网络请求
-    return await invoke('fetch', { method, url, params, data })
+    const result = await invoke<ApiResult<T>>('fetch', {
+        method,
+        url,
+        params,
+        data,
+    })
+    if (result.code !== 0) {
+        console.error(
+            'fetch result error, url: %s, code: %d.',
+            url,
+            result.code
+        )
+    }
+    return result
 }
 
 /**

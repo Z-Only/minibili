@@ -229,4 +229,12 @@ export interface TabItem {
     value: string
     icon?: string
     rid?: number
+    number?: number
+}
+
+export const formatSearchTabNavNum = (numResults: number) => {
+    if (numResults > 99) {
+        return '99+'
+    }
+    return numResults.toString()
 }

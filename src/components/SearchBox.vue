@@ -14,6 +14,7 @@ const sugggestList: Ref<Tag[]> = ref<Tag[]>([])
 const searchInputRef = useTemplateRef<HTMLElement>('searchInput')
 
 const toSearch = (keyword: string, zone: string = 'all') => {
+    // FIXME: 手动移除焦点无效
     // 移除焦点
     searchInputRef.value?.blur()
     router.push({ name: 'Search', params: { zone }, query: { keyword } })

@@ -6,14 +6,14 @@ import { useLocaleStore } from '@/store/locale'
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
 
-const enableSystemTheme = ref(themeStore.isAuto)
-const enableSystemLocale = ref(localeStore.isAuto)
+const enableSystemTheme = ref(themeStore.isAuto.value)
+const enableSystemLocale = ref(localeStore.isAuto.value)
 
 themeStore.$subscribe((_mutation, state) => {
-    enableSystemTheme.value = state.theme === 'auto'
+    enableSystemTheme.value = state.theme.value === 'auto'
 })
 localeStore.$subscribe((_mutation, state) => {
-    enableSystemLocale.value = state.locale === 'auto'
+    enableSystemLocale.value = state.locale.value === 'auto'
 })
 
 watch(enableSystemTheme, async (value) => {

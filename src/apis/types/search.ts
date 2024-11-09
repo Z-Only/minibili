@@ -373,6 +373,8 @@ export interface TypeSearchParams {
     search_type: string
     tids?: number
     user_type?: number
+    // 补充参数
+    page_size?: number
 }
 
 export interface SearchSuggestParams {
@@ -414,4 +416,63 @@ export interface Tag {
     term: string
     type: string
     value: string
+}
+
+export interface TypeSearchData {
+    cost_time: CostTime
+    egg_hit: number
+    exp_list: ExpList
+    numPages: number
+    numResults: number
+    page: number
+    pagesize: number
+    result: Result[]
+    rqt_type: string
+    seid: string
+    show_column: number
+    suggest_keyword: string
+}
+
+export interface CostTime {
+    as_request: string
+    as_request_format: string
+    as_response_format: string
+    deserialize_response: string
+    illegal_handler: string
+    main_handler: string
+    params_check: string
+    save_cache: string
+    total: string
+}
+
+export interface Result {
+    aid: number
+    arcrank: string
+    arcurl: string
+    author: string
+    badgepay: boolean
+    bvid: string
+    description: string
+    duration: string
+    favorites: number
+    hit_columns: string[]
+    id: number
+    is_pay: number
+    is_union_video: number
+    mid: number
+    new_rec_tags: string[]
+    pic: string
+    play: number
+    pubdate: number
+    rank_score: number
+    rec_tags: null
+    review: number
+    senddate: number
+    tag: string
+    title: string
+    type: string
+    typeid: string
+    typename: string
+    video_review: number
+    view_type: string
 }
