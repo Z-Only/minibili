@@ -9,7 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppBar: typeof import('./src/components/layout/AppBar.vue')['default']
     CaptchaCard: typeof import('./src/components/CaptchaCard.vue')['default']
-    copy: typeof import('./src/components/search/SearchAll copy.vue')['default']
     Home: typeof import('./src/components/pages/Home.vue')['default']
     Login: typeof import('./src/components/pages/Login.vue')['default']
     NotFound: typeof import('./src/components/pages/NotFound.vue')['default']
