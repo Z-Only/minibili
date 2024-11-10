@@ -128,3 +128,12 @@ export const geetestGet = async <T, P = null>(
 export const openDevTools = async () => {
     return invoke('open_devtools')
 }
+
+/**
+ * Resolves a risk check issue by invoking the 'resolve_risk_check_issue' command.
+ *
+ * @returns {Promise<any>} A promise that resolves when the risk check issue is resolved.
+ */
+export const resolveRiskCheckIssue = async () => {
+    return await invoke('resolve_risk_check_issue')
+}

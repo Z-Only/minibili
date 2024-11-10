@@ -29,7 +29,8 @@ pub fn run() {
             commands::fetch,
             commands::download,
             commands::geetest_get,
-            commands::open_devtools
+            commands::open_devtools,
+            commands::resolve_risk_check_issue
         ])
         .setup(|app| {
             // 创建菜单项

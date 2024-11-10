@@ -1,5 +1,7 @@
 use crate::utils::download::{send_progress_event, write_buffer_to_file, DownloadEvent};
-use crate::utils::request::{request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT};
+use crate::utils::request::{
+    fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
+};
 use futures_util::StreamExt;
 use http::Method;
 use log::info;
@@ -151,4 +153,9 @@ pub fn open_devtools(app_handle: AppHandle) {
             window.close_devtools();
         }
     }
+}
+
+#[tauri::command]
+pub async fn resolve_risk_check_issue() -> Result<(), Error> {
+    fetch_cookie().await
 }

@@ -29,6 +29,7 @@ export interface SearchAll {
     show_module_list: string[]
     suggest_keyword: string
     top_tlist: TopTlist
+    [property: string]: any
 }
 
 export interface AppDisplayOption {
@@ -426,11 +427,12 @@ export interface TypeSearchData {
     numResults: number
     page: number
     pagesize: number
-    result: Result[]
+    result: TypeSearchResult[]
     rqt_type: string
     seid: string
     show_column: number
     suggest_keyword: string
+    [property: string]: any
 }
 
 export interface CostTime {
@@ -445,34 +447,12 @@ export interface CostTime {
     total: string
 }
 
-export interface Result {
-    aid: number
-    arcrank: string
-    arcurl: string
-    author: string
-    badgepay: boolean
-    bvid: string
-    description: string
-    duration: string
-    favorites: number
-    hit_columns: string[]
-    id: number
-    is_pay: number
-    is_union_video: number
-    mid: number
-    new_rec_tags: string[]
-    pic: string
-    play: number
-    pubdate: number
-    rank_score: number
-    rec_tags: null
-    review: number
-    senddate: number
-    tag: string
-    title: string
-    type: string
-    typeid: string
-    typename: string
-    video_review: number
-    view_type: string
-}
+export type TypeSearchResult =
+    | SearchResponseVideo
+    | SearchResponseDramasOrMovies
+    | SearchResponseLiveRoom
+    | SearchResponseLiveUser
+    | SearchResponseArticle
+    | SearchResponseTopic
+    | SearchResponseUser
+    | SearchResponsePhoto

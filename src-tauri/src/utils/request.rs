@@ -2,7 +2,9 @@ use crate::utils::wbi;
 use http::Method;
 use log::info;
 use once_cell::sync::Lazy;
-use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
+use reqwest::header::{
+    HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, SET_COOKIE, USER_AGENT,
+};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::io;
@@ -102,19 +104,9 @@ impl serde::Serialize for Error {
     }
 }
 
-async fn fetch_cookie() -> Result<(), Error> {
-    let response = GLOBAL_CLIENT.get(HOST).send().await?;
-
-    if response
-        .cookies()
-        .any(|cookie| matches!(cookie.name(), "buvid3"))
-    {
-        Ok(())
-    } else {
-        Err(Error::Cookie(
-            "Cannot find name 'buvid3' in cookies.".to_string(),
-        ))
-    }
+pub async fn fetch_cookie() -> Result<(), Error> {
+    GLOBAL_CLIENT.get(HOST).send().await?;
+    Ok(())
 }
 
 pub async fn handle_request<T>(

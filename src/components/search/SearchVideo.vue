@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ShallowRef } from 'vue'
-import { TypeSearchData, Datum } from '@/apis/types/search'
+import {
+    TypeSearchData,
+    TypeSearchResult,
+    TypeSearchParams,
+} from '@/apis/types/search'
 import { fetchTypeSearch } from '@/apis/search/search'
 import { SearchResponseVideo } from '@/apis/types/search-response'
 import {
@@ -9,11 +13,14 @@ import {
     convertToVideoData,
 } from '@/common/utils'
 import { useGoTo } from 'vuetify'
+import { resolveRiskCheckIssue } from '@/service/commands'
 
 const colCount = ref(2)
 
 const searchResults: ShallowRef<TypeSearchData | null> = shallowRef(null)
-const searchVideos: ShallowRef<Datum[]> = shallowRef<Datum[]>([])
+const searchVideos: ShallowRef<TypeSearchResult[]> = shallowRef<
+    TypeSearchResult[]
+>([])
 
 const goTo = useGoTo()
 const gotoTop = () => {
@@ -22,17 +29,22 @@ const gotoTop = () => {
 
 onBeforeRouteUpdate(async (to, _from, next) => {
     const keyword = to.query.keyword as string
-    await fetchTypeSearch({ keyword, search_type: 'video' })
-        .then((res) => {
+    const typeSearchParams: TypeSearchParams = {
+        keyword,
+        search_type: 'video',
+        page: 1,
+        page_size: 20,
+    }
+    await fetchTypeSearch(typeSearchParams)
+        .then(async (res) => {
+            // 处理风控校验失败
+            if (res?.v_voucher) {
+                await resolveRiskCheckIssue()
+                res = await fetchTypeSearch(typeSearchParams)
+            }
             if (res.result) {
                 searchResults.value = res
-                const result = res.result.find(
-                    (result) => result.result_type === 'video'
-                )
-                if (result) {
-                    const videoResult = result.data
-                    searchVideos.value = videoResult
-                }
+                searchVideos.value = res.result
             }
         })
         .catch((error) => {
@@ -48,24 +60,25 @@ const { keyword } = defineProps<{
 }>()
 
 onMounted(async () => {
-    // FIXME: 触发风控
-    // 页面挂载时加载数据
-    await fetchTypeSearch({
+    const typeSearchParams: TypeSearchParams = {
         keyword,
         search_type: 'video',
         page: 1,
         page_size: 20,
-    })
-        .then((res) => {
+    }
+
+    // FIXME: 风控校验失败，后续考虑跳转登录
+    // 页面挂载时加载数据
+    await fetchTypeSearch(typeSearchParams)
+        .then(async (res) => {
+            // 处理风控校验失败
+            if (res?.v_voucher) {
+                await resolveRiskCheckIssue()
+                res = await fetchTypeSearch(typeSearchParams)
+            }
             if (res.result) {
                 searchResults.value = res
-                const result = res.result.find(
-                    (result) => result.result_type === 'video'
-                )
-                if (result) {
-                    const videoResult = result.data
-                    searchVideos.value = videoResult
-                }
+                searchVideos.value = res.result
             }
         })
         .catch((error) => {

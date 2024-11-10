@@ -4,6 +4,7 @@ import {
     SearchSuggestParams,
     SearchSuggestData,
     TypeSearchParams,
+    TypeSearchData,
 } from '@/apis/types/search'
 
 /**
@@ -59,8 +60,8 @@ export const SearchType = [
 
 export const fetchTypeSearch = async (
     params: TypeSearchParams
-): Promise<SearchAll> => {
-    return await get<SearchAll, TypeSearchParams>(
+): Promise<TypeSearchData> => {
+    return await get<TypeSearchData, TypeSearchParams>(
         'https://api.bilibili.com/x/web-interface/wbi/search/type',
         params
     )
