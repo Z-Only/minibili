@@ -108,12 +108,6 @@ async fn get_wbi_keys() -> Result<(String, String), request::Error> {
     ))
 }
 
-pub async fn initialize_wbi_keys() -> Result<(), Box<dyn std::error::Error>> {
-    let keys = get_wbi_keys().await?;
-    WBI_KEYS.set(keys).map_err(|_| "Failed to set WBI_KEYS")?;
-    Ok(())
-}
-
 fn take_filename(url: &str) -> Option<String> {
     url.rsplit_once('/')
         .and_then(|(_, s)| s.rsplit_once('.'))
@@ -149,12 +143,10 @@ fn value_to_vec(value: &serde_json::Value) -> Option<Vec<(&str, String)>> {
 /// - `None` if `params` is `None`.
 pub async fn sign_params(params: Option<&serde_json::Value>) -> String {
     // 初始化 WBI_KEYS
-    if WBI_KEYS.get().is_none() {
-        initialize_wbi_keys()
-            .await
-            .expect("Failed to initialize WBI_KEYS");
-    }
-    let keys = WBI_KEYS.get().expect("WBI_KEYS not initialized");
+    let keys = WBI_KEYS
+        .get_or_try_init(|| async { get_wbi_keys().await })
+        .await
+        .expect("Failed to initialize WBI_KEYS.");
     let vec_params = match params.as_ref() {
         Some(params) => value_to_vec(params),
         None => None,

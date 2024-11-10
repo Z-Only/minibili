@@ -67,10 +67,10 @@ onMounted(async () => {
         page_size: 20,
     }
 
-    // FIXME: 风控校验失败，后续考虑跳转登录
     // 页面挂载时加载数据
     await fetchTypeSearch(typeSearchParams)
         .then(async (res) => {
+            // FIXME: 如果风控校验依旧失败，后续考虑跳转登录
             // 处理风控校验失败
             if (res?.v_voucher) {
                 await resolveRiskCheckIssue()
