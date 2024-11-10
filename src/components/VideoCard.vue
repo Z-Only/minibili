@@ -32,6 +32,7 @@ const { video } = defineProps<{
             :aspect-ratio="4 / 3"
             lazy-src="https://i0.hdslb.com/bfs/archive/c8fd97a40bf79f03e7b76cbc87236f612caef7b2.png"
             cover
+            gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
             @click.prevent="navigateToVideo(video.bvid)"
         >
             <template v-slot:placeholder>
@@ -43,7 +44,7 @@ const { video } = defineProps<{
                 </div>
             </template>
             <!-- 显示播放次数和时长 -->
-            <div class="d-flex pa-2 video-card-stats">
+            <div class="d-flex pa-2">
                 <div class="video-card-stats-left">
                     <span>
                         <v-icon icon="mdi-play-box"></v-icon
@@ -102,13 +103,6 @@ const { video } = defineProps<{
 </template>
 
 <style scoped>
-.video-card-stats {
-    width: 100%;
-    background-image: linear-gradient(
-        rgba(0, 0, 0, 0) 0%,
-        rgba(0, 0, 0, 0.8) 100%
-    );
-}
 .video-card-stats-left {
     flex: 1;
 }

@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppBar: typeof import('./src/components/layout/AppBar.vue')['default']
+    BangumiCard: typeof import('./src/components/BangumiCard.vue')['default']
     CaptchaCard: typeof import('./src/components/CaptchaCard.vue')['default']
     Home: typeof import('./src/components/pages/Home.vue')['default']
     Login: typeof import('./src/components/pages/Login.vue')['default']
@@ -22,6 +23,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./src/components/pages/Search.vue')['default']
     SearchAll: typeof import('./src/components/search/SearchAll.vue')['default']
+    SearchBanguni: typeof import('./src/components/search/SearchBanguni.vue')['default']
     SearchBox: typeof import('./src/components/SearchBox.vue')['default']
     SearchVideo: typeof import('./src/components/search/SearchVideo.vue')['default']
     Setting: typeof import('./src/components/pages/Setting.vue')['default']

@@ -2,9 +2,7 @@ use crate::utils::wbi;
 use http::Method;
 use log::info;
 use once_cell::sync::Lazy;
-use reqwest::header::{
-    HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, SET_COOKIE, USER_AGENT,
-};
+use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::io;
@@ -105,23 +103,8 @@ impl serde::Serialize for Error {
 }
 
 pub async fn fetch_cookie() -> Result<(), Error> {
-    let response = GLOBAL_CLIENT.get(HOST).send().await?;
-    let headers = response.headers();
-    let necessary_cookies = ["buvid3", "b_nut"];
-
-    let has_necessary_cookie = headers.get_all(SET_COOKIE).iter().any(|value| {
-        value.to_str().map_or(false, |s| {
-            necessary_cookies.iter().any(|&cookie| s.contains(cookie))
-        })
-    });
-
-    if has_necessary_cookie {
-        Ok(())
-    } else {
-        Err(Error::Cookie(
-            "Cannot find necessary cookies in Set-Cookie headers.".to_string(),
-        ))
-    }
+    GLOBAL_CLIENT.get(HOST).send().await?;
+    Ok(())
 }
 
 pub async fn handle_request<T>(

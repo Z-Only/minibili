@@ -86,6 +86,10 @@ const receiveEmitResult = (data: Pageinfo) => {
                         v-else-if="item.value === 'video'"
                         :keyword="keyword"
                     ></search-video>
+                    <search-banguni
+                        v-else-if="item.value === 'anime'"
+                        :keyword="keyword"
+                    ></search-banguni>
                 </v-layout>
             </v-tabs-window-item>
         </v-tabs-window>
