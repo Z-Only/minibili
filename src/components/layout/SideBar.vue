@@ -5,6 +5,10 @@ const toHome = () => {
     router.push({ name: 'Home' })
 }
 
+const toLive = () => {
+    router.push({ name: 'Live' })
+}
+
 const toSetting = () => {
     router.push({ name: 'Setting' })
 }
@@ -19,6 +23,13 @@ const toSetting = () => {
                 value="home"
                 @click.prevent="toHome"
                 ><v-list-item-title>主页</v-list-item-title></v-list-item
+            >
+            <v-list-item
+                prepend-icon="mdi-video-account"
+                title="Live"
+                value="Live"
+                @click.prevent="toLive"
+                ><v-list-item-title>直播</v-list-item-title></v-list-item
             >
             <v-list-item
                 prepend-icon="mdi-cog"

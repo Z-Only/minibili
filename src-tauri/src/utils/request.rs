@@ -62,8 +62,6 @@ pub enum Error {
     Reqwest(#[from] reqwest::Error),
     #[error("HTTP error: {0}")]
     StatusCode(String),
-    #[error("cookie error: {0}")]
-    Cookie(String),
     #[error(transparent)]
     Io(#[from] io::Error),
     #[error("parse error: {0}")]
@@ -78,7 +76,6 @@ pub enum Error {
 enum ErrorKind {
     Reqwest(String),
     StatusCode(String),
-    Cookie(String),
     Io(String),
     Parse(String),
     Tauri(String),
@@ -93,7 +90,6 @@ impl serde::Serialize for Error {
         let error_kind = match self {
             Self::Reqwest(_) => ErrorKind::Reqwest(error_message),
             Self::StatusCode(_) => ErrorKind::StatusCode(error_message),
-            Self::Cookie(_) => ErrorKind::Cookie(error_message),
             Self::Io(_) => ErrorKind::Io(error_message),
             Self::Parse(_) => ErrorKind::Parse(error_message),
             Self::Tauri(_) => ErrorKind::Tauri(error_message),

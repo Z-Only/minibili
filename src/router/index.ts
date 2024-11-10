@@ -35,6 +35,11 @@ const routes = [
         component: () => import('@/components/pages/Space.vue'),
     },
     {
+        path: '/live',
+        name: 'Live',
+        component: () => import('@/components/live/Live.vue'),
+    },
+    {
         path: '/:pathMatch(.*)*', // 匹配所有未命中的路径
         name: 'NotFound',
         component: () => import('@/components/pages/NotFound.vue'),
