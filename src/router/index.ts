@@ -40,6 +40,11 @@ const routes = [
         component: () => import('@/components/live/Live.vue'),
     },
     {
+        path: '/live/:id',
+        name: 'LiveRoom',
+        component: () => import('@/components/live/LiveRoom.vue'),
+    },
+    {
         path: '/:pathMatch(.*)*', // 匹配所有未命中的路径
         name: 'NotFound',
         component: () => import('@/components/pages/NotFound.vue'),

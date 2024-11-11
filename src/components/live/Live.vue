@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { fetchLiveArea } from '@/apis/live/live_area'
+import { fetchLiveArea } from '@/apis/live/area'
 import { LiveAreaData, LiveRoomInfo } from '@/apis/types/live'
 import { fetchLiveRoomListData } from '@/apis/live/live'
 import { ShallowRef } from 'vue'

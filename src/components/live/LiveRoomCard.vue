@@ -4,10 +4,15 @@ import { LiveRoomInfo } from '@/apis/types/live'
 const { info } = defineProps<{
     info: LiveRoomInfo
 }>()
+
+const router = useRouter()
+const toLiveRoom = (id: number) => {
+    router.push({ name: 'LiveRoom', params: { id } })
+}
 </script>
 
 <template>
-    <v-card
+    <v-card @click.prevent="toLiveRoom(info.roomid)"
         ><v-img
             class="align-end text-white"
             :src="info.cover"
@@ -22,7 +27,6 @@ const { info } = defineProps<{
                 <v-avatar size="36">
                     <v-img :alt="info.uname" :src="info.face"></v-img>
                 </v-avatar>
-                <!-- 作者名和发布时间 -->
                 <div class="text-truncate mx-auto">
                     <div>{{ info.title }}</div>
                     <div>

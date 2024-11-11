@@ -19,6 +19,7 @@ import {
 // 获取路由参数
 const route = useRoute()
 const bvid = route.params.bvid as string
+
 const format = VideoFormatFlag.MP4
 
 // 视频详情数据
