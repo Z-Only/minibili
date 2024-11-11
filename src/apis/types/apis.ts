@@ -10,8 +10,9 @@
  */
 export interface ApiResult<T> {
     code: number
-    message?: string
     ttl?: number
+    message?: string
+    msg?: string
     data?: T
     // 兼容搜索建议接口
     result?: T
