@@ -1,4 +1,4 @@
-import { VideoFormatFlag } from '@/apis/video/stream'
+import { VideoFormatFlag } from '@/common/constants'
 
 export interface VideoCardData {
     aid: number

@@ -365,3 +365,139 @@ export interface VoiceDmInfo {
     text: string
     voice_url: string
 }
+
+export interface RoomPlayInfoParams {
+    codec: string
+    dolby?: number
+    format: string
+    panorama?: number
+    platform?: string
+    protocol: string
+    ptype?: number
+    qn?: number
+    room_id: number
+}
+
+export interface RoomPlayInfoData {
+    all_special_types: string[]
+    encrypted: boolean
+    hidden_till: number
+    is_hidden: boolean
+    is_locked: boolean
+    is_portrait: boolean
+    live_status: number
+    live_time: number
+    lock_till: number
+    playurl_info: PlayurlInfo
+    pwd_verified: boolean
+    room_id: number
+    room_shield: number
+    short_id: number
+    uid: number
+}
+
+export interface PlayurlInfo {
+    conf_json: string
+    playurl: Playurl
+}
+
+export interface Playurl {
+    cid: number
+    dolby_qn: null
+    g_qn_desc: GQnDesc[]
+    p2p_data: P2PData
+    stream: Stream[]
+}
+
+export interface GQnDesc {
+    attr_desc: null
+    desc: string
+    hdr_desc: string
+    qn: number
+}
+
+export interface P2PData {
+    m_p2p: boolean
+    m_servers: null
+    p2p: boolean
+    p2p_type: number
+}
+
+export interface Stream {
+    format: Format[]
+    protocol_name: string
+}
+
+export interface Format {
+    codec: Codec[]
+    format_name: string
+}
+
+export interface Codec {
+    accept_qn: number[]
+    attr_name: string
+    base_url: string
+    codec_name: string
+    current_qn: number
+    dolby_type: number
+    hdr_qn: null
+    url_info: UrlInfo[]
+}
+
+export interface UrlInfo {
+    extra: string
+    host: string
+    stream_ttl: number
+}
+
+export interface RoomAnchorData {
+    info: Info
+    level: Level
+    san: number
+}
+
+export interface Info {
+    face: string
+    gender: number
+    identification: number
+    mobile_verify: number
+    official_verify: OfficialVerify
+    platform_user_level: number
+    rank: string
+    uid: number
+    uname: string
+    vip_type: number
+}
+
+export interface OfficialVerify {
+    desc: string
+    role: number
+    type: number
+}
+
+export interface Level {
+    anchor_score: number
+    color: number
+    cost: number
+    master_level: MasterLevel
+    rcost: number
+    svip: number
+    svip_time: string
+    uid: number
+    update_time: string
+    user_level: number
+    user_score: string
+    vip: number
+    vip_time: string
+}
+
+export interface MasterLevel {
+    anchor_score: number
+    color: number
+    current: number[]
+    level: number
+    master_level_color: number
+    next: number[]
+    sort: string
+    upgrade_score: number
+}

@@ -9,6 +9,9 @@ import {
     RoomStatusInfoParams,
     RoomStatusInfoData,
     RoomHistoryDanmakuData,
+    RoomPlayInfoParams,
+    RoomPlayInfoData,
+    RoomAnchorData,
 } from '@/apis/types/live-info'
 
 /**
@@ -103,6 +106,34 @@ export const fetchRoomHistoryDanmaku = async (
 ): Promise<RoomHistoryDanmakuData> => {
     return await get<RoomHistoryDanmakuData, { roomid: number }>(
         'https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory',
+        { roomid }
+    )
+}
+
+/**
+ * 获取直播间信息
+ * @param params 请求参数
+ * @returns
+ */
+export const fetchRoomPlayInfo = async (
+    params: RoomPlayInfoParams
+): Promise<RoomPlayInfoData> => {
+    return await get<RoomPlayInfoData, RoomPlayInfoParams>(
+        'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo',
+        params
+    )
+}
+
+/**
+ * 获取直播间主播信息
+ * @param roomid 直播间号，可以为短号
+ * @returns
+ */
+export const fetchRoomAnchor = async (
+    roomid: number
+): Promise<RoomAnchorData> => {
+    return await get<RoomAnchorData, { roomid: number }>(
+        'https://api.live.bilibili.com/live_user/v1/UserInfo/get_anchor_in_room',
         { roomid }
     )
 }
