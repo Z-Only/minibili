@@ -42,6 +42,7 @@ futures-util = "0.3.31"
 tauri-plugin-dialog = "2"
 regex = "1.11.1"
 log = "^0.4"
+reqwest-websocket = "0.4.3"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

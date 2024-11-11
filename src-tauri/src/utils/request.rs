@@ -68,6 +68,8 @@ pub enum Error {
     Parse(String),
     #[error("tauri error: {0}")]
     Tauri(#[from] tauri::Error),
+    #[error(transparent)]
+    Socket(#[from] reqwest_websocket::Error),
 }
 
 #[derive(serde::Serialize)]
@@ -79,6 +81,7 @@ enum ErrorKind {
     Io(String),
     Parse(String),
     Tauri(String),
+    Socket(String),
 }
 
 impl serde::Serialize for Error {
@@ -93,6 +96,7 @@ impl serde::Serialize for Error {
             Self::Io(_) => ErrorKind::Io(error_message),
             Self::Parse(_) => ErrorKind::Parse(error_message),
             Self::Tauri(_) => ErrorKind::Tauri(error_message),
+            Self::Socket(_) => ErrorKind::Socket(error_message),
         };
         error_kind.serialize(serializer)
     }
