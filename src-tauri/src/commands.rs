@@ -3,22 +3,22 @@ use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
 use crate::utils::socket::{
-    decode_packet, encode_packet, init_socket, socket_receive, socket_send, AuthPacket, AuthReply,
-    Opcode,
+    authenticate, heartbeat, init_socket, receive_normal_packet, MessageEvent,
 };
-use futures_util::{SinkExt, StreamExt, TryStreamExt};
+use futures_util::StreamExt;
 use http::Method;
-use log::{error, info};
+use log::info;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use reqwest_websocket::Message;
 use serde_json;
 use std::fs::File;
 use std::str::FromStr;
-use std::time::{Duration, Instant};
+use std::sync::Arc;
+use std::time::Instant;
 use tauri::ipc::Channel;
 use tauri::AppHandle;
 use tauri::Manager;
+use tokio::sync::Mutex;
 
 #[tauri::command]
 pub async fn fetch(
@@ -166,90 +166,79 @@ pub async fn resolve_risk_check_issue() -> Result<(), Error> {
 }
 
 #[tauri::command]
-pub async fn authenticate(
+pub async fn live_msg_stream(
     host: &str,
     port: u16,
     room_id: u64,
     uid: Option<u64>,
     auth_key: Option<&str>,
+    on_event: Channel<MessageEvent>,
 ) -> Result<(), Error> {
-    // 构造认证包正文数据
-    let auth_data = AuthPacket {
-        uid,
-        roomid: room_id,
-        protover: Some(3),
-        platform: Some("web".to_string()),
-        r#type: Some(2),
-        key: auth_key.map(ToString::to_string),
-    };
-
-    // 编码认证包
-    let auth_packet = encode_packet(Opcode::AuthPacket, auth_data);
-
     // 构建一个 GET 请求，升级到 websocket 并发送
     let web_socket = init_socket(host, port, "/sub").await?;
+    let web_socket = Arc::new(Mutex::new(web_socket));
+    let on_event = Arc::new(on_event);
 
-    // 分离发送和接收通道
-    let (mut sender, mut receiver) = web_socket.split();
+    // 认证
+    let mut ws_clone_auth = web_socket.clone();
+    let event_clone_auth = on_event.clone();
 
-    // 发送认证包
-    sender.send(Message::Binary(auth_packet)).await?;
-
-    // 处理认证回复
-    if let Some(message) = receiver.try_next().await? {
-        match message {
-            Message::Binary(packet) => match decode_packet(packet) {
-                AuthReply { code } => match code {
-                    0 => {
-                        info!("Authentication success");
-                        return Ok(());
-                    }
-                    _ => error!("Authentication failed: {:?}", code),
-                },
-            },
-            _ => error!("Unexpected message type: {:?}", message),
+    match authenticate(&mut ws_clone_auth, room_id, uid, auth_key).await {
+        Ok(_) => {
+            event_clone_auth.send(MessageEvent::Auth { success: true })?;
+        }
+        Err(_) => {
+            event_clone_auth.send(MessageEvent::Auth { success: false })?;
         }
     }
 
-    Err(Error::Parse("Failed to authentocate.".to_string()))
-}
-
-#[tauri::command]
-pub async fn heartbeat(host: String, port: u16) -> Result<(), Error> {
     // 启动心跳任务
+    let mut ws_clone_heart = web_socket.clone();
+    let event_clone_heartbeat = on_event.clone();
     tokio::spawn(async move {
         loop {
-            tokio::time::sleep(Duration::from_secs(30)).await;
-
-            // 发送心跳包
-            socket_send(
-                &host,
-                port,
-                "/sub",
-                Message::Text("[object Object]".to_string()),
-            )
-            .await
-            .unwrap_or_else(|_| ());
+            match heartbeat(&mut ws_clone_heart).await {
+                Ok(popularity) => {
+                    let _ = event_clone_heartbeat.send(MessageEvent::Heartbeat {
+                        success: true,
+                        popularity,
+                    });
+                }
+                Err(_) => {
+                    let _ = event_clone_heartbeat.send(MessageEvent::Heartbeat {
+                        success: false,
+                        popularity: 0,
+                    });
+                    break;
+                }
+            }
         }
     });
 
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn receive_normal_packet(host: &str, port: u16) -> Result<(), Error> {
     // 循环接收普通数据包
-    while let Ok(Some(message)) = socket_receive(host, port, "/sub").await {
-        match message {
-            Message::Binary(data) => {
-                // 解压数据并解析 JSON 对象
-                // 注意：这里需要根据实际使用的压缩算法解压数据
-                info!("Received message: {:?}", data);
+    let mut ws_clone_recv = web_socket.clone();
+    let event_clone_normal = on_event.clone();
+    loop {
+        match receive_normal_packet(&mut ws_clone_recv).await {
+            Ok(message) => {
+                let _ = event_clone_normal.send(MessageEvent::Normal {
+                    success: true,
+                    msg: message,
+                });
             }
-            Message::Close { .. } => break,
-            _ => (),
+            Err(_) => {
+                let _ = event_clone_normal.send(MessageEvent::Normal {
+                    success: false,
+                    msg: serde_json::Value::Null,
+                });
+                break;
+            }
         }
     }
+
+    // 注意这里没有关闭 web_socket，因为它是被多个任务共享的。
+    // 每个任务结束后会自动释放对 web_socket 的引用。
+    // 如果你需要显式地关闭连接，应该在所有任务完成后进行。
 
     Ok(())
 }

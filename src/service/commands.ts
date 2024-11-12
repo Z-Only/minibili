@@ -138,12 +138,34 @@ export const resolveRiskCheckIssue = async (): Promise<void> => {
     return await invoke('resolve_risk_check_issue')
 }
 
-export const authenticate = async (
+export type MessageEvent =
+    | {
+          event: 'auth'
+          data: { success: boolean }
+      }
+    | {
+          event: 'heartbeat'
+          data: {
+              success: boolean
+              popularity: number
+          }
+      }
+    | { event: 'normal'; data: { success: boolean; msg: string } }
+
+export const liveMsgSstream = async (
     host: string,
     port: number,
     roomId: number,
     uid: number,
-    authKey?: string
+    authKey: string,
+    onEvent: Channel<MessageEvent>
 ) => {
-    return await invoke('authenticate', { host, port, roomId, uid, authKey })
+    return await invoke('live_msg_stream', {
+        host,
+        port,
+        roomId,
+        uid,
+        authKey,
+        onEvent,
+    })
 }

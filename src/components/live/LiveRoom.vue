@@ -1,20 +1,53 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
 import { fetchDanmuInfo } from '@/apis/live/stream'
-import { authenticate } from '@/service/commands'
+import { liveMsgSstream, MessageEvent } from '@/service/commands'
+import { Channel } from '@tauri-apps/api/core'
 
 // 获取路由参数
 const route = useRoute()
 const roomId = Number(route.params.id as string)
 
+const onEvent = new Channel<MessageEvent>()
+
+onEvent.onmessage = (message) => {
+    console.log(
+        `收到消息事件: ${message.event}, 数据: ${JSON.stringify(message.data)}`
+    )
+    switch (message.event) {
+        case 'auth':
+            if (message.data.success) {
+                console.log('认证成功')
+            } else {
+                console.log('认证失败')
+            }
+            break
+        case 'heartbeat':
+            if (message.data.success) {
+                console.log('心跳成功，人气: ', message.data.popularity)
+            } else {
+                console.log('心跳失败')
+            }
+            break
+        case 'normal':
+            if (message.data.success) {
+                console.log('收到消息: ', message.data.msg)
+            } else {
+                console.log('消息处理失败')
+            }
+            break
+    }
+}
+
 const auth = async (id: number) => {
     await fetchDanmuInfo(id).then(async (result) => {
-        await authenticate(
+        await liveMsgSstream(
             result.host_list[0].host,
             result.host_list[0].wss_port,
             id,
             0,
-            result.token
+            result.token,
+            onEvent
         )
     })
 }

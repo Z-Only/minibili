@@ -1,10 +1,12 @@
 use crate::utils::request::{Error, GLOBAL_CLIENT};
+use brotli::Decompressor;
 use flate2::read::ZlibDecoder;
 use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use log::{error, info};
 use reqwest_websocket::{Message, RequestBuilderExt, WebSocket};
 use serde::{Deserialize, Serialize};
-use std::io::Read;
+use std::{io::Read, sync::Arc, time::Duration};
+use tokio::sync::Mutex;
 
 // TODO: 如果过程中 host 和 port 不变化，考虑设计为全局变量
 pub async fn init_socket(
@@ -20,20 +22,6 @@ pub async fn init_socket(
         .await?
         .into_websocket()
         .await
-}
-
-pub async fn socket_send(host: &str, port: u16, path: &str, msg: Message) -> Result<(), Error> {
-    let web_socket = init_socket(host, port, path).await?;
-    let (mut sender, _) = web_socket.split();
-    sender.send(msg).await?;
-    Ok(())
-}
-
-pub async fn socket_receive(host: &str, port: u16, path: &str) -> Result<Option<Message>, Error> {
-    let web_socket = init_socket(host, port, path).await?;
-    let (_, mut receiver) = web_socket.split();
-    let msg = receiver.try_next().await?;
-    Ok(msg)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -141,7 +129,7 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
         header_size: HEADER_SIZE.to_be(), // 头部大小 (一般为 0x0010, 即 16 字节)
         protocol_version: 0,              // 协议版本
         opcode: (op.clone() as u32).to_be(), // 操作码 (封包类型)
-        sequence: 0,                      // sequence, 每次发包时向上递增
+        sequence: 0,                      // sequence, TODO: 每次发包时向上递增
     };
 
     match op {
@@ -192,7 +180,13 @@ fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> V
         }
         ProtocolVersion::NormalPacketWithBrotliCompression => {
             // brotli 解压
-            packet_body.to_vec()
+            let mut decompressor = Decompressor::new(packet_body, 4096);
+
+            // 解压数据到内存中
+            let mut decompressed_data = Vec::new();
+            decompressor.read_to_end(&mut decompressed_data).unwrap();
+
+            decompressed_data
         }
         _ => {
             error!("Unsupported protocol version: {:?}", protocol_version);
@@ -262,4 +256,103 @@ pub fn decode_packet<T: for<'de> Deserialize<'de>>(packet: Vec<u8>) -> T {
             serde_json::from_slice(packet_body).unwrap()
         }
     }
+}
+
+pub async fn authenticate(
+    web_socket: &mut Arc<Mutex<WebSocket>>,
+    room_id: u64,
+    uid: Option<u64>,
+    auth_key: Option<&str>,
+) -> Result<(), Error> {
+    // 构造认证包正文数据
+    let auth_data = AuthPacket {
+        uid,
+        roomid: room_id,
+        protover: Some(3),
+        platform: Some("web".to_string()),
+        r#type: Some(2),
+        key: auth_key.map(ToString::to_string),
+    };
+
+    // 编码认证包
+    let auth_packet = encode_packet(Opcode::AuthPacket, auth_data);
+
+    // 分离发送和接收通道
+    let ref mut web_socket = *web_socket.as_ref().lock().await;
+    let (mut sender, mut receiver) = web_socket.split();
+
+    // 发送认证包
+    sender.send(Message::Binary(auth_packet)).await?;
+
+    // 处理认证回复
+    if let Some(message) = receiver.try_next().await? {
+        match message {
+            Message::Binary(packet) => match decode_packet(packet) {
+                AuthReply { code } => match code {
+                    0 => {
+                        info!("Authentication success");
+                        return Ok(());
+                    }
+                    _ => error!("Authentication failed: {:?}", code),
+                },
+            },
+            _ => error!("Unexpected message type: {:?}", message),
+        }
+    }
+
+    Err(Error::Parse("Failed to authentocate.".to_string()))
+}
+
+pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Error> {
+    // 分离发送和接收通道
+    let ref mut web_socket = *web_socket.as_ref().lock().await;
+    let (mut sender, mut receiver) = web_socket.split();
+
+    // 等待 30 秒（30 秒左右发送一次, 否则 60 秒后会被强制断开连接）
+    tokio::time::sleep(Duration::from_secs(30)).await;
+
+    // 发送心跳包
+    sender.send(Message::Text("".to_string())).await?;
+
+    // 接收心跳包
+    if let Some(message) = receiver.try_next().await? {
+        match message {
+            Message::Binary(packet) => return Ok(decode_packet(packet)),
+            _ => error!("Unexpected message type: {:?}", message),
+        }
+    }
+
+    Err(Error::Parse("Failed to heartbeat.".to_string()))
+}
+
+pub async fn receive_normal_packet(
+    web_socket: &mut Arc<Mutex<WebSocket>>,
+) -> Result<serde_json::Value, Error> {
+    // 分离发送和接收通道
+    let ref mut web_socket = *web_socket.as_ref().lock().await;
+    let (_, mut receiver) = web_socket.split();
+
+    // 循环接收普通数据包
+    if let Some(message) = receiver.try_next().await? {
+        match message {
+            Message::Binary(packet) => return Ok(decode_packet(packet)),
+            _ => error!("Unexpected message type: {:?}", message),
+        }
+    }
+
+    Err(Error::Parse("Failed to heartbeat.".to_string()))
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase", tag = "event", content = "data")]
+pub enum MessageEvent {
+    #[serde(rename_all = "camelCase")]
+    Auth { success: bool },
+    #[serde(rename_all = "camelCase")]
+    Heartbeat { success: bool, popularity: u32 },
+    #[serde(rename_all = "camelCase")]
+    Normal {
+        success: bool,
+        msg: serde_json::Value,
+    },
 }
