@@ -138,10 +138,12 @@ export const resolveRiskCheckIssue = async () => {
     return await invoke('resolve_risk_check_issue')
 }
 
-export const connectToRoom = async (
-    userId: number,
+export const authenticate = async (
+    host: string,
+    port: number,
     roomId: number,
+    uid: number,
     authKey?: string
 ) => {
-    return await invoke('connect_to_room', { userId, roomId, authKey })
+    return await invoke('authenticate', { host, port, roomId, uid, authKey })
 }

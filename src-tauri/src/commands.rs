@@ -2,16 +2,17 @@ use crate::utils::download::{send_progress_event, write_buffer_to_file, Download
 use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
-use crate::utils::socket::wss;
-use futures_util::StreamExt;
+use crate::utils::socket::{init_socket, socket_receive, socket_send};
+use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use http::Method;
-use log::info;
+use log::{error, info};
 use once_cell::sync::Lazy;
 use regex::Regex;
-use serde_json;
+use reqwest_websocket::Message;
+use serde_json::{self, json};
 use std::fs::File;
 use std::str::FromStr;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tauri::ipc::Channel;
 use tauri::AppHandle;
 use tauri::Manager;
@@ -161,12 +162,93 @@ pub async fn resolve_risk_check_issue() -> Result<(), Error> {
     fetch_cookie().await
 }
 
+#[derive(serde::Serialize)]
+pub struct AuthPacket {
+    uid: Option<u64>,
+    roomid: u64,
+    protover: Option<u64>,
+    platform: Option<String>,
+    #[serde(rename = "type")]
+    r#type: Option<u64>,
+    key: Option<String>,
+}
+
 #[tauri::command]
-pub async fn connect_to_room(
-    user_id: u64,
+pub async fn authenticate(
+    host: &str,
+    port: u16,
     room_id: u64,
+    uid: Option<u64>,
     auth_key: Option<&str>,
 ) -> Result<(), Error> {
-    wss(user_id, room_id, auth_key).await?;
+    // 构造认证包
+    let auth_packet = AuthPacket {
+        uid,
+        roomid: room_id,
+        protover: Some(3),
+        platform: Some("web".to_string()),
+        r#type: Some(2),
+        key: auth_key.map(|k| k.to_string()),
+    };
+
+    // 构建一个 GET 请求，升级到 websocket 并发送
+    let web_socket = init_socket(host, port, "/sub").await?;
+
+    // 分离发送和接收通道
+    let (mut sender, mut receiver) = web_socket.split();
+
+    // 发送认证包
+    sender
+        .send(Message::Text(json!(auth_packet).to_string()))
+        .await?;
+
+    // 处理认证回复
+    if let Some(message) = receiver.try_next().await? {
+        match message {
+            Message::Text(text) => info!("Received authentication response: {}", text),
+            _ => error!("Unexpected message"),
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn heartbeat(host: String, port: u16) -> Result<(), Error> {
+    // 启动心跳任务
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(Duration::from_secs(30)).await;
+
+            // 发送心跳包
+            socket_send(
+                &host,
+                port,
+                "/sub",
+                Message::Text("[object Object]".to_string()),
+            )
+            .await
+            .unwrap_or_else(|_| ());
+        }
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn receive_normal_packet(host: &str, port: u16) -> Result<(), Error> {
+    // 循环接收普通数据包
+    while let Ok(Some(message)) = socket_receive(host, port, "/sub").await {
+        match message {
+            Message::Binary(data) => {
+                // 解压数据并解析 JSON 对象
+                // 注意：这里需要根据实际使用的压缩算法解压数据
+                info!("Received message: {:?}", data);
+            }
+            Message::Close { .. } => break,
+            _ => (),
+        }
+    }
+
     Ok(())
 }

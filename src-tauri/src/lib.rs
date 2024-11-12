@@ -31,7 +31,9 @@ pub fn run() {
             commands::geetest_get,
             commands::open_devtools,
             commands::resolve_risk_check_issue,
-            commands::connect_to_room
+            commands::authenticate,
+            commands::heartbeat,
+            commands::receive_normal_packet
         ])
         .setup(|app| {
             // 创建菜单项

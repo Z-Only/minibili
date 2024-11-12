@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
-import { connectToRoom } from '@/service/commands'
+import { fetchDanmuInfo } from '@/apis/live/stream'
+import { authenticate } from '@/service/commands'
 
 // 获取路由参数
 const route = useRoute()
 const roomId = Number(route.params.id as string)
+
+const auth = async (id: number) => {
+    await fetchDanmuInfo(id).then(async (result) => {
+        await authenticate(
+            result.host_list[0].host,
+            result.host_list[0].wss_port,
+            id,
+            0,
+            result.token
+        )
+    })
+}
 
 onMounted(async () => {
     await fetchRoomInfo(roomId)
@@ -15,8 +28,10 @@ onMounted(async () => {
             console.log('Failed to fetch live room info, ', err)
         })
 
-    await connectToRoom(0, roomId)
+    await auth(roomId)
 })
 </script>
 
-<template><h1>Live</h1></template>
+<template>
+    <h1>Live {{ roomId }}</h1>
+</template>
