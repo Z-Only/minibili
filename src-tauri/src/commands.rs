@@ -2,14 +2,16 @@ use crate::utils::download::{send_progress_event, write_buffer_to_file, Download
 use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
-use crate::utils::socket::{init_socket, socket_receive, socket_send};
+use crate::utils::socket::{
+    encode_packet, init_socket, socket_receive, socket_send, AuthPacket, Opcode,
+};
 use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use http::Method;
 use log::{error, info};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use reqwest_websocket::Message;
-use serde_json::{self, json};
+use serde_json;
 use std::fs::File;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
@@ -162,17 +164,6 @@ pub async fn resolve_risk_check_issue() -> Result<(), Error> {
     fetch_cookie().await
 }
 
-#[derive(serde::Serialize)]
-pub struct AuthPacket {
-    uid: Option<u64>,
-    roomid: u64,
-    protover: Option<u64>,
-    platform: Option<String>,
-    #[serde(rename = "type")]
-    r#type: Option<u64>,
-    key: Option<String>,
-}
-
 #[tauri::command]
 pub async fn authenticate(
     host: &str,
@@ -181,8 +172,8 @@ pub async fn authenticate(
     uid: Option<u64>,
     auth_key: Option<&str>,
 ) -> Result<(), Error> {
-    // 构造认证包
-    let auth_packet = AuthPacket {
+    // 构造认证包正文数据
+    let auth_data = AuthPacket {
         uid,
         roomid: room_id,
         protover: Some(3),
@@ -191,6 +182,9 @@ pub async fn authenticate(
         key: auth_key.map(|k| k.to_string()),
     };
 
+    // 编码认证包
+    let auth_packet = encode_packet(Opcode::AuthPacket, auth_data);
+
     // 构建一个 GET 请求，升级到 websocket 并发送
     let web_socket = init_socket(host, port, "/sub").await?;
 
@@ -198,9 +192,7 @@ pub async fn authenticate(
     let (mut sender, mut receiver) = web_socket.split();
 
     // 发送认证包
-    sender
-        .send(Message::Text(json!(auth_packet).to_string()))
-        .await?;
+    sender.send(Message::Binary(auth_packet)).await?;
 
     // 处理认证回复
     if let Some(message) = receiver.try_next().await? {

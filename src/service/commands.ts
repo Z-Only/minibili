@@ -132,9 +132,9 @@ export const openDevTools = async () => {
 /**
  * Resolves a risk check issue by invoking the 'resolve_risk_check_issue' command.
  *
- * @returns {Promise<any>} A promise that resolves when the risk check issue is resolved.
+ * @returns {Promise<void>} A promise that resolves when the risk check issue is resolved.
  */
-export const resolveRiskCheckIssue = async () => {
+export const resolveRiskCheckIssue = async (): Promise<void> => {
     return await invoke('resolve_risk_check_issue')
 }
 
