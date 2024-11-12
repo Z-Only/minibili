@@ -73,8 +73,7 @@ pub enum Error {
 }
 
 #[derive(serde::Serialize)]
-#[serde(tag = "kind", content = "message")]
-#[serde(rename_all = "camelCase")]
+#[serde(tag = "kind", content = "message", rename_all = "camelCase")]
 enum ErrorKind {
     Reqwest(String),
     StatusCode(String),

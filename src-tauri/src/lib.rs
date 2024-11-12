@@ -30,7 +30,8 @@ pub fn run() {
             commands::download,
             commands::geetest_get,
             commands::open_devtools,
-            commands::resolve_risk_check_issue
+            commands::resolve_risk_check_issue,
+            commands::connect_to_room
         ])
         .setup(|app| {
             // 创建菜单项

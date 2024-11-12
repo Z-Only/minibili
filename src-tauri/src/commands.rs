@@ -2,6 +2,7 @@ use crate::utils::download::{send_progress_event, write_buffer_to_file, Download
 use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
+use crate::utils::socket::wss;
 use futures_util::StreamExt;
 use http::Method;
 use log::info;
@@ -158,4 +159,14 @@ pub fn open_devtools(app_handle: AppHandle) {
 #[tauri::command]
 pub async fn resolve_risk_check_issue() -> Result<(), Error> {
     fetch_cookie().await
+}
+
+#[tauri::command]
+pub async fn connect_to_room(
+    user_id: u64,
+    room_id: u64,
+    auth_key: Option<&str>,
+) -> Result<(), Error> {
+    wss(user_id, room_id, auth_key).await?;
+    Ok(())
 }

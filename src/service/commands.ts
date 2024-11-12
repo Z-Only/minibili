@@ -137,3 +137,11 @@ export const openDevTools = async () => {
 export const resolveRiskCheckIssue = async () => {
     return await invoke('resolve_risk_check_issue')
 }
+
+export const connectToRoom = async (
+    userId: number,
+    roomId: number,
+    authKey?: string
+) => {
+    return await invoke('connect_to_room', { userId, roomId, authKey })
+}
