@@ -3,7 +3,8 @@ use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
 use crate::utils::socket::{
-    encode_packet, init_socket, socket_receive, socket_send, AuthPacket, Opcode,
+    decode_packet, encode_packet, init_socket, socket_receive, socket_send, AuthPacket, AuthReply,
+    Opcode,
 };
 use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use http::Method;
@@ -179,7 +180,7 @@ pub async fn authenticate(
         protover: Some(3),
         platform: Some("web".to_string()),
         r#type: Some(2),
-        key: auth_key.map(|k| k.to_string()),
+        key: auth_key.map(ToString::to_string),
     };
 
     // 编码认证包
@@ -197,12 +198,20 @@ pub async fn authenticate(
     // 处理认证回复
     if let Some(message) = receiver.try_next().await? {
         match message {
-            Message::Text(text) => info!("Received authentication response: {}", text),
-            _ => error!("Unexpected message"),
+            Message::Binary(packet) => match decode_packet(packet) {
+                AuthReply { code } => match code {
+                    0 => {
+                        info!("Authentication success");
+                        return Ok(());
+                    }
+                    _ => error!("Authentication failed: {:?}", code),
+                },
+            },
+            _ => error!("Unexpected message type: {:?}", message),
         }
     }
 
-    Ok(())
+    Err(Error::Parse("Failed to authentocate.".to_string()))
 }
 
 #[tauri::command]

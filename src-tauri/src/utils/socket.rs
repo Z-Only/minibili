@@ -1,7 +1,7 @@
 use crate::utils::request::{Error, GLOBAL_CLIENT};
 use flate2::read::ZlibDecoder;
 use futures_util::{SinkExt, StreamExt, TryStreamExt};
-use log::error;
+use log::{error, info};
 use reqwest_websocket::{Message, RequestBuilderExt, WebSocket};
 use serde::{Deserialize, Serialize};
 use std::io::Read;
@@ -36,7 +36,7 @@ pub async fn socket_receive(host: &str, port: u16, path: &str) -> Result<Option<
     Ok(msg)
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PacketHeader {
     pub total_size: u32,       // 封包总大小
     pub header_size: u16,      // 头部大小
@@ -102,6 +102,11 @@ pub struct AuthPacket {
 
 // 头部大小一般固定为 16
 static HEADER_SIZE: u16 = 16;
+
+#[derive(Deserialize)]
+pub struct AuthReply {
+    pub code: u32,
+}
 
 /// 构造并编码指定操作码的数据包
 ///
@@ -169,19 +174,30 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
     auth_packet
 }
 
-fn decompress_packet(packet_body: &[u8]) -> Vec<u8> {
-    {
-        // zlib 解压
-        let mut decoder = ZlibDecoder::new(packet_body);
+fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> Vec<u8> {
+    match protocol_version {
+        ProtocolVersion::NormalPacket => packet_body.to_vec(),
+        ProtocolVersion::NormalPacketWithZlibCompression => {
+            // zlib 解压
+            let mut decoder = ZlibDecoder::new(packet_body);
 
-        // 创建一个缓冲区，用于存储解压缩后的数据
-        let mut decompressed_data = Vec::new();
+            // 创建一个缓冲区，用于存储解压缩后的数据
+            let mut decompressed_data = Vec::new();
 
-        // 尝试解压缩并读取数据到缓冲区
-        decoder.read_to_end(&mut decompressed_data).unwrap();
+            // 尝试解压缩并读取数据到缓冲区
+            decoder.read_to_end(&mut decompressed_data).unwrap();
 
-        // 返回解压缩后的数据
-        decompressed_data
+            // 返回解压缩后的数据
+            decompressed_data
+        }
+        ProtocolVersion::NormalPacketWithBrotliCompression => {
+            // brotli 解压
+            packet_body.to_vec()
+        }
+        _ => {
+            error!("Unsupported protocol version: {:?}", protocol_version);
+            packet_body.to_vec()
+        }
     }
 }
 
@@ -212,39 +228,38 @@ fn decompress_packet(packet_body: &[u8]) -> Vec<u8> {
 /// };
 /// ```
 pub fn decode_packet<T: for<'de> Deserialize<'de>>(packet: Vec<u8>) -> T {
-    let packet_header: PacketHeader =
+    let mut packet_header: PacketHeader =
         bincode::deserialize(&packet[..HEADER_SIZE as usize]).unwrap();
+
+    // 将字节序为大端的头部数据还原
+    packet_header = PacketHeader {
+        total_size: u32::from_be(packet_header.total_size),
+        header_size: u16::from_be(packet_header.header_size),
+        protocol_version: u16::from_be(packet_header.protocol_version),
+        opcode: u32::from_be(packet_header.opcode),
+        sequence: u32::from_be(packet_header.sequence),
+    };
+
+    info!("packet_header: {:?}", packet_header);
 
     let protocol_version = packet_header.protocol_version;
     let opcode = packet_header.opcode;
 
-    let packet_body = &packet[(HEADER_SIZE as usize + 1)..];
+    let packet_body = &packet[HEADER_SIZE as usize..];
 
-    let original_packet_body = match ProtocolVersion::from_value(protocol_version) {
-        Some(ProtocolVersion::NormalPacket) | Some(ProtocolVersion::HeartbeatAndAuthPacket) => {
-            packet_body
-        }
-        Some(ProtocolVersion::NormalPacketWithZlibCompression) => &decompress_packet(packet_body),
-        Some(ProtocolVersion::NormalPacketWithBrotliCompression) => {
-            // brotli 解压
-            packet_body
-        }
-        _ => {
-            error!(
-                "Unsupported protocol version: {:?}",
-                ProtocolVersion::from_value(protocol_version)
-            );
-            packet_body
-        }
-    };
+    info!("packet_body: {:?}", packet_body);
 
     match Opcode::from_value(opcode) {
-        Some(Opcode::HeartbeatReply) => serde_json::from_slice(original_packet_body).unwrap(),
-        Some(Opcode::RegularPacket) => serde_json::from_slice(original_packet_body).unwrap(),
-        Some(Opcode::AuthReply) => serde_json::from_slice(original_packet_body).unwrap(),
+        Some(Opcode::HeartbeatReply) => serde_json::from_slice(packet_body).unwrap(),
+        Some(Opcode::RegularPacket) => serde_json::from_slice(&decompress_packet(
+            ProtocolVersion::from_value(protocol_version).unwrap(),
+            packet_body,
+        ))
+        .unwrap(),
+        Some(Opcode::AuthReply) => serde_json::from_slice(packet_body).unwrap(),
         _ => {
             error!("Unsupported opcode: {:?}", Opcode::from_value(opcode));
-            serde_json::from_slice(original_packet_body).unwrap()
+            serde_json::from_slice(packet_body).unwrap()
         }
     }
 }
