@@ -1,11 +1,17 @@
 use crate::utils::request::{Error, GLOBAL_CLIENT};
 use brotli::Decompressor;
 use flate2::read::ZlibDecoder;
-use futures_util::{SinkExt, StreamExt, TryStreamExt};
+use futures_util::{
+    stream::{SplitSink, SplitStream},
+    SinkExt, StreamExt, TryStreamExt,
+};
 use log::{error, info};
+use reqwest::Client;
 use reqwest_websocket::{Message, RequestBuilderExt, WebSocket};
 use serde::{Deserialize, Serialize};
-use std::{io::Read, sync::Arc, time::Duration};
+use std::{io::Read, sync::Arc, time::Duration, vec};
+use tauri::ipc::Channel;
+use tokio::sync::mpsc::Sender;
 use tokio::sync::Mutex;
 
 // TODO: 如果过程中 host 和 port 不变化，考虑设计为全局变量
@@ -304,6 +310,9 @@ pub async fn authenticate(
 }
 
 pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Error> {
+    // 编码认证包
+    let heartbeat_packet = encode_packet::<Vec<u8>>(Opcode::Heartbeat, vec![]);
+
     // 分离发送和接收通道
     let ref mut web_socket = *web_socket.as_ref().lock().await;
     let (mut sender, mut receiver) = web_socket.split();
@@ -312,7 +321,7 @@ pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Er
     tokio::time::sleep(Duration::from_secs(30)).await;
 
     // 发送心跳包
-    sender.send(Message::Text("".to_string())).await?;
+    sender.send(Message::Binary(heartbeat_packet)).await?;
 
     // 接收心跳包
     if let Some(message) = receiver.try_next().await? {
@@ -355,4 +364,169 @@ pub enum MessageEvent {
         success: bool,
         msg: serde_json::Value,
     },
+}
+
+// FIXME: 解决多线程/消息导致的异常退出
+// TODO: 抽象出 LiveStreamClient 结构体，支持多个直播间
+
+#[derive(Default)]
+pub struct LiveStreamClient {
+    client: Client,             /* Http Client */
+    uid: u64,                   /* BiliBili Account */
+    room_id: u64,               /* Room ID */
+    token: String,              /* Token */
+    host_list: Vec<HostServer>, /* Danmu Host Server List */
+    host_index: u8,             /* Index of Danmu Host Server Connected */
+    // When the function connect() finishes, conn_write will be taken and returned to outside.
+    conn_write: Option<SplitSink<WebSocket, Message>>, /* Connection with Danmu Host Server */
+    conn_read: Option<SplitStream<WebSocket>>,         /* Connection with Danmu Host Server */
+    mpsc_tx: Option<Sender<Message>>,                  /* Channel Sender */
+    on_event: Option<Channel<MessageEvent>>,           /* Channel Receiver */
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct HostServer {
+    host: String,
+    port: u32,
+    ws_port: u32,
+    wss_port: u32,
+}
+
+impl LiveStreamClient {
+    pub fn new(room_id: u64) -> Self {
+        LiveStreamClient {
+            room_id,
+            ..Default::default()
+        }
+    }
+
+    async fn init_client(&mut self) -> Result<(), reqwest::Error> {
+        // send request to get token
+        let resp = self
+            .client
+            .get(format!(
+                "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id={}",
+                self.room_id
+            ))
+            .send()
+            .await?;
+        // convert to 'serde_json::Value' instance
+        let json: serde_json::Value = serde_json::from_str(&resp.text().await?).unwrap();
+        let token = json["data"]["token"].as_str().unwrap();
+        self.token = token.to_owned();
+        // extract the danmu host server list and append into 'self.host_list'
+        let host_list_raw = json["data"]["host_list"].as_array().unwrap();
+        for obj in host_list_raw {
+            self.host_list.push(HostServer::deserialize(obj).unwrap());
+        }
+
+        Ok(())
+    }
+
+    async fn shake_hands(&mut self) {
+        for (index, item) in self.host_list.iter().enumerate() {
+            match self
+                .client
+                .get(format!("wss://{}:{}/sub", item.host, item.port))
+                .upgrade()
+                .send()
+                .await
+            {
+                Ok(upgrade_response) => match upgrade_response.into_websocket().await {
+                    Ok(conn) => {
+                        let (sender, receiver) = conn.split();
+                        self.conn_read = Some(receiver);
+                        self.conn_write = Some(sender);
+                        self.host_index = index as u8;
+                        break;
+                    }
+                    Err(e) => eprintln!("{:#?}", e),
+                },
+                Err(e) => eprintln!("{:#?}", e),
+            }
+        }
+    }
+
+    async fn send(&mut self, data: &[u8]) {
+        match self
+            .conn_write
+            .as_mut()
+            .unwrap()
+            .send(Message::from(data))
+            .await
+        {
+            Err(e) => eprintln!("{:#?}", e),
+            _ => {}
+        }
+    }
+
+    async fn read(&mut self) -> Vec<u8> {
+        match self
+            .conn_read
+            .as_mut()
+            .unwrap()
+            .try_next()
+            .await
+            .unwrap()
+            .unwrap()
+        {
+            Message::Binary(packet) => packet,
+            _ => vec![],
+        }
+    }
+
+    pub async fn send_auth(&mut self) {
+        // 构造认证包正文数据
+        let auth_data = AuthPacket {
+            uid: Some(self.uid),
+            roomid: self.room_id,
+            protover: Some(3),
+            platform: Some("web".to_string()),
+            r#type: Some(2),
+            key: Some(self.token.clone()),
+        };
+
+        // 编码认证包
+        let auth_packet = encode_packet(Opcode::AuthPacket, auth_data);
+
+        self.send(&auth_packet).await;
+    }
+
+    pub async fn send_heart_beat(&mut self) {
+        // 编码认证包
+        let heartbeat_packet = encode_packet::<Vec<u8>>(Opcode::Heartbeat, vec![]);
+
+        // 发送心跳包
+        self.send(&heartbeat_packet).await;
+    }
+
+    pub async fn connect(&mut self) -> Result<SplitSink<WebSocket, Message>, reqwest::Error> {
+        // initialize danmu client
+        self.init_client().await?;
+
+        // shake hands
+        self.shake_hands().await;
+
+        // send authentication pack
+        self.send_auth().await;
+
+        if let Some(conn_write) = self.conn_write.take() {
+            Ok(conn_write)
+        } else {
+            panic!("Connecting bilibili danmaku server failed.");
+        }
+    }
+
+    pub async fn receive(&mut self) {
+        let msg = self.read().await;
+        if msg.len() >= 16 {
+            if msg[7] == 2 {
+                let data = decode_packet::<serde_json::Value>(msg);
+                let _ = self.on_event.take().unwrap().send(MessageEvent::Normal {
+                    success: true,
+                    msg: data,
+                });
+            }
+        }
+    }
 }

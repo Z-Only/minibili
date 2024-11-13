@@ -3,7 +3,7 @@ use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
 use crate::utils::socket::{
-    authenticate, heartbeat, init_socket, receive_normal_packet, MessageEvent,
+    authenticate, heartbeat, init_socket, receive_normal_packet, LiveStreamClient, MessageEvent,
 };
 use futures_util::StreamExt;
 use http::Method;
@@ -241,4 +241,8 @@ pub async fn live_msg_stream(
     // 如果你需要显式地关闭连接，应该在所有任务完成后进行。
 
     Ok(())
+}
+
+pub async fn init_live_stream() {
+    let live_stream_client: Arc<Mutex<LiveStreamClient>>;
 }
