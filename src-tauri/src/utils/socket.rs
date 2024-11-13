@@ -300,7 +300,7 @@ pub async fn authenticate(
         }
     }
 
-    Err(Error::Parse("Failed to authentocate.".to_string()))
+    Err(Error::Stream("Failed to authentocate.".to_string()))
 }
 
 pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Error> {
@@ -322,7 +322,7 @@ pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Er
         }
     }
 
-    Err(Error::Parse("Failed to heartbeat.".to_string()))
+    Err(Error::Stream("Failed to heartbeat.".to_string()))
 }
 
 pub async fn receive_normal_packet(
@@ -340,7 +340,7 @@ pub async fn receive_normal_packet(
         }
     }
 
-    Err(Error::Parse("Failed to heartbeat.".to_string()))
+    Err(Error::Stream("Failed to heartbeat.".to_string()))
 }
 
 #[derive(Clone, Serialize)]
