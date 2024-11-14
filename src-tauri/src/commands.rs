@@ -3,18 +3,21 @@ use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
 use crate::utils::socket::{
-    authenticate, heartbeat, init_socket, receive_normal_packet, LiveStreamClient, MessageEvent,
+    authenticate, encode_packet, heartbeat, init_socket, receive_normal_packet, LiveStreamClient,
+    MessageEvent, Opcode,
 };
-use futures_util::StreamExt;
+use futures_util::stream::SplitSink;
+use futures_util::{SinkExt, StreamExt};
 use http::Method;
 use log::info;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use reqwest_websocket::Message;
 use serde_json;
 use std::fs::File;
 use std::str::FromStr;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tauri::ipc::Channel;
 use tauri::AppHandle;
 use tauri::Manager;
@@ -243,6 +246,26 @@ pub async fn live_msg_stream(
     Ok(())
 }
 
-pub async fn init_live_stream() {
-    let live_stream_client: Arc<Mutex<LiveStreamClient>>;
+#[tauri::command]
+pub async fn init_live_stream(room_id: u64, on_event: Channel<MessageEvent>) -> Result<(), Error> {
+    let client: Arc<Mutex<LiveStreamClient>> =
+        Arc::new(Mutex::new(LiveStreamClient::new(room_id, on_event)));
+
+    // 初始化连接，并进行认证
+    let mut sender = client.lock().await.connect().await?;
+
+    // 启动心跳任务
+    tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_secs(30)).await;
+
+        // 编码认证包
+        let heartbeat_packet = encode_packet::<Vec<u8>>(Opcode::Heartbeat, vec![]);
+        // 发送心跳包
+        match sender.send(Message::Binary(heartbeat_packet)).await {
+            Ok(_) => {}
+            Err(_) => {}
+        }
+    });
+
+    Ok(())
 }

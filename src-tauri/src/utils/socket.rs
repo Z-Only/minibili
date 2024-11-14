@@ -371,17 +371,16 @@ pub enum MessageEvent {
 
 #[derive(Default)]
 pub struct LiveStreamClient {
-    client: Client,             /* Http Client */
-    uid: u64,                   /* BiliBili Account */
-    room_id: u64,               /* Room ID */
-    token: String,              /* Token */
-    host_list: Vec<HostServer>, /* Danmu Host Server List */
-    host_index: u8,             /* Index of Danmu Host Server Connected */
+    client: Client,                          /* Http Client */
+    uid: u64,                                /* BiliBili Account */
+    room_id: u64,                            /* Room ID */
+    token: String,                           /* Token */
+    host_list: Vec<HostServer>,              /* Danmu Host Server List */
+    host_index: u8,                          /* Index of Danmu Host Server Connected */
+    on_event: Option<Channel<MessageEvent>>, /* Channel Receiver */
     // When the function connect() finishes, conn_write will be taken and returned to outside.
     conn_write: Option<SplitSink<WebSocket, Message>>, /* Connection with Danmu Host Server */
     conn_read: Option<SplitStream<WebSocket>>,         /* Connection with Danmu Host Server */
-    mpsc_tx: Option<Sender<Message>>,                  /* Channel Sender */
-    on_event: Option<Channel<MessageEvent>>,           /* Channel Receiver */
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -393,9 +392,10 @@ struct HostServer {
 }
 
 impl LiveStreamClient {
-    pub fn new(room_id: u64) -> Self {
+    pub fn new(room_id: u64, on_event: Channel<MessageEvent>) -> Self {
         LiveStreamClient {
             room_id,
+            on_event: Some(on_event),
             ..Default::default()
         }
     }
