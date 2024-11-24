@@ -10,9 +10,6 @@ const roomId = Number(route.params.id as string)
 const onEvent = new Channel<MessageEvent>()
 
 onEvent.onmessage = (message) => {
-    console.log(
-        `收到消息事件: ${message.event}, 数据: ${JSON.stringify(message.data)}`
-    )
     switch (message.event) {
         case 'auth':
             if (message.data.success) {
