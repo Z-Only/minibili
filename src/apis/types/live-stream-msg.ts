@@ -39,7 +39,7 @@ export interface EntryEffectData {
     privilege_type: number
     show_avatar: number
     target_id: number
-    trigger_time: bigint
+    trigger_time: number // bigint
     uid: number
     uinfo: Uinfo
     wealth_style_info: null
@@ -178,7 +178,7 @@ export interface InteractWordData {
     privilege_type: number
     show_avatar: number
     target_id: number
-    trigger_time: bigint
+    trigger_time: number // bigint
     uid: number
     uinfo: Uinfo
     wealth_style_info: null

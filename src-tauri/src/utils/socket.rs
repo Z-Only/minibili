@@ -232,10 +232,7 @@ pub enum MessageEvent {
     #[serde(rename_all = "camelCase")]
     Heartbeat { success: bool, popularity: u32 },
     #[serde(rename_all = "camelCase")]
-    Normal {
-        success: bool,
-        msg: serde_json::Value,
-    },
+    Normal { success: bool, msg: String },
 }
 
 #[derive(Default)]
@@ -259,6 +256,7 @@ struct HostServer {
     wss_port: u32,
 }
 
+// FIXME: 需要处理重新加载或退出页面后，连接没有中断并且 Channel 报错的问题
 impl LiveMsgStreamClient {
     pub fn new(room_id: u64, on_event: Channel<MessageEvent>) -> Self {
         LiveMsgStreamClient {
@@ -454,7 +452,7 @@ impl LiveMsgStreamClient {
             Ok(json) => {
                 let _ = self.on_event.as_mut().unwrap().send(MessageEvent::Normal {
                     success: true,
-                    msg: json,
+                    msg: json.to_string(),
                 });
             }
             Err(e) => {

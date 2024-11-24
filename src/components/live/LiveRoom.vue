@@ -2,10 +2,13 @@
 import { fetchRoomInfo } from '@/apis/live/info'
 import { MessageEvent, initLiveStream } from '@/service/commands'
 import { Channel } from '@tauri-apps/api/core'
+import { CmdMsg } from '@/apis/types/live-stream-msg'
 
 // 获取路由参数
 const route = useRoute()
 const roomId = Number(route.params.id as string)
+
+const danmuMsgList: Ref<CmdMsg[]> = ref([])
 
 const onEvent = new Channel<MessageEvent>()
 
@@ -27,7 +30,16 @@ onEvent.onmessage = (message) => {
             break
         case 'normal':
             if (message.data.success) {
-                console.log('收到消息: ', message.data.msg)
+                let msg = JSON.parse(message.data.msg) as CmdMsg
+                switch (msg.cmd) {
+                    case 'DANMU_MSG':
+                        console.log('弹幕消息类型')
+                        danmuMsgList.value.push(msg)
+                        break
+                    default:
+                        console.log('其它消息类型: ', msg.cmd)
+                        break
+                }
             } else {
                 console.log('消息处理失败')
             }
@@ -50,4 +62,5 @@ onMounted(async () => {
 
 <template>
     <h1>Live {{ roomId }}</h1>
+    <danmu-card :danmus="danmuMsgList" />
 </template>

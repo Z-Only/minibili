@@ -1,0 +1,33 @@
+<script setup lang="ts">
+import { CmdMsg, InfoObject } from '@/apis/types/live-stream-msg'
+
+// 定义 props 并设置默认值
+withDefaults(
+    defineProps<{
+        danmus: CmdMsg[]
+    }>(),
+    {
+        danmus: () => [],
+    }
+)
+</script>
+
+<template>
+    <v-layout height="300px">
+        <v-infinite-scroll mode="manual" :items="danmus">
+            <template v-for="(item, index) in danmus" :key="index">
+                <div v-if="item?.info && typeof item.info[15] === 'object'">
+                    {{ (item.info[15] as InfoObject)?.extra }}
+                </div>
+            </template>
+            <template v-slot:load-more="{ props }">
+                <v-btn
+                    icon="mdi-refresh"
+                    size="small"
+                    variant="text"
+                    v-bind="props"
+                ></v-btn>
+            </template>
+        </v-infinite-scroll>
+    </v-layout>
+</template>

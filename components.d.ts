@@ -10,6 +10,7 @@ declare module 'vue' {
     AppBar: typeof import('./src/components/layout/AppBar.vue')['default']
     BangumiCard: typeof import('./src/components/BangumiCard.vue')['default']
     CaptchaCard: typeof import('./src/components/CaptchaCard.vue')['default']
+    DanmuCard: typeof import('./src/components/live/DanmuCard.vue')['default']
     Home: typeof import('./src/components/pages/Home.vue')['default']
     Live: typeof import('./src/components/live/Live.vue')['default']
     LiveRoom: typeof import('./src/components/live/LiveRoom.vue')['default']
