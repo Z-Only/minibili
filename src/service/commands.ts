@@ -152,20 +152,12 @@ export type MessageEvent =
       }
     | { event: 'normal'; data: { success: boolean; msg: string } }
 
-export const liveMsgSstream = async (
-    host: string,
-    port: number,
+export const initLiveStream = async (
     roomId: number,
-    uid: number,
-    authKey: string,
     onEvent: Channel<MessageEvent>
 ) => {
-    return await invoke('live_msg_stream', {
-        host,
-        port,
+    return await invoke('init_live_stream', {
         roomId,
-        uid,
-        authKey,
         onEvent,
     })
 }

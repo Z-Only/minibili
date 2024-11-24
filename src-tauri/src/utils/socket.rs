@@ -1,34 +1,16 @@
-use crate::utils::request::{Error, GLOBAL_CLIENT};
+use crate::utils::request::Error;
 use brotli::Decompressor;
 use flate2::read::ZlibDecoder;
 use futures_util::{
     stream::{SplitSink, SplitStream},
     SinkExt, StreamExt, TryStreamExt,
 };
-use log::{error, info};
+use log::error;
 use reqwest::Client;
 use reqwest_websocket::{Message, RequestBuilderExt, WebSocket};
 use serde::{Deserialize, Serialize};
-use std::{io::Read, sync::Arc, time::Duration, vec};
+use std::{io::Read, vec};
 use tauri::ipc::Channel;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::Mutex;
-
-// TODO: 如果过程中 host 和 port 不变化，考虑设计为全局变量
-pub async fn init_socket(
-    host: &str,
-    port: u16,
-    path: &str,
-) -> Result<WebSocket, reqwest_websocket::Error> {
-    let url = format!("wss://{}:{}{}", host, port, path);
-    GLOBAL_CLIENT
-        .get(&url)
-        .upgrade()
-        .send()
-        .await?
-        .into_websocket()
-        .await
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PacketHeader {
@@ -39,7 +21,7 @@ pub struct PacketHeader {
     pub sequence: u32,         // sequence
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum ProtocolVersion {
     NormalPacket = 0,                      // 普通包 (正文不使用压缩)
     HeartbeatAndAuthPacket = 1,            // 心跳及认证包 (正文不使用压缩)
@@ -48,7 +30,7 @@ pub enum ProtocolVersion {
 }
 
 impl ProtocolVersion {
-    // 方法来根据值获取枚举
+    // 方法根据值来获取枚举
     pub fn from_value(value: u16) -> Option<Self> {
         match value {
             0 => Some(Self::NormalPacket),
@@ -70,7 +52,7 @@ pub enum Opcode {
 }
 
 impl Opcode {
-    // 方法来根据值获取枚举
+    // 方法根据值来获取枚举
     pub fn from_value(value: u32) -> Option<Self> {
         match value {
             2 => Some(Self::Heartbeat),
@@ -161,11 +143,10 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
     }
 
     // 将认证包头部和正文数据合并
-    let mut auth_packet = Vec::new();
-    auth_packet.extend(bincode::serialize(&packet_header).unwrap());
-    auth_packet.extend(package_body_binary);
+    let mut packet = bincode::serialize(&packet_header).unwrap();
+    packet.extend(package_body_binary);
 
-    auth_packet
+    packet
 }
 
 fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> Vec<u8> {
@@ -179,7 +160,9 @@ fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> V
             let mut decompressed_data = Vec::new();
 
             // 尝试解压缩并读取数据到缓冲区
-            decoder.read_to_end(&mut decompressed_data).unwrap();
+            if let Err(e) = decoder.read_to_end(&mut decompressed_data) {
+                error!("Failed to decompress zlib data: {:?}", e);
+            }
 
             // 返回解压缩后的数据
             decompressed_data
@@ -190,166 +173,55 @@ fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> V
 
             // 解压数据到内存中
             let mut decompressed_data = Vec::new();
-            decompressor.read_to_end(&mut decompressed_data).unwrap();
+            if let Err(e) = decompressor.read_to_end(&mut decompressed_data) {
+                error!("Failed to decompress brotli data: {:?}", e);
+            }
 
             decompressed_data
         }
         _ => {
-            error!("Unsupported protocol version: {:?}", protocol_version);
+            error!(
+                "Cannot decompress unsupported protocol version: {:?}.",
+                protocol_version
+            );
             packet_body.to_vec()
         }
     }
 }
 
-/// 解码指定操作码的数据包
-///
-/// # 参数
-/// - `op`: 数据包的操作码 (`Opcode`)
-/// - `packet`: (`Vec<u8>`)
-///
-/// # 返回值
-/// 返回编码后的二进制向量 (`T`) 需要实现 `DeSerialize`
-///
-/// # 示例
-/// ```ignore
-/// // 认证包
-/// let auth_package = vec![0, 0, 0, 255, 0, 16, 0, 1, 0, 0, 0, 7, 0, 0, 0, 1, 123, 34, 117, 105, 100, 34, 58, 49, 54, 48, 49, 52, 56, 54, 50, 52, 44, 34, 114, 111, 111, 109, 105, 100, 34, 58, 50, 50, 54, 48, 56, 49, 49, 50, 44, 34, 112, 114, 111, 116, 111, 118, 101, 114, 34, 58, 51, 44, 34, 112, 108, 97, 116, 102, 111, 114, 109, 34, 58, 34, 119, 101, 98, 34, 44, 34, 116, 121, 112, 101, 34, 58, 50, 44, 34, 107, 101, 121, 34, 58, 34, 48, 118, 112, 84, 72, 87, 55, 119, 87, 85, 110, 108, 111, 82, 112, 82, 81, 107, 71, 118, 78, 98, 110, 119, 118, 115, 100, 109, 45, 113, 89, 71, 119, 66, 67, 88, 117, 45, 89, 81, 100, 110, 87, 118, 83, 85, 71, 115, 115, 65, 57, 121, 98, 75, 104, 121, 50, 106, 120, 57, 82, 111, 99, 65, 80, 70, 81, 109, 84, 79, 107, 82, 119, 107, 75, 104, 122, 68, 121, 72, 57, 80, 84, 117, 111, 84, 104, 104, 52, 70, 48, 117, 98, 88, 76, 73, 100, 110, 105, 55, 52, 85, 57, 48, 75, 66, 66, 105, 114, 50, 72, 116, 81, 57, 65, 55, 119, 103, 75, 52, 56, 75, 122, 73, 95, 90, 90, 56, 56, 117, 87, 78, 89, 102, 82, 79, 72, 105, 100, 78, 106, 55, 50, 112, 97, 121, 110, 52, 121, 48, 113, 66, 104, 81, 61, 61, 34, 125]
-///
-/// let auth_data = decode_packet(auth_data);
-///
-/// // 判断是否相等
-/// AuthPacket {
-///     uid: Some(160148624),
-///     roomid: 22608112,
-///     protover: Some(3),
-///     platform: Some("web".to_string()),
-///     r#type: Some(2),
-///     key: Some("0vpTHW7wWUnloRpRQkGvNbnwvsdm-qYGwBCXu-YQdnWvSUGssA9ybKhy2jx9RocAPFQmTOkRwkKhzDyH9PTuoThh4F0ubXLIdni74U90KBBir2HtQ9A7wgK48KzI_ZZ88uWNYfROHidNj72payn4y0qBhQ==".to_string()),
-/// };
-/// ```
-pub fn decode_packet<T: for<'de> Deserialize<'de>>(packet: Vec<u8>) -> T {
+pub fn split_packets(data: &[u8]) -> Vec<Vec<u8>> {
+    let mut packets = Vec::new();
+    let mut offset = 0;
+    while offset + HEADER_SIZE as usize <= data.len() {
+        let total_size = u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap()) as usize;
+        if offset + total_size > data.len() {
+            error!("Packet size exceeds available data.");
+            break;
+        }
+        let packet_body = data[offset + HEADER_SIZE as usize..offset + total_size].to_vec();
+        packets.push(packet_body);
+        offset += total_size;
+    }
+    packets
+}
+
+fn parse_packet_header(pack: &[u8]) -> Option<PacketHeader> {
+    if pack.len() < HEADER_SIZE as usize {
+        error!("Packet is too short to contain a valid header.");
+        return None;
+    }
+
     let mut packet_header: PacketHeader =
-        bincode::deserialize(&packet[..HEADER_SIZE as usize]).unwrap();
+        bincode::deserialize(&pack[..HEADER_SIZE as usize]).unwrap();
 
     // 将字节序为大端的头部数据还原
-    packet_header = PacketHeader {
-        total_size: u32::from_be(packet_header.total_size),
-        header_size: u16::from_be(packet_header.header_size),
-        protocol_version: u16::from_be(packet_header.protocol_version),
-        opcode: u32::from_be(packet_header.opcode),
-        sequence: u32::from_be(packet_header.sequence),
-    };
+    packet_header.total_size = u32::from_be(packet_header.total_size);
+    packet_header.header_size = u16::from_be(packet_header.header_size);
+    packet_header.protocol_version = u16::from_be(packet_header.protocol_version);
+    packet_header.opcode = u32::from_be(packet_header.opcode);
+    packet_header.sequence = u32::from_be(packet_header.sequence);
 
-    info!("packet_header: {:?}", packet_header);
-
-    let protocol_version = packet_header.protocol_version;
-    let opcode = packet_header.opcode;
-
-    let packet_body = &packet[HEADER_SIZE as usize..];
-
-    info!("packet_body: {:?}", packet_body);
-
-    match Opcode::from_value(opcode) {
-        Some(Opcode::HeartbeatReply) => serde_json::from_slice(packet_body).unwrap(),
-        Some(Opcode::RegularPacket) => serde_json::from_slice(&decompress_packet(
-            ProtocolVersion::from_value(protocol_version).unwrap(),
-            packet_body,
-        ))
-        .unwrap(),
-        Some(Opcode::AuthReply) => serde_json::from_slice(packet_body).unwrap(),
-        _ => {
-            error!("Unsupported opcode: {:?}", Opcode::from_value(opcode));
-            serde_json::from_slice(packet_body).unwrap()
-        }
-    }
-}
-
-pub async fn authenticate(
-    web_socket: &mut Arc<Mutex<WebSocket>>,
-    room_id: u64,
-    uid: Option<u64>,
-    auth_key: Option<&str>,
-) -> Result<(), Error> {
-    // 构造认证包正文数据
-    let auth_data = AuthPacket {
-        uid,
-        roomid: room_id,
-        protover: Some(3),
-        platform: Some("web".to_string()),
-        r#type: Some(2),
-        key: auth_key.map(ToString::to_string),
-    };
-
-    // 编码认证包
-    let auth_packet = encode_packet(Opcode::AuthPacket, auth_data);
-
-    // 分离发送和接收通道
-    let ref mut web_socket = *web_socket.as_ref().lock().await;
-    let (mut sender, mut receiver) = web_socket.split();
-
-    // 发送认证包
-    sender.send(Message::Binary(auth_packet)).await?;
-
-    // 处理认证回复
-    if let Some(message) = receiver.try_next().await? {
-        match message {
-            Message::Binary(packet) => match decode_packet(packet) {
-                AuthReply { code } => match code {
-                    0 => {
-                        info!("Authentication success");
-                        return Ok(());
-                    }
-                    _ => error!("Authentication failed: {:?}", code),
-                },
-            },
-            _ => error!("Unexpected message type: {:?}", message),
-        }
-    }
-
-    Err(Error::Stream("Failed to authentocate.".to_string()))
-}
-
-pub async fn heartbeat(web_socket: &mut Arc<Mutex<WebSocket>>) -> Result<u32, Error> {
-    // 编码认证包
-    let heartbeat_packet = encode_packet::<Vec<u8>>(Opcode::Heartbeat, vec![]);
-
-    // 分离发送和接收通道
-    let ref mut web_socket = *web_socket.as_ref().lock().await;
-    let (mut sender, mut receiver) = web_socket.split();
-
-    // 等待 30 秒（30 秒左右发送一次, 否则 60 秒后会被强制断开连接）
-    tokio::time::sleep(Duration::from_secs(30)).await;
-
-    // 发送心跳包
-    sender.send(Message::Binary(heartbeat_packet)).await?;
-
-    // 接收心跳包
-    if let Some(message) = receiver.try_next().await? {
-        match message {
-            Message::Binary(packet) => return Ok(decode_packet(packet)),
-            _ => error!("Unexpected message type: {:?}", message),
-        }
-    }
-
-    Err(Error::Stream("Failed to heartbeat.".to_string()))
-}
-
-pub async fn receive_normal_packet(
-    web_socket: &mut Arc<Mutex<WebSocket>>,
-) -> Result<serde_json::Value, Error> {
-    // 分离发送和接收通道
-    let ref mut web_socket = *web_socket.as_ref().lock().await;
-    let (_, mut receiver) = web_socket.split();
-
-    // 循环接收普通数据包
-    if let Some(message) = receiver.try_next().await? {
-        match message {
-            Message::Binary(packet) => return Ok(decode_packet(packet)),
-            _ => error!("Unexpected message type: {:?}", message),
-        }
-    }
-
-    Err(Error::Stream("Failed to heartbeat.".to_string()))
+    Some(packet_header)
 }
 
 #[derive(Clone, Serialize)]
@@ -366,21 +238,17 @@ pub enum MessageEvent {
     },
 }
 
-// FIXME: 解决多线程/消息导致的异常退出
-// TODO: 抽象出 LiveStreamClient 结构体，支持多个直播间
-
 #[derive(Default)]
-pub struct LiveStreamClient {
-    client: Client,                          /* Http Client */
-    uid: u64,                                /* BiliBili Account */
-    room_id: u64,                            /* Room ID */
-    token: String,                           /* Token */
-    host_list: Vec<HostServer>,              /* Danmu Host Server List */
-    host_index: u8,                          /* Index of Danmu Host Server Connected */
-    on_event: Option<Channel<MessageEvent>>, /* Channel Receiver */
-    // When the function connect() finishes, conn_write will be taken and returned to outside.
-    conn_write: Option<SplitSink<WebSocket, Message>>, /* Connection with Danmu Host Server */
-    conn_read: Option<SplitStream<WebSocket>>,         /* Connection with Danmu Host Server */
+pub struct LiveMsgStreamClient {
+    client: Client,                                    /* Http Client */
+    uid: u64,                                          /* BiliBili Account */
+    room_id: u64,                                      /* Room ID */
+    token: String,                                     /* Token */
+    host_list: Vec<HostServer>,                        /* Danmu Host Server List */
+    host_index: u8,                                    /* Index of Danmu Host Server Connected */
+    on_event: Option<Channel<MessageEvent>>,           /* Tauri Channel */
+    conn_write: Option<SplitSink<WebSocket, Message>>, /* WebSocket Sink */
+    conn_read: Option<SplitStream<WebSocket>>,         /* WebSocket Stream */
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -391,9 +259,9 @@ struct HostServer {
     wss_port: u32,
 }
 
-impl LiveStreamClient {
+impl LiveMsgStreamClient {
     pub fn new(room_id: u64, on_event: Channel<MessageEvent>) -> Self {
-        LiveStreamClient {
+        LiveMsgStreamClient {
             room_id,
             on_event: Some(on_event),
             ..Default::default()
@@ -410,69 +278,60 @@ impl LiveStreamClient {
             ))
             .send()
             .await?;
-        // convert to 'serde_json::Value' instance
-        let json: serde_json::Value = serde_json::from_str(&resp.text().await?).unwrap();
-        let token = json["data"]["token"].as_str().unwrap();
-        self.token = token.to_owned();
-        // extract the danmu host server list and append into 'self.host_list'
-        let host_list_raw = json["data"]["host_list"].as_array().unwrap();
-        for obj in host_list_raw {
-            self.host_list.push(HostServer::deserialize(obj).unwrap());
-        }
 
+        let json: serde_json::Value = resp.json().await?;
+        self.token = json["data"]["token"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string();
+        if let Some(host_list) = json["data"]["host_list"].as_array() {
+            for obj in host_list {
+                if let Ok(host_server) = serde_json::from_value(obj.clone()) {
+                    self.host_list.push(host_server);
+                }
+            }
+        }
         Ok(())
     }
 
-    async fn shake_hands(&mut self) {
+    async fn shake_hands(&mut self) -> Result<(), Error> {
         for (index, item) in self.host_list.iter().enumerate() {
-            match self
+            if let Ok(upgrade_response) = self
                 .client
-                .get(format!("wss://{}:{}/sub", item.host, item.port))
+                .get(format!("wss://{}:{}/sub", item.host, item.wss_port))
                 .upgrade()
                 .send()
                 .await
             {
-                Ok(upgrade_response) => match upgrade_response.into_websocket().await {
-                    Ok(conn) => {
-                        let (sender, receiver) = conn.split();
-                        self.conn_read = Some(receiver);
-                        self.conn_write = Some(sender);
-                        self.host_index = index as u8;
-                        break;
-                    }
-                    Err(e) => eprintln!("{:#?}", e),
-                },
-                Err(e) => eprintln!("{:#?}", e),
+                if let Ok(conn) = upgrade_response.into_websocket().await {
+                    let (sender, receiver) = conn.split();
+                    self.conn_read = Some(receiver);
+                    self.conn_write = Some(sender);
+                    self.host_index = index as u8;
+                    return Ok(());
+                }
+            }
+        }
+        Err(Error::Stream("Failed to connect to server.".to_string()))
+    }
+
+    async fn send(&mut self, data: &[u8]) {
+        if let Some(conn_write) = self.conn_write.as_mut() {
+            if let Err(e) = conn_write.send(Message::from(data)).await {
+                error!("Failed to send message: {:?}", e);
             }
         }
     }
 
-    async fn send(&mut self, data: &[u8]) {
-        match self
-            .conn_write
-            .as_mut()
-            .unwrap()
-            .send(Message::from(data))
-            .await
-        {
-            Err(e) => eprintln!("{:#?}", e),
-            _ => {}
+    async fn read(&mut self) -> Option<Vec<u8>> {
+        if let Some(conn_read) = self.conn_read.as_mut() {
+            if let Ok(Some(message)) = conn_read.try_next().await {
+                if let Message::Binary(packet) = message {
+                    return Some(packet);
+                }
+            }
         }
-    }
-
-    async fn read(&mut self) -> Vec<u8> {
-        match self
-            .conn_read
-            .as_mut()
-            .unwrap()
-            .try_next()
-            .await
-            .unwrap()
-            .unwrap()
-        {
-            Message::Binary(packet) => packet,
-            _ => vec![],
-        }
+        None
     }
 
     pub async fn send_auth(&mut self) {
@@ -500,12 +359,12 @@ impl LiveStreamClient {
         self.send(&heartbeat_packet).await;
     }
 
-    pub async fn connect(&mut self) -> Result<SplitSink<WebSocket, Message>, reqwest::Error> {
+    pub async fn connect(&mut self) -> Result<SplitSink<WebSocket, Message>, Error> {
         // initialize danmu client
         self.init_client().await?;
 
         // shake hands
-        self.shake_hands().await;
+        let _ = self.shake_hands().await?;
 
         // send authentication pack
         self.send_auth().await;
@@ -513,19 +372,93 @@ impl LiveStreamClient {
         if let Some(conn_write) = self.conn_write.take() {
             Ok(conn_write)
         } else {
-            panic!("Connecting bilibili danmaku server failed.");
+            Err(Error::Stream("Failed to connect to server.".to_string()))
         }
     }
 
     pub async fn receive(&mut self) {
-        let msg = self.read().await;
-        if msg.len() >= 16 {
-            if msg[7] == 2 {
-                let data = decode_packet::<serde_json::Value>(msg);
-                let _ = self.on_event.take().unwrap().send(MessageEvent::Normal {
+        if let Some(msg) = self.read().await {
+            if msg.len() >= HEADER_SIZE as usize {
+                if let Some(header) = parse_packet_header(&msg) {
+                    let protocol = match ProtocolVersion::from_value(header.protocol_version) {
+                        Some(p) => p,
+                        None => {
+                            error!("Unknown protocol version: {}", header.protocol_version);
+                            return;
+                        }
+                    };
+                    let opcode = match Opcode::from_value(header.opcode) {
+                        Some(op) => op,
+                        None => {
+                            error!("Unknown opcode: {}", header.opcode);
+                            return;
+                        }
+                    };
+
+                    match opcode {
+                        Opcode::AuthReply => {
+                            if protocol == ProtocolVersion::HeartbeatAndAuthPacket {
+                                let packet_body = &msg[HEADER_SIZE as usize..];
+                                match serde_json::from_slice::<AuthReply>(packet_body) {
+                                    Ok(auth_reply) => {
+                                        if auth_reply.code == 0 {
+                                            let _ = self
+                                                .on_event
+                                                .as_mut()
+                                                .unwrap()
+                                                .send(MessageEvent::Auth { success: true });
+                                        } else {
+                                            error!("Authentication failed: {}", auth_reply.code);
+                                        }
+                                    }
+                                    Err(e) => {
+                                        error!("Failed to parse auth reply: {:?}", e);
+                                    }
+                                }
+                            }
+                        }
+                        Opcode::HeartbeatReply => {
+                            if protocol == ProtocolVersion::HeartbeatAndAuthPacket {
+                                let packet_body = &msg[HEADER_SIZE as usize..];
+                                if packet_body.len() >= 4 {
+                                    let popularity =
+                                        u32::from_be_bytes(packet_body[..4].try_into().unwrap());
+                                    let _ = self.on_event.as_mut().unwrap().send(
+                                        MessageEvent::Heartbeat {
+                                            success: true,
+                                            popularity,
+                                        },
+                                    );
+                                }
+                            }
+                        }
+                        Opcode::RegularPacket => {
+                            let packet_body = &msg[HEADER_SIZE as usize..];
+                            let decompressed_data = decompress_packet(protocol, packet_body);
+                            let packs = split_packets(&decompressed_data);
+                            for pack in packs {
+                                self.handle_msg(&pack).await;
+                            }
+                        }
+                        _ => {
+                            error!("Unsupported opcode: {:?}", opcode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    pub async fn handle_msg(&mut self, msg: &[u8]) {
+        match serde_json::from_slice::<serde_json::Value>(msg) {
+            Ok(json) => {
+                let _ = self.on_event.as_mut().unwrap().send(MessageEvent::Normal {
                     success: true,
-                    msg: data,
+                    msg: json,
                 });
+            }
+            Err(e) => {
+                error!("Failed to parse message as JSON: {:?}", e);
             }
         }
     }

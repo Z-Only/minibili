@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
-import { fetchDanmuInfo } from '@/apis/live/stream'
-import { liveMsgSstream, MessageEvent } from '@/service/commands'
+import { MessageEvent, initLiveStream } from '@/service/commands'
 import { Channel } from '@tauri-apps/api/core'
 
 // 获取路由参数
@@ -39,29 +38,16 @@ onEvent.onmessage = (message) => {
     }
 }
 
-const auth = async (id: number) => {
-    await fetchDanmuInfo(id).then(async (result) => {
-        await liveMsgSstream(
-            result.host_list[0].host,
-            result.host_list[0].wss_port,
-            id,
-            0,
-            result.token,
-            onEvent
-        )
-    })
-}
-
 onMounted(async () => {
     await fetchRoomInfo(roomId)
         .then((result) => {
             console.log('live room info: ', result)
         })
         .catch((err) => {
-            console.log('Failed to fetch live room info, ', err)
+            console.log('Failed to fetch live room info: ', err)
         })
 
-    await auth(roomId)
+    await initLiveStream(roomId, onEvent)
 })
 </script>
 

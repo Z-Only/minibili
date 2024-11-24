@@ -2,17 +2,12 @@ use crate::utils::download::{send_progress_event, write_buffer_to_file, Download
 use crate::utils::request::{
     fetch_cookie, request_with_sign, Error, GEETEST_CLIENT, GLOBAL_CLIENT,
 };
-use crate::utils::socket::{
-    authenticate, encode_packet, heartbeat, init_socket, receive_normal_packet, LiveStreamClient,
-    MessageEvent, Opcode,
-};
-use futures_util::stream::SplitSink;
-use futures_util::{SinkExt, StreamExt};
+use crate::utils::socket::{LiveMsgStreamClient, MessageEvent};
+use futures_util::StreamExt;
 use http::Method;
 use log::info;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use reqwest_websocket::Message;
 use serde_json;
 use std::fs::File;
 use std::str::FromStr;
@@ -169,103 +164,32 @@ pub async fn resolve_risk_check_issue() -> Result<(), Error> {
 }
 
 #[tauri::command]
-pub async fn live_msg_stream(
-    host: &str,
-    port: u16,
-    room_id: u64,
-    uid: Option<u64>,
-    auth_key: Option<&str>,
-    on_event: Channel<MessageEvent>,
-) -> Result<(), Error> {
-    // 构建一个 GET 请求，升级到 websocket 并发送
-    let web_socket = init_socket(host, port, "/sub").await?;
-    let web_socket = Arc::new(Mutex::new(web_socket));
-    let on_event = Arc::new(on_event);
-
-    // 认证
-    let mut ws_clone_auth = web_socket.clone();
-    let event_clone_auth = on_event.clone();
-
-    match authenticate(&mut ws_clone_auth, room_id, uid, auth_key).await {
-        Ok(_) => {
-            event_clone_auth.send(MessageEvent::Auth { success: true })?;
-        }
-        Err(_) => {
-            event_clone_auth.send(MessageEvent::Auth { success: false })?;
-        }
-    }
-
-    // 启动心跳任务
-    let mut ws_clone_heart = web_socket.clone();
-    let event_clone_heartbeat = on_event.clone();
-    tokio::spawn(async move {
-        loop {
-            match heartbeat(&mut ws_clone_heart).await {
-                Ok(popularity) => {
-                    let _ = event_clone_heartbeat.send(MessageEvent::Heartbeat {
-                        success: true,
-                        popularity,
-                    });
-                }
-                Err(_) => {
-                    let _ = event_clone_heartbeat.send(MessageEvent::Heartbeat {
-                        success: false,
-                        popularity: 0,
-                    });
-                    break;
-                }
-            }
-        }
-    });
-
-    // 循环接收普通数据包
-    let mut ws_clone_recv = web_socket.clone();
-    let event_clone_normal = on_event.clone();
-    loop {
-        match receive_normal_packet(&mut ws_clone_recv).await {
-            Ok(message) => {
-                let _ = event_clone_normal.send(MessageEvent::Normal {
-                    success: true,
-                    msg: message,
-                });
-            }
-            Err(_) => {
-                let _ = event_clone_normal.send(MessageEvent::Normal {
-                    success: false,
-                    msg: serde_json::Value::Null,
-                });
-                break;
-            }
-        }
-    }
-
-    // 注意这里没有关闭 web_socket，因为它是被多个任务共享的。
-    // 每个任务结束后会自动释放对 web_socket 的引用。
-    // 如果你需要显式地关闭连接，应该在所有任务完成后进行。
-
-    Ok(())
-}
-
-#[tauri::command]
 pub async fn init_live_stream(room_id: u64, on_event: Channel<MessageEvent>) -> Result<(), Error> {
-    let client: Arc<Mutex<LiveStreamClient>> =
-        Arc::new(Mutex::new(LiveStreamClient::new(room_id, on_event)));
+    // 创建客户端
+    let client = Arc::new(Mutex::new(LiveMsgStreamClient::new(room_id, on_event)));
 
     // 初始化连接，并进行认证
-    let mut sender = client.lock().await.connect().await?;
+    let _ = client.lock().await.connect().await?;
 
     // 启动心跳任务
-    tokio::spawn(async move {
-        tokio::time::sleep(Duration::from_secs(30)).await;
-
-        // 编码认证包
-        let heartbeat_packet = encode_packet::<Vec<u8>>(Opcode::Heartbeat, vec![]);
-        // 发送心跳包
-        match sender.send(Message::Binary(heartbeat_packet)).await {
-            Ok(_) => {}
-            Err(_) => {}
+    let heartbeat_client = Arc::clone(&client);
+    let heartbeat = tokio::spawn(async move {
+        loop {
+            // 每 30 秒发送一次心跳包
+            tokio::time::sleep(Duration::from_secs(30)).await;
+            heartbeat_client.lock().await.send_heart_beat().await;
         }
     });
+
+    // 启动接收任务
+    let receive_client = Arc::clone(&client);
+    let msg = tokio::spawn(async move {
+        loop {
+            receive_client.lock().await.receive().await;
+        }
+    });
+
+    tokio::join!(heartbeat, msg).0.unwrap();
 
     Ok(())
 }
