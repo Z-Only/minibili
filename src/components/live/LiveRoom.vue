@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
-import { MessageEvent, initLiveStream } from '@/service/commands'
+import { MessageEvent, monitorLiveMsgStream } from '@/service/commands'
 import { Channel } from '@tauri-apps/api/core'
-import { CmdMsg } from '@/apis/types/live-stream-msg'
+import { CmdMsg, DanmuInfo, InfoObject } from '@/apis/types/live-msg-stream'
 
 // 获取路由参数
 const route = useRoute()
 const roomId = Number(route.params.id as string)
 
-const danmuMsgList: Ref<CmdMsg[]> = ref([])
+const danmuInfos: Ref<DanmuInfo[]> = ref([])
 
 const onEvent = new Channel<MessageEvent>()
 
@@ -32,12 +32,32 @@ onEvent.onmessage = (message) => {
             if (message.data.success) {
                 let msg = JSON.parse(message.data.msg) as CmdMsg
                 switch (msg.cmd) {
-                    case 'DANMU_MSG':
-                        console.log('弹幕消息类型')
-                        danmuMsgList.value.push(msg)
+                    case 'DANMU_MSG': {
+                        console.log('弹幕消息类型: ', msg)
+                        if (
+                            msg.info &&
+                            Array.isArray(msg.info) &&
+                            msg.info[0] &&
+                            typeof (msg.info[0] as InfoObject[])[15] ===
+                                'object'
+                        ) {
+                            let danmuSuplyInfo = (
+                                msg.info[0] as InfoObject[]
+                            )[15] as InfoObject
+                            if (
+                                danmuSuplyInfo &&
+                                typeof danmuSuplyInfo.extra === 'string'
+                            ) {
+                                let danmuInfo = JSON.parse(
+                                    danmuSuplyInfo.extra
+                                ) as DanmuInfo
+                                danmuInfos.value.push(danmuInfo)
+                            }
+                        }
                         break
+                    }
                     default:
-                        console.log('其它消息类型: ', msg.cmd)
+                        console.log('其它消息类型: ', msg)
                         break
                 }
             } else {
@@ -56,11 +76,11 @@ onMounted(async () => {
             console.log('Failed to fetch live room info: ', err)
         })
 
-    await initLiveStream(roomId, onEvent)
+    await monitorLiveMsgStream(roomId, onEvent)
 })
 </script>
 
 <template>
     <h1>Live {{ roomId }}</h1>
-    <danmu-card :danmus="danmuMsgList" />
+    <danmu-card :danmus="danmuInfos" />
 </template>

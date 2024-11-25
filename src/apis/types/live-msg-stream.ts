@@ -10,7 +10,7 @@ export interface CmdMsg {
         | WatchedChangeData
         | DmInteractionData
     dm_v2?: string
-    info?: Array<string[] | number | null | InfoObject | string>
+    info?: Array<string[] | number | null | InfoObject | string | InfoObject[]>
 }
 
 // ENTRY_EFFECT
@@ -150,6 +150,68 @@ export interface GuardLeader {
 export interface Title {
     old_title_css_id: string
     title_css_id: string
+}
+
+// 弹幕 (DANMU_MSG) JSON消息 info[0][15] 对象
+export interface DanmuInfo {
+    animation: { [key: string]: any }
+    anniversary_crowd: number
+    bulge_display: number
+    color: number
+    content: string
+    direction: number
+    dm_type: number
+    emoticon_unique: string
+    emots: Emots
+    font_size: number
+    hit_combo: number
+    icon: Icon
+    id_str: string
+    is_audited: boolean
+    jump_to_url: string
+    main_state_dm_color: string
+    mode: number
+    objective_state_dm_color: string
+    pk_direction: number
+    player_mode: number
+    quartet_direction: number
+    recommend_score: number
+    reply_is_mystery: boolean
+    reply_mid: number
+    reply_uname: string
+    reply_uname_color: string
+    send_from_me: boolean
+    show_player_type: number
+    show_reply: boolean
+    space_type: string
+    space_url: string
+    user_hash: string
+    yeah_space_type: string
+    yeah_space_url: string
+}
+
+export interface Emots {
+    [property: string]: any
+}
+
+export interface 热 {
+    count: number
+    descript: string
+    emoji: string
+    emoticon_id: number
+    emoticon_unique: string
+    height: number
+    url: string
+    width: number
+}
+
+export interface Icon {
+    prefix: Prefix
+}
+
+export interface Prefix {
+    resource: string
+    type: number
 }
 
 // 进场或关注消息 (INTERACT_WORD)
