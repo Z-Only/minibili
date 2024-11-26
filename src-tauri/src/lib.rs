@@ -31,7 +31,8 @@ pub fn run() {
             commands::geetest_get,
             commands::open_devtools,
             commands::resolve_risk_check_issue,
-            commands::monitor_live_msg_stream
+            commands::monitor_live_msg_stream,
+            commands::stop_monitor_live_msg_stream
         ])
         .setup(|app| {
             // 创建菜单项

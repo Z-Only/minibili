@@ -161,3 +161,9 @@ export const monitorLiveMsgStream = async (
         onEvent,
     })
 }
+
+export const stopMonitorLiveMsgStream = async (roomId: number) => {
+    return await invoke('stop_monitor_live_msg_stream', {
+        roomId,
+    })
+}

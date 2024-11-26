@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
-import { MessageEvent, monitorLiveMsgStream } from '@/service/commands'
+import {
+    MessageEvent,
+    monitorLiveMsgStream,
+    stopMonitorLiveMsgStream,
+} from '@/service/commands'
 import { Channel } from '@tauri-apps/api/core'
 import { CmdMsg, DanmuInfo, InfoObject } from '@/apis/types/live-msg-stream'
 
@@ -77,6 +81,10 @@ onMounted(async () => {
         })
 
     await monitorLiveMsgStream(roomId, onEvent)
+})
+
+onBeforeUnmount(async () => {
+    await stopMonitorLiveMsgStream(roomId)
 })
 </script>
 

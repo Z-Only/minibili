@@ -238,6 +238,7 @@ pub enum MessageEvent {
 #[derive(Default)]
 pub struct LiveMsgStreamClient {
     client: Client,                                    /* Http Client */
+    stop_signal: bool,                                 /* Stop Signal */
     uid: u64,                                          /* BiliBili Account */
     room_id: u64,                                      /* Room ID */
     token: String,                                     /* Token */
@@ -459,5 +460,13 @@ impl LiveMsgStreamClient {
                 error!("Failed to parse message as JSON: {:?}", e);
             }
         }
+    }
+
+    pub fn stop(&mut self) {
+        self.stop_signal = true;
+    }
+
+    pub fn stopped(&mut self) -> bool {
+        self.stop_signal
     }
 }

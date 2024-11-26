@@ -5,19 +5,19 @@ use crate::utils::request::{
 use crate::utils::socket::{LiveMsgStreamClient, MessageEvent};
 use futures_util::StreamExt;
 use http::Method;
-use log::info;
+use log::{error, info};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tauri::ipc::Channel;
 use tauri::AppHandle;
 use tauri::Manager;
-use tokio::sync::Mutex as AsyncMutex;
+use tokio::sync::Mutex;
 
 #[tauri::command]
 pub async fn fetch(
@@ -165,7 +165,7 @@ pub async fn resolve_risk_check_issue() -> Result<(), Error> {
 }
 
 // 定义全局的客户端映射，使用 Mutex 保证线程安全
-static CLIENT_MAP: Lazy<Mutex<HashMap<u64, Arc<AsyncMutex<LiveMsgStreamClient>>>>> =
+static CLIENT_MAP: Lazy<Mutex<HashMap<u64, Arc<Mutex<LiveMsgStreamClient>>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 #[tauri::command]
@@ -175,14 +175,14 @@ pub async fn monitor_live_msg_stream(
 ) -> Result<(), Error> {
     // 检查并获取客户端
     let client = {
-        let mut map = CLIENT_MAP.lock().unwrap();
-        if let Some(client) = map.get(&room_id) {
+        let mut map_guard = CLIENT_MAP.lock().await;
+        if let Some(client) = map_guard.get(&room_id) {
             // 如果客户端已存在，直接使用
             client.clone()
         } else {
             // 如果不存在，创建新的客户端并保存到映射中
-            let new_client = Arc::new(AsyncMutex::new(LiveMsgStreamClient::new(room_id, on_event)));
-            map.insert(room_id, new_client.clone());
+            let new_client = Arc::new(Mutex::new(LiveMsgStreamClient::new(room_id, on_event)));
+            map_guard.insert(room_id, new_client.clone());
             new_client
         }
     };
@@ -200,6 +200,9 @@ pub async fn monitor_live_msg_stream(
             // 每 30 秒发送一次心跳包
             tokio::time::sleep(Duration::from_secs(30)).await;
             let mut client_guard = heartbeat_client.lock().await;
+            if client_guard.stopped() {
+                break;
+            }
             client_guard.send_heart_beat().await;
         }
     });
@@ -209,6 +212,9 @@ pub async fn monitor_live_msg_stream(
     let msg = tokio::spawn(async move {
         loop {
             let mut client_guard = receive_client.lock().await;
+            if client_guard.stopped() {
+                break;
+            }
             client_guard.receive().await;
         }
     });
@@ -219,6 +225,22 @@ pub async fn monitor_live_msg_stream(
     }
     if let Err(e) = msg_result {
         return Err(Error::Stream(format!("Message task failed: {:?}", e)));
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn stop_monitor_live_msg_stream(room_id: u64) -> Result<(), Error> {
+    let mut map_guard = CLIENT_MAP.lock().await;
+    if let Some(client) = map_guard.get(&room_id) {
+        // 如果客户端已存在，直接停止
+        let client = Arc::clone(&client);
+        let mut client_guard = client.lock().await;
+        client_guard.stop();
+        map_guard.remove(&room_id);
+    } else {
+        error!("Client not found for room_id: {}", room_id);
     }
 
     Ok(())

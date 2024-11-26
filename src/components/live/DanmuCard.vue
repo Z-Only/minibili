@@ -15,7 +15,7 @@ withDefaults(
 <template>
     <v-layout height="300px">
         <v-infinite-scroll mode="manual" :items="danmus">
-            <template v-for="(item, index) in danmus" :key="index">
+            <template v-for="item in danmus" :key="item">
                 <div>
                     {{ item.content }}
                 </div>
