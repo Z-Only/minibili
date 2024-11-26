@@ -41,7 +41,7 @@
         "vidstack": "^1.12.12",
         "vite-plugin-vuetify": "^2.0.4",
         "vue": "^3.3.4",
-        "vue-router": "4",
+        "vue-router": "^4.5.0",
         "vuetify": "^3.7.4"
     },
     "devDependencies": {
@@ -49,7 +49,7 @@
         "@mdi/font": "^7.4.47",
         "@tauri-apps/cli": "^2",
         "@types/jsrsasign": "^10.5.14",
-        "@types/node": "^22.9.3",
+        "@types/node": "^22.10.0",
         "@types/qrcode": "^1.5.5",
         "@vitejs/plugin-vue": "^5.2.0",
         "eslint": "^9.15.0",
