@@ -30,14 +30,14 @@ pub enum ProtocolVersion {
 }
 
 impl ProtocolVersion {
-    // 方法根据值来获取枚举
+    /// 根据值获取对应的枚举项
     pub fn from_value(value: u16) -> Option<Self> {
         match value {
             0 => Some(Self::NormalPacket),
             1 => Some(Self::HeartbeatAndAuthPacket),
             2 => Some(Self::NormalPacketWithZlibCompression),
             3 => Some(Self::NormalPacketWithBrotliCompression),
-            _ => None, // 如果没有匹配的枚举，返回 None
+            _ => None,
         }
     }
 }
@@ -52,7 +52,7 @@ pub enum Opcode {
 }
 
 impl Opcode {
-    // 方法根据值来获取枚举
+    /// 根据值获取对应的枚举项
     pub fn from_value(value: u32) -> Option<Self> {
         match value {
             2 => Some(Self::Heartbeat),
@@ -60,7 +60,7 @@ impl Opcode {
             5 => Some(Self::RegularPacket),
             7 => Some(Self::AuthPacket),
             8 => Some(Self::AuthReply),
-            _ => None, // 如果没有匹配的枚举，返回 None
+            _ => None,
         }
     }
 }
@@ -111,17 +111,21 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
     // 数据包内容
     let package_body_binary = serde_json::to_vec(&packet_body).unwrap();
 
-    // 头部数据，字节序为大端
+    // 初始化头部信息
+    let body_len = package_body_binary.len() as u32;
+    let total_size = body_len + HEADER_SIZE as u32;
+
     let mut packet_header = PacketHeader {
-        total_size: (package_body_binary.len() as u32 + HEADER_SIZE as u32).to_be(), // 封包总大小 (头部大小 + 正文大小)
-        header_size: HEADER_SIZE.to_be(), // 头部大小 (一般为 0x0010, 即 16 字节)
-        protocol_version: 0,              // 协议版本
-        opcode: (op.clone() as u32).to_be(), // 操作码 (封包类型)
-        sequence: 0,                      // sequence, TODO: 每次发包时向上递增
+        total_size: total_size.to_be(),
+        header_size: HEADER_SIZE.to_be(),
+        protocol_version: 0,
+        opcode: (op.clone() as u32).to_be(),
+        sequence: 0,
     };
 
+    // 根据不同的操作码设置协议版本和其他字段
     match op {
-        Opcode::Heartbeat => {
+        Opcode::AuthPacket | Opcode::Heartbeat => {
             packet_header.protocol_version =
                 (ProtocolVersion::HeartbeatAndAuthPacket as u16).to_be();
             packet_header.sequence = 1_u32.to_be();
@@ -131,12 +135,6 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
                 (ProtocolVersion::NormalPacketWithZlibCompression as u16).to_be();
             packet_header.sequence = 1_u32.to_be();
         }
-        Opcode::AuthPacket => {
-            // 补全头部数据
-            packet_header.protocol_version =
-                (ProtocolVersion::HeartbeatAndAuthPacket as u16).to_be();
-            packet_header.sequence = 1_u32.to_be();
-        }
         _ => {
             error!("Unsupported opcode: {:?}", op)
         }
@@ -144,11 +142,19 @@ pub fn encode_packet<T: Serialize>(op: Opcode, packet_body: T) -> Vec<u8> {
 
     // 将认证包头部和正文数据合并
     let mut packet = bincode::serialize(&packet_header).unwrap();
-    packet.extend(package_body_binary);
+    packet.extend_from_slice(&package_body_binary);
 
     packet
 }
 
+/// 根据协议版本解压缩数据包
+///
+/// # 参数
+/// - `protocol_version`: 数据包使用的协议版本
+/// - `packet_body`: 需要解压缩的数据包内容
+///
+/// # 返回值
+/// - 解压缩后的数据包内容
 fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> Vec<u8> {
     match protocol_version {
         ProtocolVersion::NormalPacket => packet_body.to_vec(),
@@ -192,14 +198,26 @@ fn decompress_packet(protocol_version: ProtocolVersion, packet_body: &[u8]) -> V
 pub fn split_packets(data: &[u8]) -> Vec<Vec<u8>> {
     let mut packets = Vec::new();
     let mut offset = 0;
+
+    // 循环直到无法再读取完整的头部信息
     while offset + HEADER_SIZE as usize <= data.len() {
-        let total_size = u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap()) as usize;
+        let total_size = u32::from_be_bytes(
+            data[offset..offset + 4]
+                .try_into()
+                .expect("Failed to convert slice into array"),
+        ) as usize;
+
+        // 检查剩余数据是否足够构成完整的数据包
         if offset + total_size > data.len() {
             error!("Packet size exceeds available data.");
             break;
         }
+
+        // 提取数据包主体并加入到数据包列表中
         let packet_body = data[offset + HEADER_SIZE as usize..offset + total_size].to_vec();
         packets.push(packet_body);
+
+        // 更新偏移量至下一个数据包开始位置
         offset += total_size;
     }
     packets
@@ -257,7 +275,6 @@ struct HostServer {
     wss_port: u32,
 }
 
-// FIXME: 需要处理重新加载或退出页面后，连接没有中断并且 Channel 报错的问题
 impl LiveMsgStreamClient {
     pub fn new(room_id: u64, on_event: Channel<MessageEvent>) -> Self {
         LiveMsgStreamClient {
