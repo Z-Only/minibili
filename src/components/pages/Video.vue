@@ -129,20 +129,21 @@ onMounted(async () => {
         src.value = playUrlData.dash?.video[0]?.base_url || ''
     }
 
-    console.log('视频%s URL:%s', format, src.value)
+    console.log('视频[%s] URL:%s', format, src.value)
 })
 </script>
 
 <template>
     <v-card>
         <v-responsive>
-            <player
+            <video-player
                 :data="{
                     format,
                     src,
                     title: videoDetails ? videoDetails.title : '',
                     pic: videoDetails ? videoDetails.pic : '',
                 }"
+                v-if="src"
             />
         </v-responsive>
     </v-card>

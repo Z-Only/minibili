@@ -17,7 +17,6 @@ declare module 'vue' {
     LiveRoomCard: typeof import('./src/components/live/LiveRoomCard.vue')['default']
     Login: typeof import('./src/components/pages/Login.vue')['default']
     NotFound: typeof import('./src/components/pages/NotFound.vue')['default']
-    Player: typeof import('./src/components/player/Player.vue')['default']
     Popular: typeof import('./src/components/home/Popular.vue')['default']
     PopularPrecious: typeof import('./src/components/home/PopularPrecious.vue')['default']
     PopularSeries: typeof import('./src/components/home/PopularSeries.vue')['default']
@@ -35,5 +34,6 @@ declare module 'vue' {
     Space: typeof import('./src/components/pages/Space.vue')['default']
     Video: typeof import('./src/components/pages/Video.vue')['default']
     VideoCard: typeof import('./src/components/VideoCard.vue')['default']
+    VideoPlayer: typeof import('./src/components/player/VideoPlayer.vue')['default']
   }
 }
