@@ -10,7 +10,7 @@ const props = defineProps<{ data: PlayerData }>()
 const playerData = computed(() => props.data)
 
 // 播放器实例
-let player = null
+let player: Player | null = null
 
 onMounted(async () => {
     console.log('PlayerData: %o', playerData)
@@ -23,14 +23,14 @@ onMounted(async () => {
         loop: false, // 循环播放
         videoInit: true, // 没有设置poster的情况视频初始化显示视频首帧
         screenShot: true, // 开启截图功能
+        fluid: true, // 填满屏幕 （流式布局）
+        playbackRate: [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
+        // download: true, //设置download控件显示
 
         //视频地址
         url: playerData.value.src,
         //封面图
         poster: playerData.value.pic,
-        fluid: true, // 填满屏幕 （流式布局）
-        playbackRate: [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
-        // download: true, //设置download控件显示
     })
     player.on(Events.PLAY, (ev) => {
         console.log('-播放开始-', ev)
@@ -46,6 +46,12 @@ onMounted(async () => {
     })
 
     console.log('Player: %o', player)
+})
+
+onBeforeUnmount(() => {
+    if (player !== null) {
+        player.destroy()
+    }
 })
 </script>
 

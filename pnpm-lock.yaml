@@ -53,6 +53,9 @@ importers:
       xgplayer:
         specifier: ^3.0.20
         version: 3.0.20(core-js@3.39.0)
+      xgplayer-flv:
+        specifier: ^3.0.20
+        version: 3.0.20(core-js@3.39.0)(xgplayer@3.0.20(core-js@3.39.0))
     devDependencies:
       '@eslint/js':
         specifier: ^9.15.0
@@ -236,6 +239,10 @@ packages:
     resolution: {integrity: sha512-trGdfBdbD0l1ZPmcJ83eNxB9rbEax4ALFTF7fN386TMYbeCQbyme5cOEXQhbGXKebwGaB/J52w1mrklMcbgy6Q==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  '@babel/runtime@7.26.0':
+    resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
+    engines: {node: '>=6.9.0'}
 
   '@babel/types@7.25.6':
     resolution: {integrity: sha512-/l42B1qxpG6RdfYf343Uw1vmDjeNhneUXtzhojE7pDgfpEypmRhI6j1kr17XCVv4Cgl9HdAiQY2x0GwKm7rWCw==}
@@ -1414,6 +1421,11 @@ packages:
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
+  concat-typed-array@1.0.2:
+    resolution: {integrity: sha512-aC878bxeWSlrY6h60cCDwBUXpKwovZrB7+C4+VHNO1CIXW2gBLxbQ757jWtOXUscLGgYI8R84N6uy9fTJPe+0g==}
+    engines: {node: '>=0.10.0'}
+    deprecated: 'WARNING: This package has been renamed to typed-array-concat.'
+
   confbox@0.1.7:
     resolution: {integrity: sha512-uJcB/FKZtBMCJpK8MQji6bJHgu1tixKPxRLeGkNzBoOZzpnZUJm0jm2/sBDWcuBx1dYgxV4JU+g5hmNxCyAmdA==}
 
@@ -1443,6 +1455,9 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  crypto-es@1.2.7:
+    resolution: {integrity: sha512-UUqiVJ2gUuZFmbFsKmud3uuLcNP2+Opt+5ysmljycFCyhA0+T16XJmo1ev/t5kMChMqWh7IEvURNCqsg+SjZGQ==}
 
   css-functions-list@3.2.3:
     resolution: {integrity: sha512-IQOkD3hbR5KrN93MtcYuad6YPuTSUhntLHDuLEbFWE+ff2/XSZNdZG+LcbbIW5AXKg/WFIfYItIzVoHngHXZzA==}
@@ -2285,6 +2300,9 @@ packages:
     resolution: {integrity: sha512-GkMg9uOTpIWWKbSsgwb5fA4EavTR+SG/PMPoAY8hkhHfEEY0/vqljY+XHqtDf2cr2IJtoNRDbrrEpZUiZCkYRw==}
     engines: {node: '>= 14.16.0'}
 
+  regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
+
   regex@4.4.0:
     resolution: {integrity: sha512-uCUSuobNVeqUupowbdZub6ggI5/JZkYyJdDogddJr60L764oxC2pMZov1fQ3wM9bdyzUILDG+Sqx6NAKAz9rKQ==}
 
@@ -2890,8 +2908,24 @@ packages:
     resolution: {integrity: sha512-+QU2zd6OTD8XWIJCbffaiQeH9U73qIqafo1x6V1snCWYGJf6cVE0cDR4D8xRzcEnfI21IFrUPzPGtcPf8AC+Rw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
+  xgplayer-flv@3.0.20:
+    resolution: {integrity: sha512-iIF3COnIHB0SDmdZ6HRQ+Ve2p2K2acB7rfqsWLVbgGvhjLYFA/PqRS+4AdGQyg+yi87MnX4zsoho/I4M7rByFA==}
+    peerDependencies:
+      core-js: '>=3.12.1'
+      xgplayer: '>=3.0.1'
+
+  xgplayer-streaming-shared@3.0.20:
+    resolution: {integrity: sha512-Z7f/ozrEDUtT5g2y7y1wssuzIPpL8YXkq6f5UX6SI0qN+aC2/r5SlKpgCVaQMi3nynWiCjwoag6vJ+uf5HVEYA==}
+    peerDependencies:
+      core-js: '>=3.12.1'
+
   xgplayer-subtitles@3.0.20:
     resolution: {integrity: sha512-I1bjsIY+aKOrhYQspLdneOkYg+Vf4cJVGPnDSFnNebnxXl9Mhz5SEpWGzYizMYxL9UvsQ9pgjeEY0o4hkwM+kQ==}
+    peerDependencies:
+      core-js: '>=3.12.1'
+
+  xgplayer-transmuxer@3.0.20:
+    resolution: {integrity: sha512-WH1XV4ZBnZ5jTdMgz4R63K2ekw61leYzYzey3rjC0WSTMMufvwFQnJ0I1Jx5w7puSZqKwHpNl1a6CUDFlba+5A==}
     peerDependencies:
       core-js: '>=3.12.1'
 
@@ -3068,6 +3102,10 @@ snapshots:
   '@babel/parser@7.25.6':
     dependencies:
       '@babel/types': 7.25.6
+
+  '@babel/runtime@7.26.0':
+    dependencies:
+      regenerator-runtime: 0.14.1
 
   '@babel/types@7.25.6':
     dependencies:
@@ -4157,6 +4195,8 @@ snapshots:
 
   concat-map@0.0.1: {}
 
+  concat-typed-array@1.0.2: {}
+
   confbox@0.1.7: {}
 
   confbox@0.1.8: {}
@@ -4187,6 +4227,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  crypto-es@1.2.7: {}
 
   css-functions-list@3.2.3: {}
 
@@ -5007,6 +5049,8 @@ snapshots:
 
   readdirp@4.0.1: {}
 
+  regenerator-runtime@0.14.1: {}
+
   regex@4.4.0: {}
 
   require-directory@2.1.1: {}
@@ -5721,10 +5765,30 @@ snapshots:
       imurmurhash: 0.1.4
       signal-exit: 4.1.0
 
+  xgplayer-flv@3.0.20(core-js@3.39.0)(xgplayer@3.0.20(core-js@3.39.0)):
+    dependencies:
+      core-js: 3.39.0
+      eventemitter3: 4.0.7
+      xgplayer: 3.0.20(core-js@3.39.0)
+      xgplayer-streaming-shared: 3.0.20(core-js@3.39.0)
+      xgplayer-transmuxer: 3.0.20(core-js@3.39.0)
+
+  xgplayer-streaming-shared@3.0.20(core-js@3.39.0):
+    dependencies:
+      core-js: 3.39.0
+      eventemitter3: 4.0.7
+
   xgplayer-subtitles@3.0.20(core-js@3.39.0):
     dependencies:
       core-js: 3.39.0
       eventemitter3: 4.0.7
+
+  xgplayer-transmuxer@3.0.20(core-js@3.39.0):
+    dependencies:
+      '@babel/runtime': 7.26.0
+      concat-typed-array: 1.0.2
+      core-js: 3.39.0
+      crypto-es: 1.2.7
 
   xgplayer@3.0.20(core-js@3.39.0):
     dependencies:

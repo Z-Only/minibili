@@ -13,6 +13,7 @@ declare module 'vue' {
     DanmuCard: typeof import('./src/components/live/DanmuCard.vue')['default']
     Home: typeof import('./src/components/pages/Home.vue')['default']
     Live: typeof import('./src/components/live/Live.vue')['default']
+    LivePlayer: typeof import('./src/components/player/LivePlayer.vue')['default']
     LiveRoom: typeof import('./src/components/live/LiveRoom.vue')['default']
     LiveRoomCard: typeof import('./src/components/live/LiveRoomCard.vue')['default']
     Login: typeof import('./src/components/pages/Login.vue')['default']

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { fetchRoomInfo } from '@/apis/live/info'
+import { fetchLivePlayUrl } from '@/apis/live/stream'
 import {
     MessageEvent,
     monitorLiveMsgStream,
@@ -7,6 +8,8 @@ import {
 } from '@/service/commands'
 import { Channel } from '@tauri-apps/api/core'
 import { CmdMsg, DanmuInfo, InfoObject } from '@/apis/types/live-msg-stream'
+import { LiveInfoData } from '@/apis/types/live-info'
+import { LivePlayUrlData } from '@/apis/types/live-stream'
 
 // 获取路由参数
 const route = useRoute()
@@ -71,16 +74,29 @@ onEvent.onmessage = (message) => {
     }
 }
 
+const roomInfo = ref<LiveInfoData | null>(null)
+const livePlayUrlData = ref<LivePlayUrlData | null>(null)
+
 onMounted(async () => {
     await fetchRoomInfo(roomId)
         .then((result) => {
             console.log('live room info: ', result)
+            roomInfo.value = result
         })
         .catch((err) => {
             console.log('Failed to fetch live room info: ', err)
         })
 
-    await monitorLiveMsgStream(roomId, onEvent)
+    await fetchLivePlayUrl(roomId)
+        .then((result) => {
+            console.log('live play url: ', result)
+            livePlayUrlData.value = result
+        })
+        .catch((err) => {
+            console.log('Failed to fetch live play url: ', err)
+        })
+
+    monitorLiveMsgStream(roomId, onEvent)
 })
 
 onBeforeUnmount(async () => {
@@ -89,6 +105,17 @@ onBeforeUnmount(async () => {
 </script>
 
 <template>
-    <h1>Live {{ roomId }}</h1>
-    <danmu-card :danmus="danmuInfos" />
+    <div class="d-flex">
+        <v-responsive
+            ><live-player
+                v-if="livePlayUrlData && roomInfo"
+                :data="{
+                    src: livePlayUrlData ? livePlayUrlData.durl[0].url : '',
+                    title: roomInfo ? roomInfo.title : '',
+                    pic: roomInfo ? roomInfo.keyframe : '',
+                }"
+        /></v-responsive>
+
+        <danmu-card :danmus="danmuInfos" />
+    </div>
 </template>
