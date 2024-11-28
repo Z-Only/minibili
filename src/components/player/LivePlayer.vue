@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PlayerData } from '@/common/types/props'
 import Player from 'xgplayer'
-import FlvPlayer from 'xgplayer-flv'
+import FlvPlugin from 'xgplayer-flv'
 import 'xgplayer/dist/index.min.css'
 
 // 定义组件接收的 props
@@ -18,25 +18,16 @@ onMounted(async () => {
 
     player = new Player({
         id: 'xg', // 占位元素id
-        lang: 'zh',
-        isLive: true,
-        preloadTime: 30,
-        minCachedTime: 5,
-        cors: true,
+        url: playerData.value.src, // 视频地址
 
-        //视频地址
-        url: playerData.value.src,
-        //封面图
-        poster: playerData.value.pic,
+        width: '100%', // 宽度
+        height: '100%', // 高度
+        volume: 0, // 默认静音
+        poster: playerData.value.pic, // 封面图
+        lang: 'zh-cn',
+        fluid: true, // 流式布局
 
-        flv: {
-            disconnectTime: 0,
-            retryDelay: 2000,
-            loadTimeout: 5000,
-            bufferBehind: 1000,
-            retryCount: 3,
-        },
-        plugins: [FlvPlayer],
+        plugins: [FlvPlugin],
     })
 
     console.log('Player: %o', player)

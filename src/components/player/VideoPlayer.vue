@@ -17,20 +17,14 @@ onMounted(async () => {
 
     player = new Player({
         id: 'xg', // 占位元素id
-        lang: 'zh', // 设置中文
-        volume: 0, // 默认静音
-        autoplay: false, // 自动播放
-        loop: false, // 循环播放
-        videoInit: true, // 没有设置poster的情况视频初始化显示视频首帧
-        screenShot: true, // 开启截图功能
-        fluid: true, // 填满屏幕 （流式布局）
-        playbackRate: [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
-        // download: true, //设置download控件显示
+        url: playerData.value.src, // 视频地址
 
-        //视频地址
-        url: playerData.value.src,
-        //封面图
-        poster: playerData.value.pic,
+        width: '100%', // 宽度
+        height: '100%', // 高度
+        volume: 0, // 默认静音
+        poster: playerData.value.pic, // 封面图
+        lang: 'zh-cn',
+        fluid: true, // 流式布局
     })
     player.on(Events.PLAY, (ev) => {
         console.log('-播放开始-', ev)
