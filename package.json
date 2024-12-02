@@ -46,7 +46,7 @@
         "xgplayer-flv": "^3.0.20"
     },
     "devDependencies": {
-        "@eslint/js": "^9.15.0",
+        "@eslint/js": "^9.16.0",
         "@mdi/font": "^7.4.47",
         "@tauri-apps/cli": "^2",
         "@types/jsrsasign": "^10.5.14",
