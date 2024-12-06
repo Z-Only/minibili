@@ -1,4 +1,5 @@
 use crate::utils::request;
+use anyhow::{Ok, Result};
 use http::Method;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
@@ -56,7 +57,7 @@ fn get_url_encoded(s: &str) -> String {
 // 为请求参数进行 wbi 签名
 fn encode_wbi(params: Vec<(&str, String)>, (img_key, sub_key): (String, String)) -> String {
     let cur_time = match SystemTime::now().duration_since(UNIX_EPOCH) {
-        Ok(t) => t.as_secs(),
+        Result::Ok(t) => t.as_secs(),
         Err(_) => panic!("SystemTime before UNIX EPOCH!"),
     };
     _encode_wbi(params, (img_key, sub_key), cur_time)
@@ -92,7 +93,7 @@ pub struct ApiResult<T> {
     pub data: T,
 }
 
-async fn get_wbi_keys() -> Result<(String, String), request::Error> {
+async fn get_wbi_keys() -> Result<(String, String)> {
     let Data { wbi_img } = request::handle_request::<ApiResult<Data>>(
         &Method::GET,
         "https://api.bilibili.com/x/web-interface/nav",

@@ -1,4 +1,4 @@
-use crate::utils::request::Error;
+use anyhow::{anyhow, Error, Ok, Result};
 use brotli::Decompressor;
 use flate2::read::ZlibDecoder;
 use futures_util::{
@@ -284,7 +284,7 @@ impl LiveMsgStreamClient {
         }
     }
 
-    async fn init_client(&mut self) -> Result<(), reqwest::Error> {
+    async fn init_client(&mut self) -> Result<()> {
         // send request to get token
         let resp = self
             .client
@@ -302,7 +302,7 @@ impl LiveMsgStreamClient {
             .to_string();
         if let Some(host_list) = json["data"]["host_list"].as_array() {
             for obj in host_list {
-                if let Ok(host_server) = serde_json::from_value(obj.clone()) {
+                if let Result::Ok(host_server) = serde_json::from_value(obj.clone()) {
                     self.host_list.push(host_server);
                 }
             }
@@ -310,16 +310,16 @@ impl LiveMsgStreamClient {
         Ok(())
     }
 
-    async fn shake_hands(&mut self) -> Result<(), Error> {
+    async fn shake_hands(&mut self) -> Result<()> {
         for (index, item) in self.host_list.iter().enumerate() {
-            if let Ok(upgrade_response) = self
+            if let Result::Ok(upgrade_response) = self
                 .client
                 .get(format!("wss://{}:{}/sub", item.host, item.wss_port))
                 .upgrade()
                 .send()
                 .await
             {
-                if let Ok(conn) = upgrade_response.into_websocket().await {
+                if let Result::Ok(conn) = upgrade_response.into_websocket().await {
                     let (sender, receiver) = conn.split();
                     self.conn_read = Some(receiver);
                     self.conn_write = Some(sender);
@@ -328,7 +328,7 @@ impl LiveMsgStreamClient {
                 }
             }
         }
-        Err(Error::Stream("Failed to connect to server.".to_string()))
+        Err(anyhow!("Failed to connect to server."))
     }
 
     async fn send(&mut self, data: &[u8]) {
@@ -341,7 +341,7 @@ impl LiveMsgStreamClient {
 
     async fn read(&mut self) -> Option<Vec<u8>> {
         if let Some(conn_read) = self.conn_read.as_mut() {
-            if let Ok(Some(message)) = conn_read.try_next().await {
+            if let Result::Ok(Some(message)) = conn_read.try_next().await {
                 if let Message::Binary(packet) = message {
                     return Some(packet);
                 }
@@ -388,7 +388,7 @@ impl LiveMsgStreamClient {
         if let Some(conn_write) = self.conn_write.take() {
             Ok(conn_write)
         } else {
-            Err(Error::Stream("Failed to connect to server.".to_string()))
+            Err(anyhow!("Failed to connect to server."))
         }
     }
 
@@ -416,7 +416,7 @@ impl LiveMsgStreamClient {
                             if protocol == ProtocolVersion::HeartbeatAndAuthPacket {
                                 let packet_body = &msg[HEADER_SIZE as usize..];
                                 match serde_json::from_slice::<AuthReply>(packet_body) {
-                                    Ok(auth_reply) => {
+                                    Result::Ok(auth_reply) => {
                                         if auth_reply.code == 0 {
                                             let _ = self
                                                 .on_event
@@ -467,7 +467,7 @@ impl LiveMsgStreamClient {
 
     pub async fn handle_msg(&mut self, msg: &[u8]) {
         match serde_json::from_slice::<serde_json::Value>(msg) {
-            Ok(json) => {
+            Result::Ok(json) => {
                 let _ = self.on_event.as_mut().unwrap().send(MessageEvent::Normal {
                     success: true,
                     msg: json.to_string(),

@@ -1,21 +1,51 @@
+use crate::core::handle;
 use crate::utils::wbi;
+use anyhow::{anyhow, Ok, Result};
 use http::Method;
 use log::info;
 use once_cell::sync::Lazy;
+use reqwest::cookie::Jar;
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, REFERER, USER_AGENT};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::io;
+use serde_json::json;
+use std::sync::Arc;
 use std::time::Duration;
-use thiserror;
+use tauri_plugin_store::StoreExt;
 use url::Url;
 
-const HOST: &str = "https://www.bilibili.com";
+pub const HOST: &str = "https://www.bilibili.com";
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(30);
 const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 const ACCEPT_VALUE: &str = "Accept: application/json, text/plain, */*";
 const ACCEPT_ENCODING_VALUE: &str = "Accept-Encoding: gzip, deflate, br";
 const MAX_RETRIES: u8 = 3;
+
+pub static COOKIE_JAR: Lazy<Arc<Jar>> = Lazy::new(|| Arc::new(Jar::default()));
+pub static COOKIE_STORE_PATH: &str = "cookie_store.bin";
+pub static COOKIE_STORE_KEY: &str = "cookie";
+
+pub async fn store_cookie(cookie_str: &str) -> Result<()> {
+    let app_handle = handle::Handle::global().app_handle.lock().unwrap();
+    let app_handle = app_handle.as_ref().unwrap();
+    let store = app_handle.store(COOKIE_STORE_PATH)?;
+
+    store.set(COOKIE_STORE_KEY, json!(cookie_str));
+
+    Ok(())
+}
+
+pub async fn init_cookie() {
+    let app_handle = handle::Handle::global().app_handle.lock().unwrap();
+    let app_handle = app_handle.as_ref().unwrap();
+    let store = app_handle.store(COOKIE_STORE_PATH).unwrap();
+
+    if let Some(cookie) = store.get(COOKIE_STORE_KEY) {
+        let cookie_jar = COOKIE_JAR.clone();
+        let host_url = url::Url::parse(HOST).unwrap();
+        cookie_jar.add_cookie_str(cookie.as_str().unwrap(), &host_url);
+    }
+}
 
 pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
     // 创建一个 HeaderMap
@@ -28,11 +58,22 @@ pub static GLOBAL_CLIENT: Lazy<Client> = Lazy::new(|| {
         HeaderValue::from_static(ACCEPT_ENCODING_VALUE),
     );
 
+    // 创建一个 Cookie jar
+    // let cookie_jar = Jar::default();
+    // let cookie_jar = Arc::new(cookie_jar);
+    // let host_url = Url::parse(HOST).expect("Failed to parse HOST as URL");
+    // COOKIE_JAR.add_cookie_str(cookie, &host_url);
+
+    // if let Ok(file) = std::fs::File::open("cookies.json").map(std::io::BufReader::new) {
+    //     // use re-exported version of `CookieStore` for crate compatibility
+    //     reqwest_cookie_store::CookieStore::load_json(file).unwrap()
+    // };
+
     // 创建一个 Client
     Client::builder()
         .default_headers(headers)
         .connect_timeout(CONNECT_TIMEOUT)
-        .cookie_store(true)
+        .cookie_provider(COOKIE_JAR.clone())
         .build()
         .expect("Failed to build global reqwest client")
 });
@@ -56,56 +97,7 @@ pub static GEETEST_CLIENT: Lazy<Client> = Lazy::new(|| {
         .expect("Failed to build geetest reqwest client")
 });
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    Reqwest(#[from] reqwest::Error),
-    #[error("HTTP error: {0}")]
-    StatusCode(String),
-    #[error(transparent)]
-    Io(#[from] io::Error),
-    #[error("parse error: {0}")]
-    Parse(String),
-    #[error("tauri error: {0}")]
-    Tauri(#[from] tauri::Error),
-    #[error(transparent)]
-    Socket(#[from] reqwest_websocket::Error),
-    #[error("stream error: {0}")]
-    Stream(String),
-}
-
-#[derive(serde::Serialize)]
-#[serde(tag = "kind", content = "message", rename_all = "camelCase")]
-enum ErrorKind {
-    Reqwest(String),
-    StatusCode(String),
-    Io(String),
-    Parse(String),
-    Tauri(String),
-    Socket(String),
-    Stream(String),
-}
-
-impl serde::Serialize for Error {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        let error_message = self.to_string();
-        let error_kind = match self {
-            Self::Reqwest(_) => ErrorKind::Reqwest(error_message),
-            Self::StatusCode(_) => ErrorKind::StatusCode(error_message),
-            Self::Io(_) => ErrorKind::Io(error_message),
-            Self::Parse(_) => ErrorKind::Parse(error_message),
-            Self::Tauri(_) => ErrorKind::Tauri(error_message),
-            Self::Socket(_) => ErrorKind::Socket(error_message),
-            Self::Stream(_) => ErrorKind::Stream(error_message),
-        };
-        error_kind.serialize(serializer)
-    }
-}
-
-pub async fn fetch_cookie() -> Result<(), Error> {
+pub async fn fetch_cookie() -> Result<()> {
     GLOBAL_CLIENT.get(HOST).send().await?;
     Ok(())
 }
@@ -115,7 +107,7 @@ pub async fn handle_request<T>(
     url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
-) -> Result<T, Error>
+) -> Result<T>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
@@ -157,12 +149,12 @@ where
                 fetch_cookie().await?;
                 continue;
             } else {
-                return Err(Error::StatusCode(status.to_string()));
+                return Err(anyhow!("Max retries reached."));
             }
         }
 
         if !status.is_success() {
-            return Err(Error::StatusCode(status.to_string()));
+            return Err(anyhow!("Request failed with status code: {:?}", status));
         }
 
         return Ok(res.json::<T>().await?);
@@ -174,12 +166,12 @@ pub async fn request_with_sign<T>(
     url: &str,
     params: Option<&serde_json::Value>,
     data: Option<&serde_json::Value>,
-) -> Result<T, Error>
+) -> Result<T>
 where
     T: for<'de> Deserialize<'de> + Serialize,
 {
     let signed_params = wbi::sign_params(params).await;
-    let mut url = Url::parse(url).map_err(|e| Error::Parse(e.to_string()))?;
+    let mut url = Url::parse(url)?;
     url.set_query(Some(&signed_params));
     handle_request::<T>(&method, &url.to_string(), None, data).await
 }

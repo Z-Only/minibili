@@ -1,3 +1,4 @@
+pub mod dirs;
 pub mod download;
 pub mod request;
 pub mod resolve;

@@ -1,4 +1,4 @@
-use crate::utils::request::Error;
+use anyhow::{Ok, Result};
 use serde::Serialize;
 use std::fs::File;
 use std::io::Write;
@@ -26,7 +26,7 @@ pub enum DownloadEvent<'a> {
     Finished { download_id: usize },
 }
 
-pub fn write_buffer_to_file(file: &mut File, buffer: &[u8]) -> Result<(), std::io::Error> {
+pub fn write_buffer_to_file(file: &mut File, buffer: &[u8]) -> Result<()> {
     file.write_all(buffer)?;
     Ok(())
 }
@@ -37,7 +37,7 @@ pub fn send_progress_event(
     content_length: usize,
     downloaded_bytes: usize,
     start_time: Instant,
-) -> Result<(), Error> {
+) -> Result<()> {
     let elapsed = start_time.elapsed().as_secs_f64();
     let speed = downloaded_bytes as f64 / elapsed;
 

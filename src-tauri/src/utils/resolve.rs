@@ -1,8 +1,18 @@
+use crate::core::{handle, tray};
+use crate::utils::request::init_cookie;
+use anyhow::{Ok, Result};
 use tauri::{App, Manager};
 
-use crate::core::{handle, tray};
-
 pub async fn resolve_setup(app: &mut App) {
-    handle::Handle::global().init(app.app_handle());
-    tray::Tray::init_tray(app.app_handle());
+    let app_handle = app.app_handle();
+    handle::Handle::global().init(app_handle);
+    tray::Tray::init_tray(app_handle);
+
+    init_resource().await.unwrap();
+}
+
+pub async fn init_resource() -> Result<()> {
+    init_cookie().await;
+
+    Ok(())
 }
