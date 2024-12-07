@@ -84,12 +84,5 @@ export default defineConfig(({ mode }) => {
         esbuild: {
             drop: env.MODE === 'production' ? ['console', 'debugger'] : [],
         },
-        css: {
-            preprocessorOptions: {
-                scss: {
-                    api: 'modern-compiler',
-                },
-            },
-        },
     }
 })
