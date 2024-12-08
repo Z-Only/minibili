@@ -47,19 +47,19 @@ const load = async ({
 }: {
     done: (status: InfiniteScrollStatus) => void
 }) => {
-    console.log('Loading more items, seriesNumber: %d.', seriesNumber)
+    console.log('Loading more items, seriesNumber: %d.', seriesNumber.value)
 
     if (seriesNumber.value < 1) {
         done('empty')
     }
 
     await getPopularSeriesVideos(seriesNumber.value)
-        .then((res) => {
-            if (!res) {
-                done('empty')
-            } else {
+        .then((success) => {
+            if (success) {
                 seriesNumber.value--
                 done('ok')
+            } else {
+                done('empty')
             }
         })
         .catch(() => {

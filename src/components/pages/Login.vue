@@ -8,8 +8,10 @@ import {
 } from '@/apis/login/qrcode'
 import { CaptchaCardData } from '@/common/types/emits'
 
+const router = useRouter()
+
 // 二维码有效期（单位毫秒）
-const EXPIRED_TIME_MS = 5_000 // HACK: 官方默认时间是 180s，为了不影响测试，这里设置为 5s
+const EXPIRED_TIME_MS = 180_000
 // 轮询间隔时间（单位毫秒）
 const INTERVAL_TIME_MS = 1000
 
@@ -85,7 +87,7 @@ function handlePollStatus(res: PollQrcode) {
  * 跳转到主页
  */
 const toHome = () => {
-    useRouter().push({ name: 'Home' })
+    router.push({ name: 'Home' })
 }
 
 const tab = ref(1)

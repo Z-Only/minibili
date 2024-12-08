@@ -7,16 +7,16 @@ const baseTabs: Ref<TabItem[]> = ref([
         text: '推荐',
         value: 'recommend',
     },
-    {
-        icon: 'mdi-gift-outline',
-        text: '入站必刷',
-        value: 'precious',
-    },
     { icon: 'mdi-fire', text: '热门', value: 'hot' },
     {
         icon: 'mdi-television-classic',
         text: '每周必看',
         value: 'must-see',
+    },
+    {
+        icon: 'mdi-gift-outline',
+        text: '入站必刷',
+        value: 'precious',
     },
     {
         icon: 'mdi-fan',
@@ -153,10 +153,14 @@ const tabs: Ref<TabItem[]> = ref(baseTabs.value)
 const tab = ref('tab-' + tabs.value[0].value)
 
 const addItem = (item: TabItem) => {
-    tabs.value.push(item)
-    nextTick(() => {
-        tab.value = item.value
-    })
+    let exist = tabs.value.every((i) => i.value !== item.value)
+
+    if (exist) {
+        tabs.value.push(item)
+        nextTick(() => {
+            tab.value = 'tab-' + item.value
+        })
+    }
 }
 </script>
 
@@ -203,12 +207,12 @@ const addItem = (item: TabItem) => {
                 <v-layout style="height: calc(100vh - 64px)">
                     <recommend v-if="item.value === 'recommend'"></recommend>
                     <popular v-else-if="item.value === 'hot'"></popular>
-                    <popular-precious
-                        v-else-if="item.value === 'precious'"
-                    ></popular-precious>
                     <popular-series
                         v-else-if="item.value === 'must-see'"
                     ></popular-series>
+                    <popular-precious
+                        v-else-if="item.value === 'precious'"
+                    ></popular-precious>
                     <!-- 排行榜的入口 -->
                     <ranking v-else :rid="item.rid"></ranking
                 ></v-layout>

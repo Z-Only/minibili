@@ -23,8 +23,10 @@ const gotoTop = () => {
 }
 
 onMounted(async () => {
+    console.log('rid: ', rid)
     await fetchRanking(rid)
         .then((data) => {
+            console.log('ranking list: ', data)
             rankingVideos.value = data.list
         })
         .catch((error) => {
