@@ -46,7 +46,7 @@ reqwest-websocket = "0.4.3"
 bincode = "1.3.3"
 flate2 = "1.0.35"
 brotli = "7.0.0"
-anyhow = "1.0.93"
+anyhow = "1.0.94"
 fs = "0.0.5"
 
 [profile.dev]
