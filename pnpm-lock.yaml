@@ -29,9 +29,6 @@ importers:
       jsrsasign:
         specifier: ^11.1.0
         version: 11.1.0
-      jsrsasign-util:
-        specifier: ^1.0.5
-        version: 1.0.5
       pinia:
         specifier: ^2.3.0
         version: 2.3.0(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))
@@ -142,7 +139,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.1)(sass@1.82.0)(terser@5.34.1)
       vue-tsc:
-        specifier: 2.1.10
+        specifier: ^2.1.10
         version: 2.1.10(typescript@5.6.3)
 
 packages:
@@ -1943,12 +1940,6 @@ packages:
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
-
-  jsonc-parser@3.3.1:
-    resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
-
-  jsrsasign-util@1.0.5:
-    resolution: {integrity: sha512-e5Kp8aaT5GH2c5X8j4uaJruYmT4GcnaGb47nw8m60YqPywtnOtTISZ9hZgtZ3a+jh7B27bU2LCf3Y32wZyfhtQ==}
 
   jsrsasign@11.1.0:
     resolution: {integrity: sha512-Ov74K9GihaK9/9WncTe1mPmvrO7Py665TUfUKvraXBpu+xcTWitrtuOwcjf4KMU9maPaYn0OuaWy0HOzy/GBXg==}
@@ -4647,13 +4638,6 @@ snapshots:
   json-schema-traverse@1.0.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
-
-  jsonc-parser@3.3.1: {}
-
-  jsrsasign-util@1.0.5:
-    dependencies:
-      jsonc-parser: 3.3.1
-      jsrsasign: 11.1.0
 
   jsrsasign@11.1.0: {}
 
