@@ -31,7 +31,7 @@ impl Tray {
             .icon(app_handle.default_window_icon().unwrap().clone()) // 设置图标
             .tooltip("MiniBili") // 设置提示信息
             .menu(&create_menu(app_handle)) // 绑定菜单
-            .menu_on_left_click(false) // 左键点击不打开菜单
+            .show_menu_on_left_click(false) // 左键点击不打开菜单
             .on_menu_event(on_menu_event)
             .build(app_handle);
     }
