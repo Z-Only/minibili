@@ -1,3 +1,5 @@
+
+
 <p align="center">
     <img src="./src-tauri/icons/icon.png" width="128" height="128" />
 </p>
@@ -38,7 +40,7 @@ MiniBili 是使用 [Tauri v2](https://v2.tauri.app) 框架开发的跨端应用�
 
 1. [Tauri 前置依赖](https://tauri.app/zh-cn/start/prerequisites/)
 2. 配置 node 环境
-3. 安装依赖，推荐 pnpm
+3. 安装依赖，推荐使用 pnpm@9.14.4
 4. 本地启动
 
 ```shell
