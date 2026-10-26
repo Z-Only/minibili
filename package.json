@@ -34,7 +34,7 @@
         "@tauri-apps/plugin-log": "~2.0.1",
         "@tauri-apps/plugin-shell": "^2.0.1",
         "@tauri-apps/plugin-store": "~2.1.0",
-        "jsrsasign": "^11.1.0",
+        "jsrsasign": "^11.1.5",
         "jsrsasign-util": "^1.0.5",
         "pinia": "^2.3.0",
         "qrcode": "^1.5.4",
